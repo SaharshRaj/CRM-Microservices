@@ -3,11 +3,13 @@ package com.crm.service;
 import com.crm.dto.SalesOpportunityDTO;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
-import com.crm.exception.InvalidCustomerIdException;
 import com.crm.exception.InvalidDateTimeException;
+import com.crm.exception.InvalidOpportunityIdException;
 import com.crm.exception.InvalidSalesDetailsException;
 import com.crm.mapper.SalesOppurtunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,13 +22,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 class SalesOpportunityServiceImplTest {
 
@@ -37,8 +38,9 @@ class SalesOpportunityServiceImplTest {
     @Mock
     private SalesOppurtunityMapper mapper;
 
+
     @InjectMocks
-    private SalesOpportunityService service;
+    private SalesOpportunityServiceImpl service;
 
     private static List<SalesOpportunity> list;
 
@@ -50,7 +52,7 @@ class SalesOpportunityServiceImplTest {
                         .customerID(1L)
                         .estimatedValue(new BigDecimal("10000.0"))
                         .salesStage(SalesStage.PROSPECTING)
-                        .closingDate(LocalDate.of(2020, Month.JANUARY, 18))
+                        .closingDate(LocalDate.of(2025, Month.MAY, 18))
                         .followUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())
                         .build(),
                 SalesOpportunity.builder()
@@ -58,7 +60,7 @@ class SalesOpportunityServiceImplTest {
                         .customerID(2L)
                         .estimatedValue(new BigDecimal("10000.0"))
                         .salesStage(SalesStage.PROSPECTING)
-                        .closingDate(LocalDate.of(2020, Month.JANUARY, 18))
+                        .closingDate(LocalDate.of(2025, Month.MAY, 18))
                         .followUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())
                         .build(),
                 SalesOpportunity.builder()
@@ -66,7 +68,7 @@ class SalesOpportunityServiceImplTest {
                         .customerID(3L)
                         .estimatedValue(new BigDecimal("10000.0"))
                         .salesStage(SalesStage.PROSPECTING)
-                        .closingDate(LocalDate.of(2020, Month.JANUARY, 18))
+                        .closingDate(LocalDate.of(2025, Month.MAY, 18))
                         .followUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())
                         .build()
         ));
@@ -77,13 +79,14 @@ class SalesOpportunityServiceImplTest {
     void testRetrieveAllSalesOpportunities_Positive() {
         when(repository.findAll()).thenReturn(list);
         assertFalse(service.retrieveAllSalesOpportunities().isEmpty());
+        verify(repository, times(1)).findAll();
     }
 
     @Test
     @DisplayName("retrieveAllSalesOpportunities() - Negative")
     void testRetrieveAllSalesOpportunities_Negative() {
         when(repository.findAll()).thenReturn(new ArrayList<>());
-        assertTrue(service.retrieveAllSalesOpportunities().isEmpty());
+        assertThrows(NoSuchElementException.class,() -> service.retrieveAllSalesOpportunities());
         verify(repository, times(1)).findAll();
     }
 
@@ -92,78 +95,120 @@ class SalesOpportunityServiceImplTest {
     void testCreateSalesOpportunity_Positive() {
         SalesOpportunity salesOpportunity = list.getFirst();
 
-        when(repository.save(salesOpportunity)).thenAnswer((invocation -> {
+        when(repository.save(any(SalesOpportunity.class))).thenAnswer((invocation -> {
             salesOpportunity.setOpportunityID(1L);
             return  salesOpportunity;
         }));
-        when(mapper.mapToDTO(salesOpportunity)).thenAnswer(invocation -> {
-
-            return SalesOpportunityDTO
-                    .builder()
-                    .opportunityID(salesOpportunity.getOpportunityID())
-                    .salesStage(salesOpportunity.getSalesStage())
-                    .estimatedValue(salesOpportunity.getEstimatedValue())
-                    .followUpReminder(salesOpportunity.getFollowUpReminder())
-                    .closingDate(salesOpportunity.getClosingDate())
-                    .customerID(salesOpportunity.getCustomerID())
-                    .build();
-        });
+        when(mapper.mapToDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityDTO
+                .builder()
+                .opportunityID(salesOpportunity.getOpportunityID())
+                .salesStage(salesOpportunity.getSalesStage())
+                .estimatedValue(salesOpportunity.getEstimatedValue())
+                .followUpReminder(salesOpportunity.getFollowUpReminder())
+                .closingDate(salesOpportunity.getClosingDate())
+                .customerID(salesOpportunity.getCustomerID())
+                .build());
 
         assertEquals(1L,
                 service.createSalesOpportunity(mapper
                 .mapToDTO(salesOpportunity))
                 .getOpportunityID()
         );
-        verify(repository, times(1)).save(salesOpportunity);
+        verify(repository, times(1)).save(any(SalesOpportunity.class));
     }
 
     @Test
     @DisplayName("createSalesOpportunity() - Negative")
     void testCreateSalesOpportunity_Negative() {
+        SalesOpportunity salesOpportunity = list.getFirst();
 
-        SalesOpportunityDTO salesOpportunityDTO = new SalesOpportunityDTO();
+        salesOpportunity.setCustomerID(0L);
 
-        when(mapper.mapToSalesOpportunity(salesOpportunityDTO)).thenAnswer(invocation -> {
+        when(repository.save(any(SalesOpportunity.class))).thenThrow(ConstraintViolationException.class);
 
-            return SalesOpportunity
-                    .builder()
-                    .opportunityID(salesOpportunityDTO.getOpportunityID())
-                    .salesStage(salesOpportunityDTO.getSalesStage())
-                    .estimatedValue(salesOpportunityDTO.getEstimatedValue())
-                    .followUpReminder(salesOpportunityDTO.getFollowUpReminder())
-                    .closingDate(salesOpportunityDTO.getClosingDate())
-                    .customerID(salesOpportunityDTO.getCustomerID())
-                    .build();
-        });
-
+        when(mapper.mapToDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityDTO
+                .builder()
+                .opportunityID(salesOpportunity.getOpportunityID())
+                .salesStage(salesOpportunity.getSalesStage())
+                .estimatedValue(salesOpportunity.getEstimatedValue())
+                .followUpReminder(salesOpportunity.getFollowUpReminder())
+                .closingDate(salesOpportunity.getClosingDate())
+                .customerID(salesOpportunity.getCustomerID())
+                .build());
+        // Assert that an InvalidSalesDetailsException is thrown when creating the SalesOpportunity
+        SalesOpportunityDTO salesOpportunityDTO = mapper.mapToDTO(salesOpportunity);
         assertThrows(InvalidSalesDetailsException.class, () -> service.createSalesOpportunity(salesOpportunityDTO));
-        verify(repository, times(1)).save(mapper.mapToSalesOpportunity(salesOpportunityDTO));
+        verify(repository, times(1)).save(any(SalesOpportunity.class));
     }
+
+    @Test
+    @DisplayName("getOpportunitiesByOpportunityID() - Positive")
+    void testGetOpportunitiesByCustomer_OpportunityID() {
+        when(repository.findById(1L)).thenAnswer((invocation -> {
+            for(SalesOpportunity s : list){
+                if(s.getOpportunityID() == 1L){
+                    return Optional.of(s);
+                }
+            }
+            return Optional.empty();
+        }));
+
+        SalesOpportunityDTO salesOpportunityDTO = service.getOpportunitiesByOpportinty(1L);
+
+        assertEquals(1L, (long) salesOpportunityDTO.getOpportunityID());
+        verify(repository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getOpportunitiesByOpportunityID() - Negative")
+    void testGetOpportunitiesByOpportunityID_Negative() {
+        when(repository.findById(0L)).thenAnswer((invocation -> {
+            for(SalesOpportunity s : list){
+                if(s.getOpportunityID() == 0L){
+                    return Optional.of(s);
+                }
+            }
+            return Optional.empty();
+        }));
+
+        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByOpportinty(0L));
+        verify(repository, times(1)).findById(anyLong());
+    }
+
 
     @Test
     @DisplayName("getOpportunitiesByCustomer() - Positive")
     void testGetOpportunitiesByCustomer_Positive() {
-        when(repository.findById(1L)).thenAnswer((invocation -> {
-            SalesOpportunity salesOpportunity = null;
+        when(repository.findByCustomerID(1L)).thenAnswer((invocation -> {
+            List<SalesOpportunity> salesOpportunityList = new ArrayList<>();
             for(SalesOpportunity s : list){
-                if(s.getOpportunityID() == 1L){
-                    salesOpportunity = s;
+                if(s.getCustomerID() == 1L){
+                    salesOpportunityList.add(s);
                 }
             }
-            return  salesOpportunity;
+            return  salesOpportunityList;
         }));
 
         List<SalesOpportunityDTO> opportunitiesByCustomer = service.getOpportunitiesByCustomer(1L);
 
         assertFalse(opportunitiesByCustomer.isEmpty());
+        verify(repository, times(1)).findByCustomerID(1L);
     }
 
     @Test
     @DisplayName("getOpportunitiesByCustomer() - Negative")
     void testGetOpportunitiesByCustomer_Negative() {
-    when(repository.findById(1L)).thenReturn(Optional.ofNullable(new  SalesOpportunity()));
-    assertThrows(InvalidCustomerIdException.class, () -> service.getOpportunitiesByCustomer(1L));
-    verify(repository, times(0)).findById(anyLong());
+        when(repository.findByCustomerID(0L)).thenAnswer((invocation -> {
+            List<SalesOpportunity> salesOpportunityList = new ArrayList<>();
+            for(SalesOpportunity s : list){
+                if(s.getCustomerID() == 0L){
+                    salesOpportunityList.add(s);
+                }
+            }
+            return  salesOpportunityList;
+        }));
+    assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByCustomer(0L));
+    verify(repository, times(1)).findByCustomerID(anyLong());
     }
 
     @Test
@@ -182,16 +227,24 @@ class SalesOpportunityServiceImplTest {
         List<SalesOpportunityDTO> opportunitiesBySalesStage = service.getOpportunitiesBySalesStage(SalesStage.PROSPECTING);
 
         assertFalse(opportunitiesBySalesStage.isEmpty());
+        verify(repository, times(1)).findBySalesStage(any(SalesStage.class));
     }
 
     @Test
     @DisplayName("getOpportunitiesBySalesStage() - Negative")
     void testGetOpportunitiesBySalesStage_Negative() {
-        when(repository.findBySalesStage(SalesStage.PROSPECTING)).thenReturn(new ArrayList<>());
+        when(repository.findBySalesStage(SalesStage.CLOSED_LOST)).thenAnswer((invocation -> {
+            List<SalesOpportunity> opportunityList = new ArrayList<>();
+            list.forEach(e -> {
+                if(e.getSalesStage() == SalesStage.CLOSED_LOST){
+                    opportunityList.add(e);
+                }
+            });
+            return  opportunityList;
+        }));
 
-        List<SalesOpportunityDTO> opportunitiesBySalesStage = service.getOpportunitiesBySalesStage(SalesStage.PROSPECTING);
-
-        assertTrue(opportunitiesBySalesStage.isEmpty());
+        assertThrows(NoSuchElementException.class, ()->service.getOpportunitiesBySalesStage(SalesStage.CLOSED_LOST));
+        verify(repository, times(1)).findBySalesStage(any(SalesStage.class));
     }
 
     @Test
@@ -200,7 +253,7 @@ class SalesOpportunityServiceImplTest {
         when(repository.findByEstimatedValue(new BigDecimal("10000.0"))).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getEstimatedValue() == new BigDecimal("10000.0")){
+                if(Objects.equals(e.getEstimatedValue(), new BigDecimal("10000.0"))){
                     opportunityList.add(e);
                 }
             });
@@ -208,46 +261,61 @@ class SalesOpportunityServiceImplTest {
         }));
 
         List<SalesOpportunityDTO> opportunitiesByEstimatedValue = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
-
+        verify(repository, times(1)).findByEstimatedValue(new BigDecimal("10000.0"));
         assertFalse(opportunitiesByEstimatedValue.isEmpty());
     }
 
     @Test
     @DisplayName("getOpportunitiesByEstimatedValue() - Negative")
     void testGetOpportunitiesByEstimatedValue_Negative() {
-        when(repository.findByEstimatedValue(new BigDecimal("10000.0"))).thenReturn(new ArrayList<>());
-
-        List<SalesOpportunityDTO> opportunitiesByEstimatedValue = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
-
-        assertTrue(opportunitiesByEstimatedValue.isEmpty());
+        BigDecimal bigDecimal = new BigDecimal("20000.0");
+        when(repository.findByEstimatedValue(bigDecimal)).thenAnswer((invocation -> {
+            List<SalesOpportunity> opportunityList = new ArrayList<>();
+            list.forEach(e -> {
+                if(e.getEstimatedValue().equals(bigDecimal)){
+                    opportunityList.add(e);
+                }
+            });
+            return  opportunityList;
+        }));
+        assertThrows(NoSuchElementException.class, ()->service.getOpportunitiesByEstimatedValue(bigDecimal));
+        verify(repository, times(1)).findByEstimatedValue(bigDecimal);
     }
 
     @Test
     @DisplayName("getOpportunitiesByClosingDate() - Positive")
     void testGetOpportunitiesByClosingDate_Positive() {
-        when(repository.findByClosingDate(LocalDate.of(2020, Month.JANUARY, 18))).thenAnswer((invocation -> {
+        when(repository.findByClosingDate(LocalDate.of(2025, Month.MAY, 18))).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getClosingDate() == LocalDate.of(2020, Month.JANUARY, 18)){
+                if(e.getClosingDate().equals(LocalDate.of(2025, Month.MAY, 18))){
                     opportunityList.add(e);
                 }
             });
             return  opportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesByClosingDate = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
-
+        List<SalesOpportunityDTO> opportunitiesByClosingDate = service.getOpportunitiesByClosingDate(LocalDate.of(2025, Month.MAY, 18));
+        verify(repository, times(1)).findByClosingDate(LocalDate.of(2025, Month.MAY, 18));
         assertFalse(opportunitiesByClosingDate.isEmpty());
     }
 
     @Test
     @DisplayName("getOpportunitiesByClosingDate() - Negative")
     void testGetOpportunitiesByClosingDate_Negative() {
-        when(repository.findByClosingDate(LocalDate.of(2020, Month.JANUARY, 18))).thenReturn(new ArrayList<>());
+        LocalDate localDate = LocalDate.of(2025, Month.MAY, 20);
+        when(repository.findByClosingDate(localDate)).thenAnswer((invocation -> {
+            List<SalesOpportunity> opportunityList = new ArrayList<>();
+            list.forEach(e -> {
+                if(e.getClosingDate().equals(localDate)){
+                    opportunityList.add(e);
+                }
+            });
+            return  opportunityList;
+        }));
 
-        List<SalesOpportunityDTO> opportunitiesByClosingDate = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
-
-        assertTrue(opportunitiesByClosingDate.isEmpty());
+        assertThrows(NoSuchElementException.class,()-> service.getOpportunitiesByClosingDate(localDate));
+        verify(repository, times(1)).findByClosingDate(localDate);
     }
 
     @Test
@@ -256,26 +324,34 @@ class SalesOpportunityServiceImplTest {
         when(repository.findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getFollowUpReminder() == LocalDate.of(2025, Month.APRIL, 18).atStartOfDay()){
+                if(e.getFollowUpReminder().equals(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())){
                     opportunityList.add(e);
                 }
             });
             return  opportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesByFollowUpReminder = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
-
+        List<SalesOpportunityDTO> opportunitiesByFollowUpReminder = service.getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay());
+        verify(repository, times(1)).findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay());
         assertFalse(opportunitiesByFollowUpReminder.isEmpty());
     }
 
     @Test
     @DisplayName("getOpportunitiesByFollowUpReminder() - Negative")
     void testGetOpportunitiesByFollowUpReminder_Negative() {
-        when(repository.findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())).thenReturn(new ArrayList<>());
+        LocalDateTime localDateTime = LocalDate.of(2025, Month.APRIL, 28).atStartOfDay();
+        when(repository.findByFollowUpReminder(localDateTime)).thenAnswer((invocation -> {
+            List<SalesOpportunity> opportunityList = new ArrayList<>();
+            list.forEach(e -> {
+                if(e.getFollowUpReminder().isEqual(localDateTime)){
+                    opportunityList.add(e);
+                }
+            });
+            return  opportunityList;
+        }));
 
-        List<SalesOpportunityDTO> opportunitiesByFollowUpReminder = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
-
-        assertTrue(opportunitiesByFollowUpReminder.isEmpty());
+        assertThrows(NoSuchElementException.class,()-> service.getOpportunitiesByFollowUpReminder(localDateTime));
+        verify(repository, times(1)).findByFollowUpReminder(localDateTime);
     }
 
 
@@ -285,6 +361,7 @@ class SalesOpportunityServiceImplTest {
         SalesOpportunity salesOpportunity = list.getFirst();
         LocalDateTime localDateTime = LocalDate.of(2025, Month.APRIL, 18).atStartOfDay();
         when(repository.findById(1L)).thenReturn(Optional.ofNullable(salesOpportunity));
+        assert salesOpportunity != null;
         when(repository.save(salesOpportunity)).thenAnswer(invocation -> {
             salesOpportunity.setFollowUpReminder(localDateTime);
             return salesOpportunity;
@@ -295,8 +372,8 @@ class SalesOpportunityServiceImplTest {
     }
 
     @Test
-    @DisplayName("scheduleFollowUpReminder() - Negative")
-    void testScheduleFollowUpReminder_Negative() {
+    @DisplayName("scheduleFollowUpReminder() - Negative_InvalidDateTimeException")
+    void testScheduleFollowUpReminder_Negative_throwsInvalidDateTimeException() {
         LocalDateTime localDateTime = LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay();
 
         assertThrows(InvalidDateTimeException.class, () -> service.scheduleFollowUpReminder(1L,localDateTime));
@@ -304,7 +381,14 @@ class SalesOpportunityServiceImplTest {
         verify(repository, times(0)).save(any());
     }
 
-
-
+    @Test
+    @DisplayName("scheduleFollowUpReminder() - Negative_InvalidOpportunityIDException")
+    void testScheduleFollowUpReminder_Negative_throwsInvalidOppotunityIDException() {
+        when(repository.findById(0L)).thenReturn(Optional.empty());
+        LocalDateTime localDateTime = LocalDate.of(2026, Month.JANUARY, 18).atStartOfDay();
+        assertThrows(InvalidOpportunityIdException.class, () -> service.scheduleFollowUpReminder(0L,localDateTime));
+        verify(repository, times(1)).findById(anyLong());
+        verify(repository, times(0)).save(any());
+    }
 
 }
