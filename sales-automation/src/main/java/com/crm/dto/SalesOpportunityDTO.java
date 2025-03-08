@@ -1,8 +1,6 @@
 package com.crm.dto;
 
 import com.crm.enums.SalesStage;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,4 +21,5 @@ public class SalesOpportunityDTO {
     private SalesStage salesStage;
     private BigDecimal estimatedValue;
     private LocalDate closingDate;
+    private LocalDateTime followUpReminder;
 }

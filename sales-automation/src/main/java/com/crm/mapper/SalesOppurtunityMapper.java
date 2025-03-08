@@ -15,5 +15,5 @@ public interface SalesOppurtunityMapper {
     //SalesOpportunity to SalesOpportunityDTO
     SalesOpportunityDTO mapToDTO(SalesOpportunity salesOpportunity);
     //SalesOpportunityDTO to SalesOpportunity
-    SalesOpportunity mapToNotification(SalesOpportunityDTO salesOpportunityDTO);
+    SalesOpportunity mapToSalesOpportunity(SalesOpportunityDTO salesOpportunityDTO);
 }
