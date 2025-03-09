@@ -153,7 +153,7 @@ class SalesOpportunityServiceImplTest {
             return Optional.empty();
         }));
 
-        SalesOpportunityDTO salesOpportunityDTO = service.getOpportunitiesByOpportinty(1L);
+        SalesOpportunityDTO salesOpportunityDTO = service.getOpportunitiesByOpportunity(1L);
 
         assertEquals(1L, (long) salesOpportunityDTO.getOpportunityID());
         verify(repository, times(1)).findById(1L);
@@ -171,7 +171,7 @@ class SalesOpportunityServiceImplTest {
             return Optional.empty();
         }));
 
-        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByOpportinty(0L));
+        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByOpportunity(0L));
         verify(repository, times(1)).findById(anyLong());
     }
 
@@ -383,12 +383,48 @@ class SalesOpportunityServiceImplTest {
 
     @Test
     @DisplayName("scheduleFollowUpReminder() - Negative_InvalidOpportunityIDException")
-    void testScheduleFollowUpReminder_Negative_throwsInvalidOppotunityIDException() {
+    void testScheduleFollowUpReminder_Negative_throwsInvalidOpportunityIDException() {
         when(repository.findById(0L)).thenReturn(Optional.empty());
         LocalDateTime localDateTime = LocalDate.of(2026, Month.JANUARY, 18).atStartOfDay();
         assertThrows(InvalidOpportunityIdException.class, () -> service.scheduleFollowUpReminder(0L,localDateTime));
         verify(repository, times(1)).findById(anyLong());
         verify(repository, times(0)).save(any());
+    }
+
+    @Test
+    @DisplayName("testDeleteByOpportunityID() - Positive")
+    void testDeleteByOpportunityID_Positive() {
+        SalesOpportunity obj = list.getFirst();
+        when(repository.findById(1L)).thenAnswer((invocation -> {
+            for(SalesOpportunity s : list){
+                if(s.getOpportunityID() == 1L){
+                    return Optional.of(s);
+                }
+            }
+            return Optional.empty();
+        }));
+        doAnswer(invocation -> list.remove(obj)).when(repository).delete(obj);
+        service.deleteByOpportunityID(1L);
+        Optional<SalesOpportunity> salesOpportunity = repository.findById(1L);
+        assertFalse(salesOpportunity.isPresent());
+        verify(repository, times(1)).delete(obj);
+        verify(repository, times(2)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("testDeleteByOpportunityID() - Negative")
+    void testDeleteByOpportunityID_Negative() {
+        when(repository.findById(0L)).thenAnswer((invocation -> {
+            for(SalesOpportunity s : list){
+                if(s.getOpportunityID() == 0L){
+                    return Optional.of(s);
+                }
+            }
+            return Optional.empty();
+        }));
+        assertThrows(InvalidOpportunityIdException.class,() -> service.deleteByOpportunityID(0L));
+        verify(repository, times(0)).delete(any(SalesOpportunity.class));
+        verify(repository, times(1)).findById(0L);
     }
 
 }

@@ -19,7 +19,7 @@ public interface SalesOpportunityService {
     //Creates a new sales opportunity (deal) associated with a customer.
     SalesOpportunityDTO createSalesOpportunity(SalesOpportunityDTO salesOpportunityDto) throws InvalidSalesDetailsException;
 
-    SalesOpportunityDTO getOpportunitiesByOpportinty(Long opportunityId) throws NoSuchElementException;
+    SalesOpportunityDTO getOpportunitiesByOpportunity(Long opportunityId) throws NoSuchElementException;
 
     //Retrieves all sales opportunities linked to a specific customer.
     List<SalesOpportunityDTO> getOpportunitiesByCustomer(Long customerId) throws NoSuchElementException;

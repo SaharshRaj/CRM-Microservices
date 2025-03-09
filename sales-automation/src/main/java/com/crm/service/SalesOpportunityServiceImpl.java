@@ -77,13 +77,13 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      * @throws NoSuchElementException if no opportunity is found with the given ID.
      */
     @Override
-    public SalesOpportunityDTO getOpportunitiesByOpportinty(Long opportunityId) throws NoSuchElementException {
+    public SalesOpportunityDTO getOpportunitiesByOpportunity(Long opportunityId) throws NoSuchElementException {
         Optional<SalesOpportunity> salesOpportunity = repository.findById(opportunityId);
         if(salesOpportunity.isPresent()){
             return  SalesOppurtunityMapper.MAPPER.mapToDTO(salesOpportunity.get());
         }
         else {
-            throw new NoSuchElementException("No leads found with given Customer ID");
+            throw new NoSuchElementException("No leads found with given Opportunity ID");
         }
     }
 
@@ -119,7 +119,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     public List<SalesOpportunityDTO> getOpportunitiesBySalesStage(SalesStage salesStage) throws NoSuchElementException {
         List<SalesOpportunity> salesOpportunityList = repository.findBySalesStage(salesStage);
         if(salesOpportunityList.isEmpty()){
-            throw new NoSuchElementException("No leads found with given customer id");
+            throw new NoSuchElementException("No leads found with requested Sales Stage");
         }
         else {
             List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
@@ -140,7 +140,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     public List<SalesOpportunityDTO> getOpportunitiesByEstimatedValue(BigDecimal estimatedValue) throws NoSuchElementException {
         List<SalesOpportunity> salesOpportunityList = repository.findByEstimatedValue(estimatedValue);
         if(salesOpportunityList.isEmpty()){
-            throw new NoSuchElementException("No leads found with given customer id");
+            throw new NoSuchElementException("No leads found with given Estimated Value");
         }
         else {
             List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
