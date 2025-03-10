@@ -23,17 +23,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -87,6 +83,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         List<SalesOpportunityDTO> actual = objectMapper.readValue(jsonResponse, new TypeReference<List<SalesOpportunityDTO>>() {});
         assertEquals(expected, actual);
+        verify(service, times(1)).retrieveAllSalesOpportunities();
     }
 
     @Test
@@ -108,6 +105,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).retrieveAllSalesOpportunities();
     }
 
 
@@ -120,7 +118,7 @@ class SalesOpportunityControllerTest {
         when(service.createSalesOpportunity(any(SalesOpportunityDTO.class))).thenReturn(expected);
 
         MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity")
-                .content("{\"customerId\":1,\"" +
+                .content("{\"customerID\":1,\"" +
                         "salesStage\":\"QUALIFICATION\"" +
                         ",\"estimatedValue\":10000.0" +
                         ",\"closingDate\":\"2025-04-20\"}")
@@ -130,6 +128,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         SalesOpportunityDTO actual = objectMapper.readValue(jsonResponse, SalesOpportunityDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).createSalesOpportunity(SalesOpportunityDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
     }
 
     @Test
@@ -144,7 +143,7 @@ class SalesOpportunityControllerTest {
         when(service.createSalesOpportunity(any(SalesOpportunityDTO.class))).thenThrow(new InvalidSalesDetailsException("Invalid Details Provided"));
 
         MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity")
-                .content("{\"customerId\":1,\"" +
+                .content("{\"customerID\":1,\"" +
                         "salesStage\":\"QUALIFICATION\"" +
                         ",\"estimatedValue\":10000.0" +
                         ",\"closingDate\":\"2025-04-20\"}")
@@ -154,6 +153,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).createSalesOpportunity(SalesOpportunityDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
     }
 
 
@@ -173,6 +173,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         SalesOpportunityDTO actual = objectMapper.readValue(jsonResponse, SalesOpportunityDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByOpportunity(1L);
     }
 
     @Test
@@ -184,7 +185,7 @@ class SalesOpportunityControllerTest {
                 .message("No leads found with given Opportunity ID")
                 .build();
 
-        when(service.getOpportunitiesByOpportunity(anyLong())).thenThrow(new NoSuchElementException("No leads found with given Customer ID"));
+        when(service.getOpportunitiesByOpportunity(anyLong())).thenThrow(new NoSuchElementException("No leads found with given Opportunity ID"));
 
         MvcResult mvcResult = mockMvc.perform(get("/api/sales-opportunity/1"))
                 .andDo(print())
@@ -194,6 +195,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByOpportunity(1L);
     }
 
 
@@ -219,6 +221,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         List<SalesOpportunityDTO> actual = objectMapper.readValue(jsonResponse, new TypeReference<List<SalesOpportunityDTO>>() {});
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByCustomer(1L);
     }
 
     @Test
@@ -241,6 +244,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByCustomer(1L);
     }
 
 
@@ -266,6 +270,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         List<SalesOpportunityDTO> actual = objectMapper.readValue(jsonResponse, new TypeReference<List<SalesOpportunityDTO>>() {});
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesBySalesStage(SalesStage.QUALIFICATION);
     }
 
 
@@ -288,6 +293,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesBySalesStage(SalesStage.QUALIFICATION);
     }
 
 
@@ -313,6 +319,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         List<SalesOpportunityDTO> actual = objectMapper.readValue(jsonResponse, new TypeReference<List<SalesOpportunityDTO>>() {});
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
     }
 
 
@@ -335,6 +342,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
     }
 
 
@@ -360,6 +368,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         List<SalesOpportunityDTO> actual = objectMapper.readValue(jsonResponse, new TypeReference<List<SalesOpportunityDTO>>() {});
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByClosingDate(LocalDate.of(2025, Month.APRIL, 20));
     }
 
     @Test
@@ -381,6 +390,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByClosingDate(LocalDate.of(2025, Month.APRIL, 20));
     }
 
 
@@ -406,6 +416,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         List<SalesOpportunityDTO> actual = objectMapper.readValue(jsonResponse, new TypeReference<List<SalesOpportunityDTO>>() {});
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 20).atStartOfDay());
     }
 
     @Test
@@ -427,6 +438,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 20).atStartOfDay());
     }
 
 
@@ -438,7 +450,7 @@ class SalesOpportunityControllerTest {
 
         when(service.scheduleFollowUpReminder(anyLong(), any(LocalDateTime.class))).thenReturn(expected);
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/followUpReminder?opportunityID=1&reminderDate=2025-04-20T00:00:00"))
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/followUpReminder").param("opportunityId","1").param("reminderDate", "2025-02-20T00:00:00"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
@@ -446,6 +458,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         SalesOpportunityDTO actual = objectMapper.readValue(jsonResponse, SalesOpportunityDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).scheduleFollowUpReminder(1L, LocalDate.of(2025, Month.FEBRUARY, 20).atStartOfDay());
     }
 
     @Test
@@ -459,7 +472,7 @@ class SalesOpportunityControllerTest {
 
         when(service.scheduleFollowUpReminder(anyLong(), any(LocalDateTime.class))).thenThrow(new InvalidOpportunityIdException("Lead with Opportunity ID 1 does not exist."));
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/followUpReminder?opportunityID=1&reminderDate=2025-04-20T00:00:00"))
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/followUpReminder").param("opportunityId","1").param("reminderDate", "2025-02-20T00:00:00"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -467,6 +480,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).scheduleFollowUpReminder(1L, LocalDate.of(2025, Month.FEBRUARY, 20).atStartOfDay());
     }
 
 
@@ -481,7 +495,7 @@ class SalesOpportunityControllerTest {
 
         when(service.scheduleFollowUpReminder(anyLong(), any(LocalDateTime.class))).thenThrow(new InvalidDateTimeException("Please enter valid date"));
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/followUpReminder?opportunityID=1&reminderDate=2025-04-20T00:00:00"))
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/followUpReminder").param("opportunityId","1").param("reminderDate", "2025-02-20T00:00:00"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -489,6 +503,7 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).scheduleFollowUpReminder(1L, LocalDate.of(2025, Month.FEBRUARY, 20).atStartOfDay());
     }
 
 
@@ -496,18 +511,20 @@ class SalesOpportunityControllerTest {
     @DisplayName("DELETE /api/sales-opportunity ==> 200")
     void deleteByOpportunityID_POSITIVE() throws Exception {
         // api: DELETE /api/sales-opportunity ==> 200 : String
-        String expected = "Successfully deleted Lead with ID 1";
+        Map<String, String> expected = new HashMap<>();
+        expected.put("message", "Successfully deleted Lead with ID 1");
 
         when(service.deleteByOpportunityID(1L)).thenReturn(true);
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/followUpReminder?opportunityID=1&reminderDate=2025-04-20T00:00:00"))
+        MvcResult mvcResult = mockMvc.perform(delete("/api/sales-opportunity/1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
-        String actual = objectMapper.readValue(jsonResponse, String.class);
+        Map<String, String> actual = objectMapper.readValue(jsonResponse, Map.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).deleteByOpportunityID(1L);
     }
 
     @Test
@@ -521,7 +538,7 @@ class SalesOpportunityControllerTest {
 
         when(service.deleteByOpportunityID(1L)).thenThrow( new InvalidOpportunityIdException("Lead with Opportunity ID 1 does not exist."));
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/followUpReminder?opportunityID=1&reminderDate=2025-04-20T00:00:00"))
+        MvcResult mvcResult = mockMvc.perform(delete("/api/sales-opportunity/1"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -529,6 +546,29 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
         assertEquals(expected, actual);
+        verify(service, times(1)).deleteByOpportunityID(1L);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/sales-opportunity ==> 500")
+    void deleteByOpportunityID_NEGATIVE_FAILS() throws Exception {
+        // api: DELETE /api/sales-opportunity ==> 500 : ErrorResponseDTO
+        ErrorResponseDTO expected = ErrorResponseDTO.builder()
+                .code("500")
+                .message("Some error occurred while deleting Lead with ID 1")
+                .build();
+
+        when(service.deleteByOpportunityID(1L)).thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(delete("/api/sales-opportunity/1"))
+                .andDo(print())
+                .andExpect(status().isInternalServerError())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
+        assertEquals(expected, actual);
+        verify(service, times(1)).deleteByOpportunityID(1L);
     }
 
 

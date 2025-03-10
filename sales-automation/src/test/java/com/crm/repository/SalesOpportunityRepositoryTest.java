@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -243,6 +244,29 @@ class SalesOpportunityRepositoryTest {
 
         List<SalesOpportunity> salesOpportunityList = repository.findByFollowUpReminder(LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay());
         assertTrue(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
+    }
+
+    @Test
+    @DisplayName("delete() - Positive")
+    void delete_Positive() {
+        SalesOpportunity opportunity = SalesOpportunity.builder()
+                .customerID(1L)
+                .estimatedValue(new BigDecimal("20000.0"))
+                .salesStage(SalesStage.QUALIFICATION)
+                .closingDate(LocalDate.now())
+                .followUpReminder(LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay())
+                .build();
+
+        SalesOpportunity saved = repository.save(opportunity);
+        repository.delete(opportunity);
+        Optional<SalesOpportunity> salesOpportunity = repository.findById(saved.getOpportunityID());
+        assertFalse(salesOpportunity.isPresent(), "SalesOpportunity not found");
+    }
+
+    @Test
+    @DisplayName("delete() - Negative")
+    void delete_Negative() {
+        assertThrows(InvalidDataAccessApiUsageException.class,()->repository.delete(null));
     }
 
 }

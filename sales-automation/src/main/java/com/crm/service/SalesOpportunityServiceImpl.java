@@ -27,7 +27,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
 
 
     /**
-     * Retrieves all sales opportunities.
+     * Retrieves all available leads.
      *
      * @return a list of SalesOpportunityDTO objects representing all sales opportunities.
      * @throws NoSuchElementException if no sales opportunities are found.
@@ -51,9 +51,9 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Creates a new sales opportunity.
+     * Creates a new lead.
      *
-     * @param salesOpportunityDto the DTO representing the sales opportunity to be created.
+     * @param salesOpportunityDto the DTO representing the lead to be created.
      * @return the created SalesOpportunityDTO object.
      * @throws InvalidSalesDetailsException if there is an error during creation.
      */
@@ -70,10 +70,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Retrieves a sales opportunity by its opportunity ID.
+     * Retrieves a lead by its opportunity ID.
      *
-     * @param opportunityId the ID of the opportunity to be retrieved.
-     * @return the SalesOpportunityDTO object representing the retrieved opportunity.
+     * @param opportunityId the ID of the lead to be retrieved.
+     * @return the SalesOpportunityDTO object representing the retrieved lead.
      * @throws NoSuchElementException if no opportunity is found with the given ID.
      */
     @Override
@@ -88,10 +88,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Retrieves sales opportunities by customer ID.
+     * Retrieves leads by customer ID.
      *
-     * @param customerId the ID of the customer whose opportunities are to be retrieved.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved opportunities.
+     * @param customerId the ID of the customer whose leads are to be retrieved.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      * @throws NoSuchElementException if no opportunities are found for the given customer ID.
      */
     @Override
@@ -109,10 +109,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Retrieves sales opportunities by sales stage.
+     * Retrieves leads by sales stage.
      *
-     * @param salesStage the sales stage to filter opportunities by.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved opportunities.
+     * @param salesStage the sales stage to filter leads by.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      * @throws NoSuchElementException if no opportunities are found for the given sales stage.
      */
     @Override
@@ -130,10 +130,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Retrieves sales opportunities by estimated value.
+     * Retrieves leads by estimated value.
      *
-     * @param estimatedValue the estimated value to filter opportunities by.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved opportunities.
+     * @param estimatedValue the estimated value to filter leads by.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      * @throws NoSuchElementException if no opportunities are found for the given estimated value.
      */
     @Override
@@ -152,10 +152,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
 
 
     /**
-     * Retrieves sales opportunities by closing date.
+     * Retrieves sales leads by closing date.
      *
-     * @param closingDate the closing date to filter opportunities by.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved opportunities.
+     * @param closingDate the closing date to filter leads by.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      * @throws NoSuchElementException if no opportunities are found for the given closing date.
      */
     @Override
@@ -173,10 +173,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Retrieves sales opportunities by follow-up reminder date.
+     * Retrieves leads by follow-up reminder date.
      *
-     * @param followUpReminder the follow-up reminder date to filter opportunities by.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved opportunities.
+     * @param followUpReminder the follow-up reminder date to filter leads by.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      * @throws NoSuchElementException if no opportunities are found for the given follow-up reminder date.
      */
     @Override
@@ -194,7 +194,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Schedules a follow-up reminder for a sales opportunity.
+     * Schedules a follow-up reminder for a lead.
      *
      * @param opportunityId the ID of the opportunity to schedule the reminder for.
      * @param reminderDate the date and time for the follow-up reminder.
@@ -222,7 +222,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     }
 
     /**
-     * Deletes a sales opportunity by its opportunity ID.
+     * Deletes a sales lead by its opportunity ID.
      *
      * @param opportunityId the ID of the opportunity to be deleted.
      * @return true if the deletion was successful, false otherwise.

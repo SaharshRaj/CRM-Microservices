@@ -2,8 +2,10 @@ package com.crm.controller;
 
 import com.crm.dto.SalesOpportunityDTO;
 import com.crm.enums.SalesStage;
+import com.crm.exception.UnknownErrorOccurredException;
 import com.crm.service.SalesOpportunityService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,92 +23,127 @@ public class SalesOpportunityControllerImpl implements SalesOpportunityControlle
 
 
     /**
-     * @return
+     * Retrieves list of all available leads.
+     *
+     * @return a list of SalesOpportunityDTO objects representing all leads
      */
     @Override
     public ResponseEntity<List<SalesOpportunityDTO>> retrieveAllSalesOpportunities() {
-        return null;
+        List<SalesOpportunityDTO> salesOpportunityDTOList = service.retrieveAllSalesOpportunities();
+        return new ResponseEntity<>(salesOpportunityDTOList, HttpStatus.OK);
     }
 
     /**
-     * @param salesOpportunityDto
-     * @return
+     * Creates a new lead.
+     *
+     * @param salesOpportunityDto the DTO representing the lead to be created.
+     * @return the created SalesOpportunityDTO object.
      */
     @Override
     public ResponseEntity<SalesOpportunityDTO> createSalesOpportunity(SalesOpportunityDTO salesOpportunityDto) {
-        return null;
+        SalesOpportunityDTO salesOpportunity = service.createSalesOpportunity(salesOpportunityDto);
+        return new ResponseEntity<>(salesOpportunity, HttpStatus.OK);
     }
 
     /**
-     * @param opportunityId
-     * @return
+     * Retrieves a lead by its opportunity ID.
+     *
+     * @param opportunityId the ID of the lead to be retrieved.
+     * @return the SalesOpportunityDTO object representing the retrieved lead.
      */
     @Override
     public ResponseEntity<SalesOpportunityDTO> getOpportunitiesByOpportunity(Long opportunityId) {
-        return null;
+        SalesOpportunityDTO result = service.getOpportunitiesByOpportunity(opportunityId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * @param customerId
-     * @return
+     * Retrieves leads by customer ID
+     *
+     * @param customerId the ID of the customer whose leads are to be retrieved.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      */
     @Override
     public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByCustomer(Long customerId) {
-        return null;
+        List<SalesOpportunityDTO> result = service.getOpportunitiesByCustomer(customerId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * @param salesStage
-     * @return
+     * Retrieves leads by sales stage.
+     *
+     * @param salesStage the sales stage to filter leads by.
+     * @returna list of SalesOpportunityDTO objects representing the retrieved leads.
      */
     @Override
     public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesBySalesStage(SalesStage salesStage) {
-        return null;
+        List<SalesOpportunityDTO> result = service.getOpportunitiesBySalesStage(salesStage);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * @param estimatedValue
-     * @return
+     * Retrieves leads by estimated value.
+     *
+     * @param estimatedValue the estimated value to filter leads by.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      */
     @Override
     public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByEstimatedValue(BigDecimal estimatedValue) {
-        return null;
+        List<SalesOpportunityDTO> result = service.getOpportunitiesByEstimatedValue(estimatedValue);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * @param closingDate
-     * @return
+     * Retrieves sales leads by closing date.
+     *
+     * @param closingDate the closing date to filter leads by.
+     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
      */
     @Override
     public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByClosingDate(LocalDate closingDate) {
-        return null;
+        List<SalesOpportunityDTO> result = service.getOpportunitiesByClosingDate(closingDate);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * @param followUpReminder
-     * @return
+     * Retrieves leads by follow-up reminder date.
+     *
+     * @param followUpReminder the follow-up reminder date to filter leads by.
+     * @returna list of SalesOpportunityDTO objects representing the retrieved leads.
      */
     @Override
     public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByFollowUpReminder(LocalDateTime followUpReminder) {
-        return null;
+        List<SalesOpportunityDTO> result = service.getOpportunitiesByFollowUpReminder(followUpReminder);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * @param opportunityId
-     * @param reminderDate
-     * @return
+     * Schedules a follow-up reminder for a lead.
+     *
+     * @param opportunityId the ID of the lead to schedule the reminder for.
+     * @param reminderDate the date and time for the follow-up reminder.
+     * @return the updated SalesOpportunityDTO object.
      */
     @Override
     public ResponseEntity<SalesOpportunityDTO> scheduleFollowUpReminder(Long opportunityId, LocalDateTime reminderDate) {
-        return null;
+        SalesOpportunityDTO result = service.scheduleFollowUpReminder(opportunityId, reminderDate);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * @param opportunityId
-     * @return
+     * Deletes a sales lead by its opportunity ID.
+     *
+     * @param opportunityId the ID of the lead to be deleted.
+     * @return ResponseEntity with success message if the deletion was successful, ErrorResponseDTO otherwise.
      */
     @Override
     public ResponseEntity<String> deleteByOpportunityID(Long opportunityId) {
-        return null;
+        boolean success = service.deleteByOpportunityID(opportunityId);
+        if(success){
+            return new ResponseEntity<>("{\"message\": \"Successfully deleted Lead with ID " + opportunityId + "\"}", HttpStatus.OK);
+        }
+        else{
+            throw new UnknownErrorOccurredException("Some error occurred while deleting Lead with ID "+ opportunityId);
+        }
     }
 }
