@@ -3,6 +3,7 @@ package com.crm.controller;
 import com.crm.dto.SalesOpportunityDTO;
 import com.crm.enums.SalesStage;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public interface SalesOpportunityController {
     ResponseEntity<List<SalesOpportunityDTO>> retrieveAllSalesOpportunities();
 
     @PostMapping
-    ResponseEntity<SalesOpportunityDTO> createSalesOpportunity(@RequestBody SalesOpportunityDTO salesOpportunityDto);
+    ResponseEntity<SalesOpportunityDTO> createSalesOpportunity(@Valid  @RequestBody SalesOpportunityDTO salesOpportunityDto);
 
     @GetMapping("/{opportunityId}")
     ResponseEntity<SalesOpportunityDTO> getOpportunitiesByOpportunity(@PathVariable Long opportunityId);

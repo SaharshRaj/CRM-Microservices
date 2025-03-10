@@ -92,6 +92,8 @@ class SalesOpportunityControllerTest {
     // api: GET /api/sales-opportunity ==> 404 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity")
                 .message("No Sales Opportunity Available")
                 .build();
 
@@ -104,7 +106,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).retrieveAllSalesOpportunities();
     }
 
@@ -137,6 +141,8 @@ class SalesOpportunityControllerTest {
         // api: POST /api/sales-opportunity ==> 404 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("400")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity")
                 .message("Invalid Details Provided")
                 .build();
 
@@ -152,7 +158,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).createSalesOpportunity(SalesOpportunityDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
     }
 
@@ -182,6 +190,8 @@ class SalesOpportunityControllerTest {
         // api: GET /api/sales-opportunity/{opportunityID} ==> 404 : List<SalesOpportunityDTO>
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/1")
                 .message("No leads found with given Opportunity ID")
                 .build();
 
@@ -194,7 +204,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).getOpportunitiesByOpportunity(1L);
     }
 
@@ -230,6 +242,8 @@ class SalesOpportunityControllerTest {
         // api: GET /api/sales-opportunity/customer/{customerID} ==> 404 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/customer/1")
                 .message("No leads found with given Customer ID")
                 .build();
 
@@ -243,7 +257,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).getOpportunitiesByCustomer(1L);
     }
 
@@ -280,6 +296,8 @@ class SalesOpportunityControllerTest {
         // api: GET /api/sales-opportunity/salesStage/{salesStage} ==> 404 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/salesStage/QUALIFICATION")
                 .message("No leads found with requested Sales Stage")
                 .build();
 
@@ -292,7 +310,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).getOpportunitiesBySalesStage(SalesStage.QUALIFICATION);
     }
 
@@ -324,11 +344,13 @@ class SalesOpportunityControllerTest {
 
 
     @Test
-    @DisplayName("api: GET /api/sales-opportunity/estimatedValue/{estimatedValue} ==> 404")
+    @DisplayName("GET /api/sales-opportunity/estimatedValue/{estimatedValue} ==> 404")
     void getOpportunitiesByEstimatedValue_NEGATIVE() throws Exception {
         // api: GET /api/sales-opportunity/estimatedValue/{estimatedValue} ==> 404 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/estimatedValue/10000.0")
                 .message("No leads found with given Estimated Value")
                 .build();
 
@@ -341,7 +363,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
     }
 
@@ -377,6 +401,8 @@ class SalesOpportunityControllerTest {
         // api: GET /api/sales-opportunity/closingDate/{closingDate} ==> 404 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/closingDate/2025-04-20")
                 .message("No leads found with given Closing Date")
                 .build();
 
@@ -389,7 +415,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).getOpportunitiesByClosingDate(LocalDate.of(2025, Month.APRIL, 20));
     }
 
@@ -425,6 +453,8 @@ class SalesOpportunityControllerTest {
         // api: GET /api/sales-opportunity/followUpReminder/{followUpReminder} ==> 404 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/followUpReminder/2025-04-20T00:00:00")
                 .message("No leads found with given Follow-up Reminder")
                 .build();
 
@@ -437,7 +467,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 20).atStartOfDay());
     }
 
@@ -467,6 +499,8 @@ class SalesOpportunityControllerTest {
         // api: POST /api/followUpReminder ==> 400 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("400")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/followUpReminder")
                 .message("Lead with Opportunity ID 1 does not exist.")
                 .build();
 
@@ -479,7 +513,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).scheduleFollowUpReminder(1L, LocalDate.of(2025, Month.FEBRUARY, 20).atStartOfDay());
     }
 
@@ -490,6 +526,8 @@ class SalesOpportunityControllerTest {
         // api: POST /api/followUpReminder ==> 400 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("400")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/followUpReminder")
                 .message("Please enter valid date")
                 .build();
 
@@ -502,7 +540,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).scheduleFollowUpReminder(1L, LocalDate.of(2025, Month.FEBRUARY, 20).atStartOfDay());
     }
 
@@ -533,6 +573,8 @@ class SalesOpportunityControllerTest {
         // api: DELETE /api/sales-opportunity ==> 400 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("400")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/1")
                 .message("Lead with Opportunity ID 1 does not exist.")
                 .build();
 
@@ -545,7 +587,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).deleteByOpportunityID(1L);
     }
 
@@ -555,6 +599,8 @@ class SalesOpportunityControllerTest {
         // api: DELETE /api/sales-opportunity ==> 500 : ErrorResponseDTO
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
                 .code("500")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/1")
                 .message("Some error occurred while deleting Lead with ID 1")
                 .build();
 
@@ -567,7 +613,9 @@ class SalesOpportunityControllerTest {
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
-        assertEquals(expected, actual);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).deleteByOpportunityID(1L);
     }
 

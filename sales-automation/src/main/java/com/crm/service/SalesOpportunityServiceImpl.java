@@ -213,7 +213,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
                 return SalesOppurtunityMapper.MAPPER.mapToDTO(savedOpportunity);
             }
             else{
-                throw new InvalidOpportunityIdException("Lead with Opportunity ID {opportunityId} does not exist.");
+                throw new InvalidOpportunityIdException("Lead with Opportunity ID "+opportunityId+" does not exist.");
             }
         }
         else{
@@ -236,7 +236,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
             return true;
         }
         else{
-            throw new InvalidOpportunityIdException("Lead with Opportunity ID {opportunityId} does not exist.");
+            throw new InvalidOpportunityIdException("Lead with Opportunity ID "+opportunityId+" does not exist.");
 
         }
     }
