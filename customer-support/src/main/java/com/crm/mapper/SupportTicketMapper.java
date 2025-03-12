@@ -11,9 +11,9 @@ public interface SupportTicketMapper {
     //SupportTicketMapper using Factory
     SupportTicketMapper MAPPER = Mappers.getMapper(SupportTicketMapper.class);
 
-
     //SupportTicket to SupportTicketDTO
     SupportTicketDTO mapToDTO(SupportTicket supportTicket);
+    
     //SupportTicketDTO to SupportTicket
-    SupportTicket mapToSupoortTicket(SupportTicketDTO supportTicketDTO);
+    SupportTicket mapToSupportTicket(SupportTicketDTO supportTicketDTO);
 }

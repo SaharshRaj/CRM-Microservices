@@ -1,6 +1,6 @@
 package com.crm.entities;
 
-import com.crm.dto.CustomerProfileDTO;
+//import com.crm.dto.CustomerProfileDTO;
 import com.crm.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
