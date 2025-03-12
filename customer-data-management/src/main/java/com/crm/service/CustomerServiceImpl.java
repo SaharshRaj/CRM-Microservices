@@ -6,6 +6,7 @@ import com.crm.enums.PurchasingHabits;
 import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +24,20 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerProfileMapper customerProfileMapper;
 
 	@Override
+	public void addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
+		if(customerProfileDTO == null){
+			throw new ResourceNotFoundException("Enter valid Customer Profile Details");
+		}
+		CustomerProfile customerProfile = customerProfileMapper.mapToCustomer(customerProfileDTO);
+		customerProfileRepository.save(customerProfile);
+	}
+
+	@Override
 	public List<CustomerProfileDTO> retrieveAllProfiles() throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = (customerProfileRepository.findAll());
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("No customers found");
+		}
 		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
 	}
 
@@ -45,6 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
 		existingCustomer.setPhoneNumber(customerProfileDTO.getPhoneNumber());
 		existingCustomer.setEmailId(customerProfileDTO.getEmailId());
 		existingCustomer.setSegmentationData(customerProfileDTO.getSegmentationData());
+		existingCustomer.setPurchaseHistory(customerProfileDTO.getPurchaseHistory());
 		CustomerProfile updatedCustomerProfile = customerProfileRepository.save(existingCustomer);
 		return customerProfileMapper.mapToDTO(updatedCustomerProfile);
 
@@ -59,18 +73,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	}
 
-	@Override
-	public List<CustomerProfileDTO> searchCustomers(String keyword) throws ResourceNotFoundException {
-		if (isEmail(keyword)) {
-			return searchCustomerBasedOnEmailId(keyword);
-		} else if (isContactNumber(keyword)) {
-			return searchCustomerBasedOnPhoneNumber(keyword);
-		} else if (isName(keyword)) {
-			return searchCustomerBasedOnName(keyword);
-		} else {
-			throw new ResourceNotFoundException("No customers found with the given keyword");
-		}
-	}
+
 	
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnEmailId(String email) throws ResourceNotFoundException {
@@ -98,24 +101,6 @@ public class CustomerServiceImpl implements CustomerService {
 		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
 	}
 
-	private boolean isEmail(String keyword) {
-		String emailRegex = "[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-		Pattern pattern = Pattern.compile(emailRegex);
-		return pattern.matcher(keyword).matches();
-	}
-
-	private boolean isContactNumber(String keyword) {
-		String contactNumberRegex = "^[0-9]{10}$";
-		Pattern pattern = Pattern.compile(contactNumberRegex);
-		return pattern.matcher(keyword).matches();
-	}
-
-	private boolean isName(String keyword) {
-		String nameRegex = "^[A-Za-z\\s]+$";
-		Pattern pattern = Pattern.compile(nameRegex);
-		return pattern.matcher(keyword).matches();
-	}
-
 	@Override
 	public PurchasingHabits displayCustomerPurchasingHabit(Long customerId) throws ResourceNotFoundException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
@@ -124,19 +109,21 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public void updatePurchasingHabit(Long customerId) throws ResourceNotFoundException {
+	public CustomerProfileDTO updatePurchasingHabit(Long customerId) throws ResourceNotFoundException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 		int numberOfPurchases = existingCustomer.getPurchaseHistory().size();
 		if (numberOfPurchases <= 3) {
 			existingCustomer.setPurchasingHabits(PurchasingHabits.NEW);
-		} else if (numberOfPurchases > 3 && numberOfPurchases < 10) {
+		} else if (numberOfPurchases < 10) {
 			existingCustomer.setPurchasingHabits(PurchasingHabits.SPARSE);
-		} else if (numberOfPurchases >=10 && numberOfPurchases < 25) {
+		} else if (numberOfPurchases < 25) {
 			existingCustomer.setPurchasingHabits(PurchasingHabits.REGULAR);
 		} else {
 			existingCustomer.setPurchasingHabits(PurchasingHabits.FREQUENT);
 		}
+		customerProfileRepository.save(existingCustomer);
+		return customerProfileMapper.mapToDTO(existingCustomer);
 	}
 
 }
