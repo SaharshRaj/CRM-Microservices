@@ -6,10 +6,9 @@ import com.crm.enums.SalesStage;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidOpportunityIdException;
 import com.crm.exception.InvalidSalesDetailsException;
-import com.crm.mapper.SalesOppurtunityMapper;
+import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,14 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@Slf4j
+
 @ExtendWith(MockitoExtension.class)
 class SalesOpportunityServiceImplTest {
 
@@ -36,7 +34,7 @@ class SalesOpportunityServiceImplTest {
     private SalesOpportunityRepository repository;
 
     @Mock
-    private SalesOppurtunityMapper mapper;
+    private SalesOpportunityMapper mapper;
 
 
     @InjectMocks
@@ -53,7 +51,7 @@ class SalesOpportunityServiceImplTest {
                         .estimatedValue(new BigDecimal("10000.0"))
                         .salesStage(SalesStage.PROSPECTING)
                         .closingDate(LocalDate.of(2025, Month.MAY, 18))
-                        .followUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())
+                        .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
                         .build(),
                 SalesOpportunity.builder()
                         .opportunityID(2L)
@@ -61,7 +59,7 @@ class SalesOpportunityServiceImplTest {
                         .estimatedValue(new BigDecimal("10000.0"))
                         .salesStage(SalesStage.PROSPECTING)
                         .closingDate(LocalDate.of(2025, Month.MAY, 18))
-                        .followUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())
+                        .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
                         .build(),
                 SalesOpportunity.builder()
                         .opportunityID(3L)
@@ -69,7 +67,7 @@ class SalesOpportunityServiceImplTest {
                         .estimatedValue(new BigDecimal("10000.0"))
                         .salesStage(SalesStage.PROSPECTING)
                         .closingDate(LocalDate.of(2025, Month.MAY, 18))
-                        .followUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())
+                        .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
                         .build()
         ));
     }
@@ -321,37 +319,37 @@ class SalesOpportunityServiceImplTest {
     @Test
     @DisplayName("getOpportunitiesByFollowUpReminder() - Positive")
     void testGetOpportunitiesByFollowUpReminder_Positive() {
-        when(repository.findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())).thenAnswer((invocation -> {
+        when(repository.findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18))).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getFollowUpReminder().equals(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay())){
+                if(e.getFollowUpReminder().equals(LocalDate.of(2025, Month.APRIL, 18))){
                     opportunityList.add(e);
                 }
             });
             return  opportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesByFollowUpReminder = service.getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay());
-        verify(repository, times(1)).findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18).atStartOfDay());
+        List<SalesOpportunityDTO> opportunitiesByFollowUpReminder = service.getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18));
+        verify(repository, times(1)).findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18));
         assertFalse(opportunitiesByFollowUpReminder.isEmpty());
     }
 
     @Test
     @DisplayName("getOpportunitiesByFollowUpReminder() - Negative")
     void testGetOpportunitiesByFollowUpReminder_Negative() {
-        LocalDateTime localDateTime = LocalDate.of(2025, Month.APRIL, 28).atStartOfDay();
-        when(repository.findByFollowUpReminder(localDateTime)).thenAnswer((invocation -> {
+        LocalDate localDate = LocalDate.of(2025, Month.APRIL, 28);
+        when(repository.findByFollowUpReminder(localDate)).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getFollowUpReminder().isEqual(localDateTime)){
+                if(e.getFollowUpReminder().isEqual(localDate)){
                     opportunityList.add(e);
                 }
             });
             return  opportunityList;
         }));
 
-        assertThrows(NoSuchElementException.class,()-> service.getOpportunitiesByFollowUpReminder(localDateTime));
-        verify(repository, times(1)).findByFollowUpReminder(localDateTime);
+        assertThrows(NoSuchElementException.class,()-> service.getOpportunitiesByFollowUpReminder(localDate));
+        verify(repository, times(1)).findByFollowUpReminder(localDate);
     }
 
 
@@ -359,14 +357,14 @@ class SalesOpportunityServiceImplTest {
     @DisplayName("scheduleFollowUpReminder() - Positive")
     void testScheduleFollowUpReminder_Positive() {
         SalesOpportunity salesOpportunity = list.getFirst();
-        LocalDateTime localDateTime = LocalDate.of(2025, Month.APRIL, 18).atStartOfDay();
+        LocalDate localDate = LocalDate.of(2025, Month.APRIL, 18);
         when(repository.findById(1L)).thenReturn(Optional.ofNullable(salesOpportunity));
         assert salesOpportunity != null;
         when(repository.save(salesOpportunity)).thenAnswer(invocation -> {
-            salesOpportunity.setFollowUpReminder(localDateTime);
+            salesOpportunity.setFollowUpReminder(localDate);
             return salesOpportunity;
         });
-        assertEquals(localDateTime, service.scheduleFollowUpReminder(1L,localDateTime).getFollowUpReminder());
+        assertEquals(localDate, service.scheduleFollowUpReminder(1L,localDate).getFollowUpReminder());
         verify(repository, times(1)).findById(anyLong());
         verify(repository, times(1)).save(any());
     }
@@ -374,9 +372,9 @@ class SalesOpportunityServiceImplTest {
     @Test
     @DisplayName("scheduleFollowUpReminder() - Negative_InvalidDateTimeException")
     void testScheduleFollowUpReminder_Negative_throwsInvalidDateTimeException() {
-        LocalDateTime localDateTime = LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay();
+        LocalDate localDate = LocalDate.of(2020, Month.JANUARY, 18);
 
-        assertThrows(InvalidDateTimeException.class, () -> service.scheduleFollowUpReminder(1L,localDateTime));
+        assertThrows(InvalidDateTimeException.class, () -> service.scheduleFollowUpReminder(1L,localDate));
         verify(repository, times(0)).findById(anyLong());
         verify(repository, times(0)).save(any());
     }
@@ -385,8 +383,8 @@ class SalesOpportunityServiceImplTest {
     @DisplayName("scheduleFollowUpReminder() - Negative_InvalidOpportunityIDException")
     void testScheduleFollowUpReminder_Negative_throwsInvalidOpportunityIDException() {
         when(repository.findById(0L)).thenReturn(Optional.empty());
-        LocalDateTime localDateTime = LocalDate.of(2026, Month.JANUARY, 18).atStartOfDay();
-        assertThrows(InvalidOpportunityIdException.class, () -> service.scheduleFollowUpReminder(0L,localDateTime));
+        LocalDate localDate = LocalDate.of(2026, Month.JANUARY, 18);
+        assertThrows(InvalidOpportunityIdException.class, () -> service.scheduleFollowUpReminder(0L,localDate));
         verify(repository, times(1)).findById(anyLong());
         verify(repository, times(0)).save(any());
     }

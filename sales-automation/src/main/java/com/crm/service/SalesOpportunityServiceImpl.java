@@ -6,14 +6,13 @@ import com.crm.enums.SalesStage;
 import com.crm.exception.InvalidOpportunityIdException;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidSalesDetailsException;
-import com.crm.mapper.SalesOppurtunityMapper;
+import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,8 +21,12 @@ import java.util.Optional;
 @Service
 public class SalesOpportunityServiceImpl implements SalesOpportunityService {
 
-    @Autowired
     private SalesOpportunityRepository repository;
+
+    @Autowired
+    public SalesOpportunityServiceImpl(SalesOpportunityRepository repository){
+        this.repository = repository;
+    }
 
 
     /**
@@ -40,7 +43,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
 
         opportunityList.forEach(
-                e -> salesOpportunityDTOList.add(SalesOppurtunityMapper.MAPPER.mapToDTO(e))
+                e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToDTO(e))
         );
 
         if(salesOpportunityDTOList.isEmpty()){
@@ -59,10 +62,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      */
     @Override
     public SalesOpportunityDTO createSalesOpportunity(SalesOpportunityDTO salesOpportunityDto) throws InvalidSalesDetailsException {
-        SalesOpportunity salesOpportunity = SalesOppurtunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityDto);
+        SalesOpportunity salesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityDto);
         try {
             SalesOpportunity savedOpportunity = repository.save(salesOpportunity);
-            return SalesOppurtunityMapper.MAPPER.mapToDTO(savedOpportunity);
+            return SalesOpportunityMapper.MAPPER.mapToDTO(savedOpportunity);
         } catch (Exception e) {
             throw new InvalidSalesDetailsException(e.getMessage());
         }
@@ -80,7 +83,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     public SalesOpportunityDTO getOpportunitiesByOpportunity(Long opportunityId) throws NoSuchElementException {
         Optional<SalesOpportunity> salesOpportunity = repository.findById(opportunityId);
         if(salesOpportunity.isPresent()){
-            return  SalesOppurtunityMapper.MAPPER.mapToDTO(salesOpportunity.get());
+            return  SalesOpportunityMapper.MAPPER.mapToDTO(salesOpportunity.get());
         }
         else {
             throw new NoSuchElementException("No leads found with given Opportunity ID");
@@ -103,7 +106,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         else {
         List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
         salesOpportunityList.forEach(
-                e -> salesOpportunityDTOList.add(SalesOppurtunityMapper.MAPPER.mapToDTO(e)));
+                e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToDTO(e)));
         return salesOpportunityDTOList;
         }
     }
@@ -124,7 +127,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         else {
             List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
             salesOpportunityList.forEach(
-                    e -> salesOpportunityDTOList.add(SalesOppurtunityMapper.MAPPER.mapToDTO(e)));
+                    e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToDTO(e)));
             return salesOpportunityDTOList;
         }
     }
@@ -145,7 +148,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         else {
             List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
             salesOpportunityList.forEach(
-                    e -> salesOpportunityDTOList.add(SalesOppurtunityMapper.MAPPER.mapToDTO(e)));
+                    e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToDTO(e)));
             return salesOpportunityDTOList;
         }
     }
@@ -167,7 +170,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         else {
             List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
             salesOpportunityList.forEach(
-                    e -> salesOpportunityDTOList.add(SalesOppurtunityMapper.MAPPER.mapToDTO(e)));
+                    e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToDTO(e)));
             return salesOpportunityDTOList;
         }
     }
@@ -180,7 +183,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      * @throws NoSuchElementException if no opportunities are found for the given follow-up reminder date.
      */
     @Override
-    public List<SalesOpportunityDTO> getOpportunitiesByFollowUpReminder(LocalDateTime followUpReminder) throws NoSuchElementException {
+    public List<SalesOpportunityDTO> getOpportunitiesByFollowUpReminder(LocalDate followUpReminder) throws NoSuchElementException {
         List<SalesOpportunity> salesOpportunityList = repository.findByFollowUpReminder(followUpReminder);
         if(salesOpportunityList.isEmpty()){
             throw new NoSuchElementException("No leads found with given Follow-up Reminder");
@@ -188,7 +191,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         else {
             List<SalesOpportunityDTO> salesOpportunityDTOList = new ArrayList<>();
             salesOpportunityList.forEach(
-                    e -> salesOpportunityDTOList.add(SalesOppurtunityMapper.MAPPER.mapToDTO(e)));
+                    e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToDTO(e)));
             return salesOpportunityDTOList;
         }
     }
@@ -203,14 +206,14 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      * @throws InvalidOpportunityIdException if the opportunity ID is invalid.
      */
     @Override
-    public SalesOpportunityDTO scheduleFollowUpReminder(Long opportunityId, LocalDateTime reminderDate) throws InvalidDateTimeException, InvalidOpportunityIdException {
-        if(reminderDate.isAfter(LocalDateTime.now())){
+    public SalesOpportunityDTO scheduleFollowUpReminder(Long opportunityId, LocalDate reminderDate) throws InvalidDateTimeException, InvalidOpportunityIdException {
+        if(reminderDate.isAfter(LocalDate.now())){
             Optional<SalesOpportunity> optionalSalesOpportunity = repository.findById(opportunityId);
             if(optionalSalesOpportunity.isPresent()){
                 SalesOpportunity salesOpportunity = optionalSalesOpportunity.get();
                 salesOpportunity.setFollowUpReminder(reminderDate);
                 SalesOpportunity savedOpportunity  = repository.save(salesOpportunity);
-                return SalesOppurtunityMapper.MAPPER.mapToDTO(savedOpportunity);
+                return SalesOpportunityMapper.MAPPER.mapToDTO(savedOpportunity);
             }
             else{
                 throw new InvalidOpportunityIdException("Lead with Opportunity ID "+opportunityId+" does not exist.");

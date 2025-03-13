@@ -2,10 +2,7 @@ package com.crm.global;
 
 import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ValidationErrorResponseDTO;
-import com.crm.exception.InvalidDateTimeException;
-import com.crm.exception.InvalidOpportunityIdException;
-import com.crm.exception.InvalidSalesDetailsException;
-import com.crm.exception.UnknownErrorOccurredException;
+import com.crm.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -86,18 +83,31 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(InvalidCronExpressionException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidCronExpression(InvalidCronExpressionException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponseDTO> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
         List<String> errorMessage = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach(e -> errorMessage.add(e.getDefaultMessage()));
 
         ValidationErrorResponseDTO errorResponse = ValidationErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Validation Failed")
-                .messages(errorMessage)
-                .path(request.getDescription(false))
-                .build();
+                    .timestamp(LocalDateTime.now())
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .error("Validation Failed")
+                    .messages(errorMessage)
+                    .path(request.getDescription(false))
+                    .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }

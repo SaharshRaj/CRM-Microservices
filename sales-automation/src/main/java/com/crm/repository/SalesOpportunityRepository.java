@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SalesOpportunityRepository extends JpaRepository<SalesOpportunity, Long> {
@@ -14,5 +13,5 @@ public interface SalesOpportunityRepository extends JpaRepository<SalesOpportuni
     List<SalesOpportunity> findBySalesStage(SalesStage salesStage);
     List<SalesOpportunity> findByEstimatedValue(BigDecimal estimatedValue);
     List<SalesOpportunity> findByClosingDate(LocalDate closingDate);
-    List<SalesOpportunity> findByFollowUpReminder(LocalDateTime followUpReminder);
+    List<SalesOpportunity> findByFollowUpReminder(LocalDate followUpReminder);
 }

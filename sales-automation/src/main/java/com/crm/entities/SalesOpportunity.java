@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -31,6 +30,6 @@ public class SalesOpportunity {
     @Column(name = "closing_date")
     private LocalDate closingDate;
     @Column(name = "follow_up_reminder")
-    private LocalDateTime followUpReminder;
+    private LocalDate followUpReminder;
 
 }

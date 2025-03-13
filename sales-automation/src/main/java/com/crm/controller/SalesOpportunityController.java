@@ -1,15 +1,14 @@
 package com.crm.controller;
 
 import com.crm.dto.SalesOpportunityDTO;
+import com.crm.dto.ScheduleConfigDTO;
 import com.crm.enums.SalesStage;
-
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -39,11 +38,15 @@ public interface SalesOpportunityController {
     ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByClosingDate(@PathVariable LocalDate closingDate);
 
     @GetMapping("/followUpReminder/{followUpReminder}")
-    ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByFollowUpReminder(@PathVariable LocalDateTime followUpReminder);
+    ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByFollowUpReminder(@PathVariable LocalDate followUpReminder);
 
     @PostMapping("/followUpReminder")
-    ResponseEntity<SalesOpportunityDTO> scheduleFollowUpReminder(@RequestParam Long opportunityId, @RequestParam LocalDateTime reminderDate);
+    ResponseEntity<SalesOpportunityDTO> scheduleFollowUpReminder(@RequestParam Long opportunityId, @RequestParam LocalDate reminderDate);
 
     @DeleteMapping("/{opportunityId}")
     ResponseEntity<String> deleteByOpportunityID(@PathVariable Long opportunityId);
+
+    @PostMapping("/configureCron")
+    ResponseEntity<ScheduleConfigDTO> configCronJob(@Valid @RequestBody ScheduleConfigDTO scheduleConfigDTO);
+
 }

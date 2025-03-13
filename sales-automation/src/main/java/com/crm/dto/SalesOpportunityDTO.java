@@ -11,7 +11,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -35,5 +34,5 @@ public class SalesOpportunityDTO {
     @NotNull(message = "Please enter proper date.")
     private LocalDate closingDate;
 
-    private LocalDateTime followUpReminder;
+    private LocalDate followUpReminder;
 }

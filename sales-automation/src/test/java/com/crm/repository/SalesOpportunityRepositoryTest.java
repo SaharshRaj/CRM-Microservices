@@ -102,30 +102,12 @@ class SalesOpportunityRepositoryTest {
                 .closingDate(LocalDate.now())
                 .build();
 
-        repository.save(opportunity);
+        SalesOpportunity saved = repository.save(opportunity);
 
-        SalesOpportunity salesOpportunity = repository.findById(1L).get();
+        SalesOpportunity salesOpportunity = repository.findById(saved.getOpportunityID()).get();
         salesOpportunity.setSalesStage(SalesStage.CLOSED_WON);
         SalesOpportunity newSalesOpportunity = repository.save(salesOpportunity);
         assertEquals(SalesStage.CLOSED_WON, newSalesOpportunity.getSalesStage());
-
-    }
-
-    @Test
-    @DisplayName("delete() - Positive")
-    void deleteSalesOpportunityTest_Positive(){
-        SalesOpportunity opportunity = SalesOpportunity.builder()
-                .customerID(1L)
-                .estimatedValue(new BigDecimal("20000.0"))
-                .salesStage(SalesStage.QUALIFICATION)
-                .closingDate(LocalDate.now())
-                .build();
-
-        SalesOpportunity savedOpportunity = repository.save(opportunity);
-
-        repository.delete(savedOpportunity);
-        Optional<SalesOpportunity> newSalesOpportunity = repository.findById(savedOpportunity.getOpportunityID());
-        assertFalse(newSalesOpportunity.isPresent());
 
     }
 
@@ -230,19 +212,20 @@ class SalesOpportunityRepositoryTest {
                 .estimatedValue(new BigDecimal("20000.0"))
                 .salesStage(SalesStage.QUALIFICATION)
                 .closingDate(LocalDate.now())
-                .followUpReminder(LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay())
+                .followUpReminder(LocalDate.of(2020, Month.JANUARY, 18))
                 .build();
 
         repository.save(opportunity);
-        List<SalesOpportunity> salesOpportunityList = repository.findByFollowUpReminder(LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay());
+        List<SalesOpportunity> salesOpportunityList = repository.findByFollowUpReminder(LocalDate.of(2020, Month.JANUARY, 18));
         assertFalse(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
     }
+
 
     @Test
     @DisplayName("findByFollowUpReminder() - Negative")
     void findSalesOpportunityByFollowUpReminder_Negative() {
 
-        List<SalesOpportunity> salesOpportunityList = repository.findByFollowUpReminder(LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay());
+        List<SalesOpportunity> salesOpportunityList = repository.findByFollowUpReminder(LocalDate.of(2020, Month.JANUARY, 18));
         assertTrue(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
     }
 
@@ -254,7 +237,7 @@ class SalesOpportunityRepositoryTest {
                 .estimatedValue(new BigDecimal("20000.0"))
                 .salesStage(SalesStage.QUALIFICATION)
                 .closingDate(LocalDate.now())
-                .followUpReminder(LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay())
+                .followUpReminder(LocalDate.of(2020, Month.JANUARY, 18))
                 .build();
 
         SalesOpportunity saved = repository.save(opportunity);

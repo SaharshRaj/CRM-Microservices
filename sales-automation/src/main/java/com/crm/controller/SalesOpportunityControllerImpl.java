@@ -1,8 +1,10 @@
 package com.crm.controller;
 
 import com.crm.dto.SalesOpportunityDTO;
+import com.crm.dto.ScheduleConfigDTO;
 import com.crm.enums.SalesStage;
 import com.crm.exception.UnknownErrorOccurredException;
+import com.crm.scheduler.DynamicSchedulerService;
 import com.crm.service.SalesOpportunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,14 +13,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 public class SalesOpportunityControllerImpl implements SalesOpportunityController {
     
+
+    private final SalesOpportunityService service;
+    private final DynamicSchedulerService schedulerService;
+
     @Autowired
-    private SalesOpportunityService service;
+    public SalesOpportunityControllerImpl(SalesOpportunityService service, DynamicSchedulerService schedulerService){
+        this.service = service;
+        this.schedulerService = schedulerService;
+    }
 
 
 
@@ -112,7 +120,7 @@ public class SalesOpportunityControllerImpl implements SalesOpportunityControlle
      * @returna list of SalesOpportunityDTO objects representing the retrieved leads.
      */
     @Override
-    public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByFollowUpReminder(LocalDateTime followUpReminder) {
+    public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByFollowUpReminder(LocalDate followUpReminder) {
         List<SalesOpportunityDTO> result = service.getOpportunitiesByFollowUpReminder(followUpReminder);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -125,7 +133,7 @@ public class SalesOpportunityControllerImpl implements SalesOpportunityControlle
      * @return the updated SalesOpportunityDTO object.
      */
     @Override
-    public ResponseEntity<SalesOpportunityDTO> scheduleFollowUpReminder(Long opportunityId, LocalDateTime reminderDate) {
+    public ResponseEntity<SalesOpportunityDTO> scheduleFollowUpReminder(Long opportunityId, LocalDate reminderDate) {
         SalesOpportunityDTO result = service.scheduleFollowUpReminder(opportunityId, reminderDate);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -145,5 +153,15 @@ public class SalesOpportunityControllerImpl implements SalesOpportunityControlle
         else{
             throw new UnknownErrorOccurredException("Some error occurred while deleting Lead with ID "+ opportunityId);
         }
+    }
+
+    /**
+     * @param scheduleConfigDTO containing the new cron expression.
+     * @return the updated scheduleConfigDTO object.
+     */
+    @Override
+    public ResponseEntity<ScheduleConfigDTO> configCronJob(ScheduleConfigDTO scheduleConfigDTO) {
+        ScheduleConfigDTO result = schedulerService.updateCronExpression(scheduleConfigDTO);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
