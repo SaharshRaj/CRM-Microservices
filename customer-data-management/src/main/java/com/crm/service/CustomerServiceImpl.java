@@ -2,7 +2,9 @@ package com.crm.service;
 
 import com.crm.dto.CustomerProfileDTO;
 import com.crm.entities.CustomerProfile;
+import com.crm.enums.Interest;
 import com.crm.enums.PurchasingHabits;
+import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
@@ -15,8 +17,95 @@ import java.util.stream.Collectors;
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
+
+	@Override
+	public List<CustomerProfileDTO> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		List<CustomerProfileDTO> list = customerProfiles.stream().filter(c-> c.getRegion() == region).map(customerProfileMapper::mapToDTO).toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		return list;	}
+
+	@Override
+	public List<CustomerProfileDTO> searchCustomerBasedOnInterest(Interest interest) throws ResourceNotFoundException {
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		List<CustomerProfileDTO> list = customerProfiles.stream().filter(c-> c.getInterest() == interest).map(customerProfileMapper::mapToDTO).toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		return list;	}
+
+	@Override
+	public List<CustomerProfileDTO> searchCustomerBasedOnPurchasingHabit(PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		List<CustomerProfileDTO> list = customerProfiles.stream().filter(c-> c.getPurchasingHabits() == purchasingHabits).map(customerProfileMapper::mapToDTO).toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		return list;
+	}
+
+	@Override
+	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterest(Region region, Interest interest) throws ResourceNotFoundException {
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		List<CustomerProfileDTO> list = customerProfiles.stream()
+				.filter(c-> (c.getRegion() == region) && (c.getInterest() == interest))
+				.map(customerProfileMapper::mapToDTO)
+				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		return list;
+	}
+
+	@Override
+	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndPurchasingHabit(Region region, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		List<CustomerProfileDTO> list = customerProfiles.stream()
+				.filter(c-> (c.getRegion() == region) && (c.getPurchasingHabits() == purchasingHabits))
+				.map(customerProfileMapper::mapToDTO)
+				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		return list;
+	}
+
+	@Override
+	public List<CustomerProfileDTO> searchCustomerBasedOnInterestAndPurchasingHabit(Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		List<CustomerProfileDTO> list = customerProfiles.stream()
+				.filter(c-> (c.getInterest() == interest) && (c.getPurchasingHabits() == purchasingHabits))
+				.map(customerProfileMapper::mapToDTO)
+				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		return list;
+	}
+
 	@Autowired
 	private CustomerProfileRepository customerProfileRepository;
+
 	@Autowired
 	private CustomerProfileMapper customerProfileMapper;
 
@@ -100,10 +189,18 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public PurchasingHabits displayCustomerPurchasingHabit(Long customerId) throws ResourceNotFoundException {
-		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
-				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-		return existingCustomer.getPurchasingHabits();
+	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region region, Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if(customerProfiles.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		List<CustomerProfileDTO> list = customerProfiles.stream()
+				.filter(c-> (c.getInterest() == interest) && (c.getRegion() == region) && (c.getPurchasingHabits() == purchasingHabits))
+				.map(customerProfileMapper::mapToDTO).toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no Customers");
+		}
+		return list;
 	}
 
 	@Override
