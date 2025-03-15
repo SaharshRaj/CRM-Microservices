@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public interface CustomerService {
-	public void addCustomerProfile(CustomerProfileDTO customerProfileDTO)  throws ResourceNotFoundException;
+	public CustomerProfileDTO addCustomerProfile(CustomerProfileDTO customerProfileDTO)  throws ResourceNotFoundException;
 	public List<CustomerProfileDTO> retrieveAllProfiles() throws ResourceNotFoundException;
 	public CustomerProfileDTO getCustomerById(Long customerId) throws ResourceNotFoundException;
 	public CustomerProfileDTO updateCustomer(Long customerId, CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException;

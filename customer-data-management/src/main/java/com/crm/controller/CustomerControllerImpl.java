@@ -21,10 +21,15 @@ public class CustomerControllerImpl implements CustomerController{
      * Add JavaDoc
      */
     @Override
-    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles() {
-        List<CustomerProfileDTO> customerProfileDTOS = service.retrieveAllProfiles();
-        return new ResponseEntity<>(customerProfileDTOS, HttpStatus.OK);
-    }
+    public ResponseEntity<?> getAllCustomerProfiles() throws ResourceNotFoundException{
+            try{
+                List<CustomerProfileDTO> customerProfileDTOList = service.retrieveAllProfiles();
+                return ResponseEntity.ok(customerProfileDTOList);
+            }catch(ResourceNotFoundException e){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There Are No Exisiting CustomerProfiles");
+            }
+
+        }
 
     @Override
     public ResponseEntity<?> getCustomerById(long customerId) throws ResourceNotFoundException {
@@ -80,14 +85,14 @@ public class CustomerControllerImpl implements CustomerController{
     public ResponseEntity<?> addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
         try{
             service.addCustomerProfile(customerProfileDTO);
-            return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Added Sucessfully");
+            return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Added Successfully");
         }catch(ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer Profile Cannot Be Empty");
         }
     }
 
     @Override
-    public ResponseEntity<?> updateCustomer(Long customerId, CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
+    public ResponseEntity<?> updateCustomer(long customerId, CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
         try {
             CustomerProfileDTO updatedCustomer = service.updateCustomer(customerId, customerProfileDTO);
             return ResponseEntity.ok(updatedCustomer);
@@ -97,7 +102,7 @@ public class CustomerControllerImpl implements CustomerController{
     }
 
     @Override
-    public ResponseEntity<?> updatePurchasingHabit(Long customerId) throws ResourceNotFoundException {
+    public ResponseEntity<?> updatePurchasingHabit(long customerId) throws ResourceNotFoundException {
         try{
             CustomerProfileDTO customerDTO = service.updatePurchasingHabit(customerId);
             return ResponseEntity.ok(customerDTO);
@@ -107,7 +112,7 @@ public class CustomerControllerImpl implements CustomerController{
     }
 
     @Override
-    public ResponseEntity<String> deleteCustomer(@PathVariable Long customerId) throws ResourceNotFoundException {
+    public ResponseEntity<String> deleteCustomer( long customerId) throws ResourceNotFoundException {
         try {
             service.deleteCustomer(customerId);
             return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Deleted");

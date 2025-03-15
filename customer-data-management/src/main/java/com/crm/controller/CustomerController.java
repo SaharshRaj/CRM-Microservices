@@ -11,7 +11,7 @@ import java.util.List;
 public interface CustomerController {
 
     @GetMapping
-    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
+    public ResponseEntity<?> getAllCustomerProfiles() throws ResourceNotFoundException;
 
     @GetMapping("/{customerId}")
     public ResponseEntity<?> getCustomerById(@PathVariable long customerId) throws ResourceNotFoundException;
@@ -32,13 +32,13 @@ public interface CustomerController {
     public ResponseEntity<?> addCustomerProfile(@RequestBody CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException;
 
     @PostMapping("/purchasingHabit/{customerId}")
-    public ResponseEntity<?> updatePurchasingHabit(@PathVariable Long customerId) throws ResourceNotFoundException;
+    public ResponseEntity<?> updatePurchasingHabit(@PathVariable long customerId) throws ResourceNotFoundException;
 
     @PostMapping("/{customerId}")
-    public ResponseEntity<?> updateCustomer(@PathVariable Long customerId, @RequestBody CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException;
+    public ResponseEntity<?> updateCustomer(@PathVariable long customerId, @RequestBody CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException;
 
     @DeleteMapping("/{customerId}")
-    public ResponseEntity<String> deleteCustomer(@PathVariable Long customerId) throws ResourceNotFoundException;
+    public ResponseEntity<String> deleteCustomer(@PathVariable long customerId) throws ResourceNotFoundException;
 
 
 

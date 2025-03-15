@@ -6,13 +6,10 @@ import com.crm.enums.PurchasingHabits;
 import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,12 +21,13 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerProfileMapper customerProfileMapper;
 
 	@Override
-	public void addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
+	public CustomerProfileDTO addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
 		if(customerProfileDTO == null){
 			throw new ResourceNotFoundException("Enter valid Customer Profile Details");
 		}
 		CustomerProfile customerProfile = customerProfileMapper.mapToCustomer(customerProfileDTO);
-		customerProfileRepository.save(customerProfile);
+		CustomerProfile savedCustomer = customerProfileRepository.save(customerProfile);
+		return customerProfileMapper.mapToDTO(savedCustomer);
 	}
 
 	@Override
@@ -96,7 +94,7 @@ public class CustomerServiceImpl implements CustomerService {
 			throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAllByPhoneNumber(phoneNumber);
 		if (customerProfiles.isEmpty()) {
-			throw new ResourceNotFoundException("No customers found with the given phone number");
+			throw new ResourceNotFoundException("No customers found with the given phonenumber");
 		}
 		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
 	}
