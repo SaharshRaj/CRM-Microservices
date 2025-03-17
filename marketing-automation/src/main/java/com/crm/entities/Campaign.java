@@ -1,13 +1,14 @@
 package com.crm.entities;
 
-import com.crm.enums.Type;
+import com.crm.enums.Type; 
+
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 
-@Getter
 @Setter
+@Getter
 @Entity
 @Table(name = "campaign")
 @NoArgsConstructor
@@ -18,13 +19,12 @@ public class Campaign {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "campaign_id",nullable = false)
     private Long campaignID;
-
+    @Column(unique=true) 
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
     @Enumerated(EnumType.STRING)
     private Type type;
-    private Integer customerInteractions;
-
+    private int customerInteractions=0; 
 
 }

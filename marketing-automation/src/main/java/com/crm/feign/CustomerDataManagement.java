@@ -2,14 +2,13 @@ package com.crm.feign;
 
 //import com.crm.dto.CustomerProfileDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
+import com.crm.dto.EmailDTO; 
 
 @FeignClient("api-gateway")
 public interface CustomerDataManagement {
-    //All the methods you wnat to use
-//    @GetMapping("")
-//    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
+//	@PostMapping("/notification/send")
+//	void sendNotifications(@RequestBody NotificationDTO notificationDTO);
 }

@@ -1,19 +1,14 @@
 package com.crm.mapper;
 
+import org.mapstruct.Mapper;
+
 import com.crm.dto.CampaignDTO;
 import com.crm.entities.Campaign;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring") // Add this annotation
 public interface CampaignMapper {
 
-    //CustomerProfileMapper using Factory
-    CampaignMapper MAPPER = Mappers.getMapper(CampaignMapper.class);
-
-
-    //CustomerProfile to CustomerProfileDTO
     CampaignDTO mapToDTO(Campaign campaign);
-    //CustomerProfileDTO to CustomerProfile
-    Campaign mapToCampaign(CampaignDTO supportTicketDTO);
+
+    Campaign mapToCampaign(CampaignDTO campaignDTO);
 }

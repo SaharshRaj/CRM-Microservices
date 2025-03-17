@@ -1,0 +1,15 @@
+package com.crm.dto;
+
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+@Data
+public class SmsDTO {
+
+	@NotNull(message="The message should be minimum 10 characters and maximum 100 charcater")
+	private String message;
+	
+	private String Url;
+	
+	
+}
