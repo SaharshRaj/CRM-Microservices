@@ -1,6 +1,7 @@
 package com.crm.service;
 
-import com.crm.dto.SalesOpportunityDTO;
+import com.crm.dto.SalesOpportunityRequestDTO;
+import com.crm.dto.SalesOpportunityResponseDTO;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
 import com.crm.exception.InvalidDateTimeException;
@@ -74,7 +75,7 @@ class SalesOpportunityServiceImplTest {
 
     @Test
     @DisplayName("retrieveAllSalesOpportunities() - Positive")
-    void testRetrieveAllSalesOpportunities_Positive() {
+    void retrieveAllSalesOpportunitiesShouldReturnListOfOpportunitiesWhenDataExists() {
         when(repository.findAll()).thenReturn(list);
         assertFalse(service.retrieveAllSalesOpportunities().isEmpty());
         verify(repository, times(1)).findAll();
@@ -82,22 +83,22 @@ class SalesOpportunityServiceImplTest {
 
     @Test
     @DisplayName("retrieveAllSalesOpportunities() - Negative")
-    void testRetrieveAllSalesOpportunities_Negative() {
+    void retrieveAllSalesOpportunitiesShouldThrowExceptionWhenNoDataExists() {
         when(repository.findAll()).thenReturn(new ArrayList<>());
-        assertThrows(NoSuchElementException.class,() -> service.retrieveAllSalesOpportunities());
+        assertThrows(NoSuchElementException.class, () -> service.retrieveAllSalesOpportunities());
         verify(repository, times(1)).findAll();
     }
 
     @Test
     @DisplayName("createSalesOpportunity() - Positive")
-    void testCreateSalesOpportunity_Positive() {
+    void createSalesOpportunityShouldReturnCreatedOpportunityWhenValidInput() {
         SalesOpportunity salesOpportunity = list.getFirst();
 
         when(repository.save(any(SalesOpportunity.class))).thenAnswer((invocation -> {
             salesOpportunity.setOpportunityID(1L);
-            return  salesOpportunity;
+            return salesOpportunity;
         }));
-        when(mapper.mapToDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityDTO
+        when(mapper.mapToRequestDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityRequestDTO
                 .builder()
                 .opportunityID(salesOpportunity.getOpportunityID())
                 .salesStage(salesOpportunity.getSalesStage())
@@ -109,22 +110,22 @@ class SalesOpportunityServiceImplTest {
 
         assertEquals(1L,
                 service.createSalesOpportunity(mapper
-                .mapToDTO(salesOpportunity))
-                .getOpportunityID()
+                                .mapToRequestDTO(salesOpportunity))
+                        .getOpportunityID()
         );
         verify(repository, times(1)).save(any(SalesOpportunity.class));
     }
 
     @Test
     @DisplayName("createSalesOpportunity() - Negative")
-    void testCreateSalesOpportunity_Negative() {
+    void createSalesOpportunityShouldThrowExceptionWhenInvalidInput() {
         SalesOpportunity salesOpportunity = list.getFirst();
 
         salesOpportunity.setCustomerID(0L);
 
         when(repository.save(any(SalesOpportunity.class))).thenThrow(ConstraintViolationException.class);
 
-        when(mapper.mapToDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityDTO
+        when(mapper.mapToRequestDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityRequestDTO
                 .builder()
                 .opportunityID(salesOpportunity.getOpportunityID())
                 .salesStage(salesOpportunity.getSalesStage())
@@ -134,35 +135,35 @@ class SalesOpportunityServiceImplTest {
                 .customerID(salesOpportunity.getCustomerID())
                 .build());
         // Assert that an InvalidSalesDetailsException is thrown when creating the SalesOpportunity
-        SalesOpportunityDTO salesOpportunityDTO = mapper.mapToDTO(salesOpportunity);
-        assertThrows(InvalidSalesDetailsException.class, () -> service.createSalesOpportunity(salesOpportunityDTO));
+        SalesOpportunityRequestDTO salesOpportunityRequestDTO = mapper.mapToRequestDTO(salesOpportunity);
+        assertThrows(InvalidSalesDetailsException.class, () -> service.createSalesOpportunity(salesOpportunityRequestDTO));
         verify(repository, times(1)).save(any(SalesOpportunity.class));
     }
 
     @Test
     @DisplayName("getOpportunitiesByOpportunityID() - Positive")
-    void testGetOpportunitiesByCustomer_OpportunityID() {
+    void getOpportunitiesByOpportunityIdShouldReturnOpportunityWhenIdExists() {
         when(repository.findById(1L)).thenAnswer((invocation -> {
-            for(SalesOpportunity s : list){
-                if(s.getOpportunityID() == 1L){
+            for (SalesOpportunity s : list) {
+                if (s.getOpportunityID() == 1L) {
                     return Optional.of(s);
                 }
             }
             return Optional.empty();
         }));
 
-        SalesOpportunityDTO salesOpportunityDTO = service.getOpportunitiesByOpportunity(1L);
+        SalesOpportunityResponseDTO salesOpportunityResponseDTO = service.getOpportunitiesByOpportunity(1L);
 
-        assertEquals(1L, (long) salesOpportunityDTO.getOpportunityID());
+        assertEquals(1L, (long) salesOpportunityResponseDTO.getOpportunityID());
         verify(repository, times(1)).findById(1L);
     }
 
     @Test
     @DisplayName("getOpportunitiesByOpportunityID() - Negative")
-    void testGetOpportunitiesByOpportunityID_Negative() {
+    void getOpportunitiesByOpportunityIdShouldThrowExceptionWhenIdDoesNotExist() {
         when(repository.findById(0L)).thenAnswer((invocation -> {
-            for(SalesOpportunity s : list){
-                if(s.getOpportunityID() == 0L){
+            for (SalesOpportunity s : list) {
+                if (s.getOpportunityID() == 0L) {
                     return Optional.of(s);
                 }
             }
@@ -176,18 +177,18 @@ class SalesOpportunityServiceImplTest {
 
     @Test
     @DisplayName("getOpportunitiesByCustomer() - Positive")
-    void testGetOpportunitiesByCustomer_Positive() {
+    void getOpportunitiesByCustomerIdShouldReturnListOfOpportunitiesWhenCustomerExists() {
         when(repository.findByCustomerID(1L)).thenAnswer((invocation -> {
             List<SalesOpportunity> salesOpportunityList = new ArrayList<>();
-            for(SalesOpportunity s : list){
-                if(s.getCustomerID() == 1L){
+            for (SalesOpportunity s : list) {
+                if (s.getCustomerID() == 1L) {
                     salesOpportunityList.add(s);
                 }
             }
-            return  salesOpportunityList;
+            return salesOpportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesByCustomer = service.getOpportunitiesByCustomer(1L);
+        List<SalesOpportunityResponseDTO> opportunitiesByCustomer = service.getOpportunitiesByCustomer(1L);
 
         assertFalse(opportunitiesByCustomer.isEmpty());
         verify(repository, times(1)).findByCustomerID(1L);
@@ -195,34 +196,34 @@ class SalesOpportunityServiceImplTest {
 
     @Test
     @DisplayName("getOpportunitiesByCustomer() - Negative")
-    void testGetOpportunitiesByCustomer_Negative() {
+    void getOpportunitiesByCustomerIdShouldThrowExceptionWhenCustomerDoesNotExist() {
         when(repository.findByCustomerID(0L)).thenAnswer((invocation -> {
             List<SalesOpportunity> salesOpportunityList = new ArrayList<>();
-            for(SalesOpportunity s : list){
-                if(s.getCustomerID() == 0L){
+            for (SalesOpportunity s : list) {
+                if (s.getCustomerID() == 0L) {
                     salesOpportunityList.add(s);
                 }
             }
-            return  salesOpportunityList;
+            return salesOpportunityList;
         }));
-    assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByCustomer(0L));
-    verify(repository, times(1)).findByCustomerID(anyLong());
+        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByCustomer(0L));
+        verify(repository, times(1)).findByCustomerID(anyLong());
     }
 
     @Test
     @DisplayName("getOpportunitiesBySalesStage() - Positive")
-    void testGetOpportunitiesBySalesStage_Positive() {
+    void getOpportunitiesBySalesStageShouldReturnListOfOpportunitiesWhenSalesStageExists() {
         when(repository.findBySalesStage(SalesStage.PROSPECTING)).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getSalesStage() == SalesStage.PROSPECTING){
+                if (e.getSalesStage() == SalesStage.PROSPECTING) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesBySalesStage = service.getOpportunitiesBySalesStage(SalesStage.PROSPECTING);
+        List<SalesOpportunityResponseDTO> opportunitiesBySalesStage = service.getOpportunitiesBySalesStage(SalesStage.PROSPECTING);
 
         assertFalse(opportunitiesBySalesStage.isEmpty());
         verify(repository, times(1)).findBySalesStage(any(SalesStage.class));
@@ -230,132 +231,132 @@ class SalesOpportunityServiceImplTest {
 
     @Test
     @DisplayName("getOpportunitiesBySalesStage() - Negative")
-    void testGetOpportunitiesBySalesStage_Negative() {
+    void getOpportunitiesBySalesStageShouldThrowExceptionWhenSalesStageDoesNotExist() {
         when(repository.findBySalesStage(SalesStage.CLOSED_LOST)).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getSalesStage() == SalesStage.CLOSED_LOST){
+                if (e.getSalesStage() == SalesStage.CLOSED_LOST) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
 
-        assertThrows(NoSuchElementException.class, ()->service.getOpportunitiesBySalesStage(SalesStage.CLOSED_LOST));
+        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesBySalesStage(SalesStage.CLOSED_LOST));
         verify(repository, times(1)).findBySalesStage(any(SalesStage.class));
     }
 
     @Test
     @DisplayName("getOpportunitiesByEstimatedValue() - Positive")
-    void testGetOpportunitiesByEstimatedValue_Positive() {
+    void getOpportunitiesByEstimatedValueShouldReturnListOfOpportunitiesWhenEstimatedValueExists() {
         when(repository.findByEstimatedValue(new BigDecimal("10000.0"))).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(Objects.equals(e.getEstimatedValue(), new BigDecimal("10000.0"))){
+                if (Objects.equals(e.getEstimatedValue(), new BigDecimal("10000.0"))) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesByEstimatedValue = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
+        List<SalesOpportunityResponseDTO> opportunitiesByEstimatedValue = service.getOpportunitiesByEstimatedValue(new BigDecimal("10000.0"));
         verify(repository, times(1)).findByEstimatedValue(new BigDecimal("10000.0"));
         assertFalse(opportunitiesByEstimatedValue.isEmpty());
     }
 
     @Test
     @DisplayName("getOpportunitiesByEstimatedValue() - Negative")
-    void testGetOpportunitiesByEstimatedValue_Negative() {
+    void getOpportunitiesByEstimatedValueShouldThrowExceptionWhenEstimatedValueDoesNotExist() {
         BigDecimal bigDecimal = new BigDecimal("20000.0");
         when(repository.findByEstimatedValue(bigDecimal)).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getEstimatedValue().equals(bigDecimal)){
+                if (e.getEstimatedValue().equals(bigDecimal)) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
-        assertThrows(NoSuchElementException.class, ()->service.getOpportunitiesByEstimatedValue(bigDecimal));
+        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByEstimatedValue(bigDecimal));
         verify(repository, times(1)).findByEstimatedValue(bigDecimal);
     }
 
     @Test
     @DisplayName("getOpportunitiesByClosingDate() - Positive")
-    void testGetOpportunitiesByClosingDate_Positive() {
+    void getOpportunitiesByClosingDateShouldReturnListOfOpportunitiesWhenClosingDateExists() {
         when(repository.findByClosingDate(LocalDate.of(2025, Month.MAY, 18))).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getClosingDate().equals(LocalDate.of(2025, Month.MAY, 18))){
+                if (e.getClosingDate().equals(LocalDate.of(2025, Month.MAY, 18))) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesByClosingDate = service.getOpportunitiesByClosingDate(LocalDate.of(2025, Month.MAY, 18));
+        List<SalesOpportunityResponseDTO> opportunitiesByClosingDate = service.getOpportunitiesByClosingDate(LocalDate.of(2025, Month.MAY, 18));
         verify(repository, times(1)).findByClosingDate(LocalDate.of(2025, Month.MAY, 18));
         assertFalse(opportunitiesByClosingDate.isEmpty());
     }
 
     @Test
     @DisplayName("getOpportunitiesByClosingDate() - Negative")
-    void testGetOpportunitiesByClosingDate_Negative() {
+    void getOpportunitiesByClosingDateShouldThrowExceptionWhenClosingDateDoesNotExist() {
         LocalDate localDate = LocalDate.of(2025, Month.MAY, 20);
         when(repository.findByClosingDate(localDate)).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getClosingDate().equals(localDate)){
+                if (e.getClosingDate().equals(localDate)) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
 
-        assertThrows(NoSuchElementException.class,()-> service.getOpportunitiesByClosingDate(localDate));
+        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByClosingDate(localDate));
         verify(repository, times(1)).findByClosingDate(localDate);
     }
 
     @Test
     @DisplayName("getOpportunitiesByFollowUpReminder() - Positive")
-    void testGetOpportunitiesByFollowUpReminder_Positive() {
+    void getOpportunitiesByFollowUpReminderShouldReturnListOfOpportunitiesWhenFollowUpReminderExists() {
         when(repository.findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18))).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getFollowUpReminder().equals(LocalDate.of(2025, Month.APRIL, 18))){
+                if (e.getFollowUpReminder().equals(LocalDate.of(2025, Month.APRIL, 18))) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
 
-        List<SalesOpportunityDTO> opportunitiesByFollowUpReminder = service.getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18));
+        List<SalesOpportunityResponseDTO> opportunitiesByFollowUpReminder = service.getOpportunitiesByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18));
         verify(repository, times(1)).findByFollowUpReminder(LocalDate.of(2025, Month.APRIL, 18));
         assertFalse(opportunitiesByFollowUpReminder.isEmpty());
     }
 
     @Test
     @DisplayName("getOpportunitiesByFollowUpReminder() - Negative")
-    void testGetOpportunitiesByFollowUpReminder_Negative() {
+    void getOpportunitiesByFollowUpReminderShouldThrowExceptionWhenFollowUpReminderDoesNotExist() {
         LocalDate localDate = LocalDate.of(2025, Month.APRIL, 28);
         when(repository.findByFollowUpReminder(localDate)).thenAnswer((invocation -> {
             List<SalesOpportunity> opportunityList = new ArrayList<>();
             list.forEach(e -> {
-                if(e.getFollowUpReminder().isEqual(localDate)){
+                if (e.getFollowUpReminder().isEqual(localDate)) {
                     opportunityList.add(e);
                 }
             });
-            return  opportunityList;
+            return opportunityList;
         }));
 
-        assertThrows(NoSuchElementException.class,()-> service.getOpportunitiesByFollowUpReminder(localDate));
+        assertThrows(NoSuchElementException.class, () -> service.getOpportunitiesByFollowUpReminder(localDate));
         verify(repository, times(1)).findByFollowUpReminder(localDate);
     }
 
 
     @Test
     @DisplayName("scheduleFollowUpReminder() - Positive")
-    void testScheduleFollowUpReminder_Positive() {
+    void scheduleFollowUpReminderShouldUpdateAndReturnOpportunityWhenValidInput() {
         SalesOpportunity salesOpportunity = list.getFirst();
         LocalDate localDate = LocalDate.of(2025, Month.APRIL, 18);
         when(repository.findById(1L)).thenReturn(Optional.ofNullable(salesOpportunity));
@@ -364,38 +365,38 @@ class SalesOpportunityServiceImplTest {
             salesOpportunity.setFollowUpReminder(localDate);
             return salesOpportunity;
         });
-        assertEquals(localDate, service.scheduleFollowUpReminder(1L,localDate).getFollowUpReminder());
+        assertEquals(localDate, service.scheduleFollowUpReminder(1L, localDate).getFollowUpReminder());
         verify(repository, times(1)).findById(anyLong());
         verify(repository, times(1)).save(any());
     }
 
     @Test
     @DisplayName("scheduleFollowUpReminder() - Negative_InvalidDateTimeException")
-    void testScheduleFollowUpReminder_Negative_throwsInvalidDateTimeException() {
+    void scheduleFollowUpReminderShouldThrowExceptionWhenInvalidDateTime() {
         LocalDate localDate = LocalDate.of(2020, Month.JANUARY, 18);
 
-        assertThrows(InvalidDateTimeException.class, () -> service.scheduleFollowUpReminder(1L,localDate));
+        assertThrows(InvalidDateTimeException.class, () -> service.scheduleFollowUpReminder(1L, localDate));
         verify(repository, times(0)).findById(anyLong());
         verify(repository, times(0)).save(any());
     }
 
     @Test
     @DisplayName("scheduleFollowUpReminder() - Negative_InvalidOpportunityIDException")
-    void testScheduleFollowUpReminder_Negative_throwsInvalidOpportunityIDException() {
+    void scheduleFollowUpReminderShouldThrowExceptionWhenInvalidOpportunityId() {
         when(repository.findById(0L)).thenReturn(Optional.empty());
         LocalDate localDate = LocalDate.of(2026, Month.JANUARY, 18);
-        assertThrows(InvalidOpportunityIdException.class, () -> service.scheduleFollowUpReminder(0L,localDate));
+        assertThrows(InvalidOpportunityIdException.class, () -> service.scheduleFollowUpReminder(0L, localDate));
         verify(repository, times(1)).findById(anyLong());
         verify(repository, times(0)).save(any());
     }
 
     @Test
     @DisplayName("testDeleteByOpportunityID() - Positive")
-    void testDeleteByOpportunityID_Positive() {
+    void deleteByOpportunityIdShouldRemoveOpportunityWhenIdExists() {
         SalesOpportunity obj = list.getFirst();
         when(repository.findById(1L)).thenAnswer((invocation -> {
-            for(SalesOpportunity s : list){
-                if(s.getOpportunityID() == 1L){
+            for (SalesOpportunity s : list) {
+                if (s.getOpportunityID() == 1L) {
                     return Optional.of(s);
                 }
             }
@@ -411,16 +412,16 @@ class SalesOpportunityServiceImplTest {
 
     @Test
     @DisplayName("testDeleteByOpportunityID() - Negative")
-    void testDeleteByOpportunityID_Negative() {
+    void deleteByOpportunityIdShouldThrowExceptionWhenIdDoesNotExist() {
         when(repository.findById(0L)).thenAnswer((invocation -> {
-            for(SalesOpportunity s : list){
-                if(s.getOpportunityID() == 0L){
+            for (SalesOpportunity s : list) {
+                if (s.getOpportunityID() == 0L) {
                     return Optional.of(s);
                 }
             }
             return Optional.empty();
         }));
-        assertThrows(InvalidOpportunityIdException.class,() -> service.deleteByOpportunityID(0L));
+        assertThrows(InvalidOpportunityIdException.class, () -> service.deleteByOpportunityID(0L));
         verify(repository, times(0)).delete(any(SalesOpportunity.class));
         verify(repository, times(1)).findById(0L);
     }

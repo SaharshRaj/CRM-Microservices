@@ -21,7 +21,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     private final DummyClass dummyClass;
 
     @Autowired
-    public SchedulerServiceImpl(SalesOpportunityRepository repository, DummyClass dummyClass){
+    public SchedulerServiceImpl(SalesOpportunityRepository repository, DummyClass dummyClass) {
         this.repository = repository;
         this.dummyClass = dummyClass;
     }
@@ -35,12 +35,12 @@ public class SchedulerServiceImpl implements SchedulerService {
                 o ->
                 {
                     EmailFormat email = EmailFormat.builder()
-                                .salutation("Dear employee,")
-                                .openingLine("I hope this message finds you well.")
-                                .body("This is to inform you that Lead #"+o.getOpportunityID()+" is closing on "+o.getClosingDate()+".")
-                                .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
-                                .closing("SALES-AUTOMATION SERVICE \n CRM")
-                                .build();
+                            .salutation("Dear employee,")
+                            .openingLine("I hope this message finds you well.")
+                            .body("This is to inform you that Lead #" + o.getOpportunityID() + " is closing on " + o.getClosingDate() + ".")
+                            .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
+                            .closing("SALES-AUTOMATION SERVICE \n CRM")
+                            .build();
 
                     NotificationDTO notificationDTO = NotificationDTO.builder()
                             .subject("Follow-up Reminder for Sales Lead with ID " + o.getOpportunityID())
@@ -48,10 +48,9 @@ public class SchedulerServiceImpl implements SchedulerService {
                             .build();
                     NotificationDTO resultDTO = dummyClass.sendNotificatonDummy(notificationDTO);
                     result.add(resultDTO);
-                    if(resultDTO.getStatus().equals("SENT")){
+                    if (resultDTO.getStatus().equals("SENT")) {
                         log.info("NOTIFICATION SENT FOR LEAD WITH ID #{}", o.getOpportunityID());
-                    }
-                    else{
+                    } else {
                         log.error("FAILED TO SEND NOTIFICATION FOR LEAD WITH ID #{}", o.getOpportunityID());
                     }
                 }

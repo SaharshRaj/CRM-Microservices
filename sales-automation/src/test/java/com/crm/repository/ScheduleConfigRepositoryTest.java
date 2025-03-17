@@ -21,19 +21,19 @@ class ScheduleConfigRepositoryTest {
 
     @Test
     @DisplayName("save() - Positive")
-    void testSaveScheduleConfig_Positive() {
+    void saveScheduleConfigShouldPersistDataSuccessfully() {
         ScheduleConfig sendNotification = ScheduleConfig.builder()
                 .taskName("Send Notification")
                 .cronExpression("* * * * * *")
                 .build();
 
         ScheduleConfig saved = repository.save(sendNotification);
-        assertTrue(saved.getId()>0);
+        assertTrue(saved.getId() > 0);
     }
 
     @Test
     @DisplayName("findById() - Positive")
-    void findScheduleConfigByIdTest_Positive() {
+    void findScheduleConfigByIdShouldReturnConfigWhenIdExists() {
         ScheduleConfig sendNotification = ScheduleConfig.builder()
                 .taskName("Send Notification")
                 .cronExpression("* * * * * *")
@@ -46,14 +46,14 @@ class ScheduleConfigRepositoryTest {
 
     @Test
     @DisplayName("findById() - Negative")
-    void findScheduleConfigByIdTest_Negative() {
+    void findScheduleConfigByIdShouldReturnEmptyOptionalWhenIdDoesNotExist() {
         Optional<ScheduleConfig> configOptional = repository.findById(1L);
         assertFalse(configOptional.isPresent());
     }
 
     @Test
     @DisplayName("findAll() - Positive")
-    void getAllSalesOpportunities_Positive() {
+    void findAllScheduleConfigsShouldReturnListOfConfigsWhenDataExists() {
         ScheduleConfig obj1 = ScheduleConfig.builder()
                 .taskName("Send Notification")
                 .cronExpression("* * * * * *")
@@ -70,26 +70,27 @@ class ScheduleConfigRepositoryTest {
         repository.save(obj1);
         repository.save(obj2);
         repository.save(obj3);
-        
+
         List<ScheduleConfig> scheduleConfigList = repository.findAll();
         assertFalse(scheduleConfigList.isEmpty());
     }
+
     @Test
     @DisplayName("findAll() - Negative")
-    void getAllSalesOpportunities_Negative() {
+    void findAllScheduleConfigsShouldReturnEmptyListWhenNoDataExists() {
         List<ScheduleConfig> scheduleConfigList = repository.findAll();
         assertTrue(scheduleConfigList.isEmpty());
     }
 
     @Test
     @DisplayName("update() - Positive")
-    void updateScheduleConfigTest_Positive(){
+    void updateScheduleConfigShouldModifyExistingConfig() {
         ScheduleConfig obj1 = ScheduleConfig.builder()
                 .taskName("Send Notification")
                 .cronExpression("* * * * * *")
                 .build();
         ScheduleConfig scheduleConfig = repository.save(obj1);
-        
+
         scheduleConfig.setCronExpression("1 2 3 4 5 6");
         ScheduleConfig updatedScheduleConfig = repository.save(scheduleConfig);
         assertEquals("1 2 3 4 5 6", updatedScheduleConfig.getCronExpression());
@@ -97,7 +98,7 @@ class ScheduleConfigRepositoryTest {
 
     @Test
     @DisplayName("delete() - Positive")
-    void deleteScheduleConfigTest_Positive(){
+    void deleteScheduleConfigShouldRemoveConfigFromRepository() {
         ScheduleConfig sendNotification = ScheduleConfig.builder()
                 .taskName("Send Notification")
                 .cronExpression("* * * * * *")
@@ -112,7 +113,7 @@ class ScheduleConfigRepositoryTest {
 
     @Test
     @DisplayName("findByTaskName() - Positive")
-    void findByTaskName_Positive() {
+    void findScheduleConfigByTaskNameShouldReturnConfigWhenTaskNameExists() {
         ScheduleConfig sendNotification = ScheduleConfig.builder()
                 .taskName("Send Notification")
                 .cronExpression("* * * * * *")
@@ -125,7 +126,7 @@ class ScheduleConfigRepositoryTest {
 
     @Test
     @DisplayName("findByTaskName() - Negative")
-    void findByTaskName_Negative() {
+    void findScheduleConfigByTaskNameShouldReturnEmptyOptionalWhenTaskNameDoesNotExist() {
         Optional<ScheduleConfig> scheduleConfig = repository.findByTaskName("Task Name");
         assertTrue(scheduleConfig.isEmpty());
     }

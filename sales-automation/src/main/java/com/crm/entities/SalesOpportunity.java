@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class SalesOpportunity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "opportunity_id",nullable = false)
+    @Column(name = "opportunity_id", nullable = false)
     private Long opportunityID;
     //Foreign Key
     @Column(name = "customer_id")

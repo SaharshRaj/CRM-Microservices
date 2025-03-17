@@ -1,6 +1,7 @@
 package com.crm.scheduler;
 
-import com.crm.dto.ScheduleConfigDTO;
+import com.crm.dto.ScheduleConfigRequestDTO;
+import com.crm.dto.ScheduleConfigResponseDTO;
 import com.crm.entities.ScheduleConfig;
 import com.crm.exception.InvalidCronExpressionException;
 import com.crm.mapper.SalesOpportunityMapper;
@@ -27,30 +28,29 @@ public class DynamicSchedulerServiceImpl implements DynamicSchedulerService {
 
 
     @Autowired
-    public DynamicSchedulerServiceImpl(ScheduleConfigRepository repository, SchedulerServiceImpl schedulerService){
+    public DynamicSchedulerServiceImpl(ScheduleConfigRepository repository, SchedulerServiceImpl schedulerService) {
         this.scheduleConfigRepository = repository;
         this.schedulerService = schedulerService;
         taskScheduler.initialize();
     }
 
     @Override
-    public ScheduleConfigDTO updateCronExpression(ScheduleConfigDTO scheduleConfigDTO) {
-        String newCron = SalesOpportunityMapper.MAPPER.mapToScheduleConfig(scheduleConfigDTO).getCronExpression();
+    public ScheduleConfigResponseDTO updateCronExpression(ScheduleConfigRequestDTO scheduleConfigRequestDTO) {
+        String newCron = SalesOpportunityMapper.MAPPER.mapToScheduleConfig(scheduleConfigRequestDTO).getCronExpression();
         ScheduleConfig config = scheduleConfigRepository.findByTaskName("Send Reminder")
                 .orElse(new ScheduleConfig());
-        if(CronExpression.isValidExpression(newCron)){
+        if (CronExpression.isValidExpression(newCron)) {
             ZonedDateTime nextExecution = CronExpression.parse(newCron).next(ZonedDateTime.now());
             config.setCronExpression(newCron);
             ScheduleConfig saved = scheduleConfigRepository.save(config);
             restartScheduledTask(newCron);
             log.info("Next execution scheduled for {}", nextExecution);
-            return SalesOpportunityMapper.MAPPER.mapToScheduleConfigDTO(saved);
-    }
-        else{
+            return SalesOpportunityMapper.MAPPER.mapToScheduleConfigResponseDTO(saved);
+        } else {
             log.info("Invalid Cron Expression {}", newCron);
-            throw new InvalidCronExpressionException("Invalid Cron Expression "+newCron);
+            throw new InvalidCronExpressionException("Invalid Cron Expression " + newCron);
         }
-        }
+    }
 
     @Override
     public void restartScheduledTask(String cronExpression) {

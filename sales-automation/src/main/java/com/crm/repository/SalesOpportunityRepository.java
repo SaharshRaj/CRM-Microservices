@@ -10,8 +10,12 @@ import java.util.List;
 
 public interface SalesOpportunityRepository extends JpaRepository<SalesOpportunity, Long> {
     List<SalesOpportunity> findByCustomerID(long customerID);
+
     List<SalesOpportunity> findBySalesStage(SalesStage salesStage);
+
     List<SalesOpportunity> findByEstimatedValue(BigDecimal estimatedValue);
+
     List<SalesOpportunity> findByClosingDate(LocalDate closingDate);
+
     List<SalesOpportunity> findByFollowUpReminder(LocalDate followUpReminder);
 }

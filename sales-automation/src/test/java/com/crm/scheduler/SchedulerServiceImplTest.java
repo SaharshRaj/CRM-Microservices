@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class SchedulerServiceImplTest {
 
@@ -77,7 +78,7 @@ class SchedulerServiceImplTest {
 
 
     @Test
-    void sendNotifications_POSITIVE() {
+    void sendNotificationsShouldReturnListOfSentNotificationsWhenFollowUpRemindersExist() {
         // Create EmailFormat and NotificationDTO objects for testing
         EmailFormat email1 = EmailFormat.builder()
                 .salutation("Dear employee,")

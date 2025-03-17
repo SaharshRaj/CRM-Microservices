@@ -26,7 +26,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("save() - Positive")
-    void testSaveSalesOpportunity_positive() {
+    void saveSalesOpportunityShouldPersistDataSuccessfully() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("10000.0"))
@@ -40,7 +40,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findById() - Positive")
-    void findSalesOpportunityByIdTest_Positive() {
+    void findSalesOpportunityByIdShouldReturnOpportunityWhenIdExists() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -56,14 +56,14 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findById() - Negative")
-    void findSalesOpportunityByIdTest_Negative() {
+    void findSalesOpportunityByIdShouldReturnEmptyOptionalWhenIdDoesNotExist() {
         Optional<SalesOpportunity> savedOpportunity = repository.findById(999L); // Use an ID that doesn't exist
         assertFalse(savedOpportunity.isPresent(), "SalesOpportunity should not be found");
     }
 
     @Test
     @DisplayName("findAll() - Positive")
-    void getAllSalesOpportunities_Positive() {
+    void findAllSalesOpportunitiesShouldReturnListOfOpportunitiesWhenDataExists() {
         SalesOpportunity opportunity1 = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("30000.0"))
@@ -85,16 +85,17 @@ class SalesOpportunityRepositoryTest {
         assertFalse(allOpportunities.isEmpty(), "SalesOpportunity list should not be empty");
         assertEquals(2, allOpportunities.size(), "SalesOpportunity list should contain 2 entries");
     }
+
     @Test
     @DisplayName("findAll() - Negative")
-    void getAllSalesOpportunities_Negative() {
+    void findAllSalesOpportunitiesShouldReturnEmptyListWhenNoDataExists() {
         List<SalesOpportunity> allOpportunities = repository.findAll();
         assertTrue(allOpportunities.isEmpty(), "SalesOpportunity list should be empty");
     }
 
     @Test
     @DisplayName("update() - Positive")
-    void updateSalesOpportunityTest_Positive(){
+    void updateSalesOpportunityShouldModifyExistingOpportunity() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -113,7 +114,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByCustomerID() - Positive")
-    void findSalesOpportunityByCustomersTest_Positive() {
+    void findSalesOpportunitiesByCustomerIdShouldReturnListOfOpportunitiesWhenCustomerExists() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -128,7 +129,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByCustomerID() - Negative")
-    void findSalesOpportunityByCustomersTest_Negative() {
+    void findSalesOpportunitiesByCustomerIdShouldReturnEmptyListWhenCustomerDoesNotExist() {
 
         List<SalesOpportunity> salesOpportunityList = repository.findByCustomerID(2L);
         assertTrue(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
@@ -136,7 +137,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findBySalesStage() - Positive")
-    void findSalesOpportunityBySalesStage_Positive() {
+    void findSalesOpportunitiesBySalesStageShouldReturnListOfOpportunitiesWhenSalesStageExists() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -151,7 +152,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findBySalesStage() - Negative")
-    void findSalesOpportunityBySalesStage_Negative() {
+    void findSalesOpportunitiesBySalesStageShouldReturnEmptyListWhenSalesStageDoesNotExist() {
 
         List<SalesOpportunity> salesOpportunityList = repository.findBySalesStage(SalesStage.PROSPECTING);
         assertTrue(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
@@ -159,7 +160,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByEstimatedValue() - Positive")
-    void findSalesOpportunityByEstimatedValue_Positive() {
+    void findSalesOpportunitiesByEstimatedValueShouldReturnListOfOpportunitiesWhenEstimatedValueExists() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -174,7 +175,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByEstimatedValue() - Negative")
-    void findSalesOpportunityByEstimatedValue_Negative() {
+    void findSalesOpportunitiesByEstimatedValueShouldReturnEmptyListWhenEstimatedValueDoesNotExist() {
 
         List<SalesOpportunity> salesOpportunityList = repository.findByEstimatedValue(BigDecimal.valueOf(100000.0));
         assertTrue(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
@@ -182,7 +183,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByClosingDate() - Positive")
-    void findSalesOpportunityByClosingDate_Positive() {
+    void findSalesOpportunitiesByClosingDateShouldReturnListOfOpportunitiesWhenClosingDateExists() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -197,7 +198,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByClosingDate() - Negative")
-    void findSalesOpportunityByClosingDate_Negative() {
+    void findSalesOpportunitiesByClosingDateShouldReturnEmptyListWhenClosingDateDoesNotExist() {
 
         List<SalesOpportunity> salesOpportunityList = repository.findByClosingDate(LocalDate.now());
         assertTrue(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
@@ -206,7 +207,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByFollowUpReminder() - Positive")
-    void findSalesOpportunityByFollowUpReminder_Positive() {
+    void findSalesOpportunitiesByFollowUpReminderShouldReturnListOfOpportunitiesWhenFollowUpReminderExists() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -223,7 +224,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("findByFollowUpReminder() - Negative")
-    void findSalesOpportunityByFollowUpReminder_Negative() {
+    void findSalesOpportunityfindSalesOpportunitiesByFollowUpReminderShouldReturnEmptyListWhenFollowUpReminderDoesNotExistByFollowUpReminder_Negative() {
 
         List<SalesOpportunity> salesOpportunityList = repository.findByFollowUpReminder(LocalDate.of(2020, Month.JANUARY, 18));
         assertTrue(salesOpportunityList.isEmpty(), "SalesOpportunity not found");
@@ -231,7 +232,7 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("delete() - Positive")
-    void delete_Positive() {
+    void deleteSalesOpportunityShouldRemoveOpportunityFromRepository() {
         SalesOpportunity opportunity = SalesOpportunity.builder()
                 .customerID(1L)
                 .estimatedValue(new BigDecimal("20000.0"))
@@ -248,8 +249,8 @@ class SalesOpportunityRepositoryTest {
 
     @Test
     @DisplayName("delete() - Negative")
-    void delete_Negative() {
-        assertThrows(InvalidDataAccessApiUsageException.class,()->repository.delete(null));
+    void deleteSalesOpportunityShouldThrowExceptionWhenOpportunityIsNull() {
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> repository.delete(null));
     }
 
 }

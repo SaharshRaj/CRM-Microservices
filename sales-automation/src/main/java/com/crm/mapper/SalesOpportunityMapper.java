@@ -1,7 +1,9 @@
 package com.crm.mapper;
 
-import com.crm.dto.SalesOpportunityDTO;
-import com.crm.dto.ScheduleConfigDTO;
+import com.crm.dto.SalesOpportunityRequestDTO;
+import com.crm.dto.SalesOpportunityResponseDTO;
+import com.crm.dto.ScheduleConfigRequestDTO;
+import com.crm.dto.ScheduleConfigResponseDTO;
 import com.crm.entities.SalesOpportunity;
 import com.crm.entities.ScheduleConfig;
 import org.mapstruct.Mapper;
@@ -14,11 +16,20 @@ public interface SalesOpportunityMapper {
     SalesOpportunityMapper MAPPER = Mappers.getMapper(SalesOpportunityMapper.class);
 
 
-    //SalesOpportunity to SalesOpportunityDTO
-    SalesOpportunityDTO mapToDTO(SalesOpportunity salesOpportunity);
+    //SalesOpportunity to SalesOpportunityRequestDTO
+    SalesOpportunityRequestDTO mapToRequestDTO(SalesOpportunity salesOpportunity);
+
+    //SalesOpportunityRequestDTO to SalesOpportunity
+    SalesOpportunity mapToSalesOpportunity(SalesOpportunityRequestDTO salesOpportunityRequestDTO);
+
+    //SalesOpportunity to SalesOpportunityRequestDTO
+    SalesOpportunityResponseDTO mapToResponseDTO(SalesOpportunity salesOpportunity);
+
     //SalesOpportunityDTO to SalesOpportunity
-    SalesOpportunity mapToSalesOpportunity(SalesOpportunityDTO salesOpportunityDTO);
+    ScheduleConfigRequestDTO mapToScheduleConfigDTO(ScheduleConfig scheduleConfig);
+
     //SalesOpportunityDTO to SalesOpportunity
-    ScheduleConfigDTO mapToScheduleConfigDTO(ScheduleConfig scheduleConfig);
-    ScheduleConfig mapToScheduleConfig(ScheduleConfigDTO scheduleConfig);
+    ScheduleConfigResponseDTO mapToScheduleConfigResponseDTO(ScheduleConfig scheduleConfig);
+
+    ScheduleConfig mapToScheduleConfig(ScheduleConfigRequestDTO scheduleConfig);
 }

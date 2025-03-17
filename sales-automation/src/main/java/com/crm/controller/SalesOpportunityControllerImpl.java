@@ -1,7 +1,9 @@
 package com.crm.controller;
 
-import com.crm.dto.SalesOpportunityDTO;
-import com.crm.dto.ScheduleConfigDTO;
+import com.crm.dto.SalesOpportunityRequestDTO;
+import com.crm.dto.SalesOpportunityResponseDTO;
+import com.crm.dto.ScheduleConfigRequestDTO;
+import com.crm.dto.ScheduleConfigResponseDTO;
 import com.crm.enums.SalesStage;
 import com.crm.exception.UnknownErrorOccurredException;
 import com.crm.scheduler.DynamicSchedulerService;
@@ -15,153 +17,157 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * REST controller for managing sales opportunities.
+ * Provides endpoints for retrieving, creating, updating, and deleting sales opportunities.
+ */
 @RestController
 public class SalesOpportunityControllerImpl implements SalesOpportunityController {
-    
+
 
     private final SalesOpportunityService service;
     private final DynamicSchedulerService schedulerService;
 
     @Autowired
-    public SalesOpportunityControllerImpl(SalesOpportunityService service, DynamicSchedulerService schedulerService){
+    public SalesOpportunityControllerImpl(SalesOpportunityService service, DynamicSchedulerService schedulerService) {
         this.service = service;
         this.schedulerService = schedulerService;
     }
 
 
-
     /**
-     * Retrieves list of all available leads.
+     * Retrieves list of all available sales opportunities.
      *
-     * @return a list of SalesOpportunityDTO objects representing all leads
+     * @return ResponseEntity containing a list of SalesOpportunityResponseDTO objects representing all sales opportunities, or an empty list if none exist.
      */
     @Override
-    public ResponseEntity<List<SalesOpportunityDTO>> retrieveAllSalesOpportunities() {
-        List<SalesOpportunityDTO> salesOpportunityDTOList = service.retrieveAllSalesOpportunities();
-        return new ResponseEntity<>(salesOpportunityDTOList, HttpStatus.OK);
+    public ResponseEntity<List<SalesOpportunityResponseDTO>> retrieveAllSalesOpportunities() {
+        List<SalesOpportunityResponseDTO> salesOpportunityRequestDTOList = service.retrieveAllSalesOpportunities();
+        return new ResponseEntity<>(salesOpportunityRequestDTOList, HttpStatus.OK);
     }
 
     /**
-     * Creates a new lead.
+     * Creates a new sales opportunity.
      *
-     * @param salesOpportunityDto the DTO representing the lead to be created.
-     * @return the created SalesOpportunityDTO object.
+     * @param salesOpportunityRequestDto the DTO representing the sales opportunity to be created.
+     * @return ResponseEntity containing the created SalesOpportunityResponseDTO object.
      */
     @Override
-    public ResponseEntity<SalesOpportunityDTO> createSalesOpportunity(SalesOpportunityDTO salesOpportunityDto) {
-        SalesOpportunityDTO salesOpportunity = service.createSalesOpportunity(salesOpportunityDto);
+    public ResponseEntity<SalesOpportunityResponseDTO> createSalesOpportunity(SalesOpportunityRequestDTO salesOpportunityRequestDto) {
+        SalesOpportunityResponseDTO salesOpportunity = service.createSalesOpportunity(salesOpportunityRequestDto);
         return new ResponseEntity<>(salesOpportunity, HttpStatus.OK);
     }
 
     /**
-     * Retrieves a lead by its opportunity ID.
+     * Retrieves a sales opportunity by its opportunity ID.
      *
-     * @param opportunityId the ID of the lead to be retrieved.
-     * @return the SalesOpportunityDTO object representing the retrieved lead.
+     * @param opportunityId the ID of the sales opportunity to be retrieved.
+     * @return ResponseEntity containing the SalesOpportunityResponseDTO object representing the retrieved sales opportunity.
      */
     @Override
-    public ResponseEntity<SalesOpportunityDTO> getOpportunitiesByOpportunity(Long opportunityId) {
-        SalesOpportunityDTO result = service.getOpportunitiesByOpportunity(opportunityId);
+    public ResponseEntity<SalesOpportunityResponseDTO> getOpportunitiesByOpportunity(Long opportunityId) {
+        SalesOpportunityResponseDTO result = service.getOpportunitiesByOpportunity(opportunityId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * Retrieves leads by customer ID
+     * Retrieves sales opportunities by customer ID.
      *
-     * @param customerId the ID of the customer whose leads are to be retrieved.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
+     * @param customerId the ID of the customer whose sales opportunities are to be retrieved.
+     * @return ResponseEntity containing a list of SalesOpportunityResponseDTO objects representing the retrieved sales opportunities.
      */
     @Override
-    public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByCustomer(Long customerId) {
-        List<SalesOpportunityDTO> result = service.getOpportunitiesByCustomer(customerId);
+    public ResponseEntity<List<SalesOpportunityResponseDTO>> getOpportunitiesByCustomer(Long customerId) {
+        List<SalesOpportunityResponseDTO> result = service.getOpportunitiesByCustomer(customerId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * Retrieves leads by sales stage.
+     * Retrieves sales opportunities by sales stage.
      *
-     * @param salesStage the sales stage to filter leads by.
-     * @returna list of SalesOpportunityDTO objects representing the retrieved leads.
+     * @param salesStage the sales stage to filter sales opportunities by.
+     * @return ResponseEntity containing a list of SalesOpportunityResponseDTO objects representing the retrieved sales opportunities.
      */
     @Override
-    public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesBySalesStage(SalesStage salesStage) {
-        List<SalesOpportunityDTO> result = service.getOpportunitiesBySalesStage(salesStage);
+    public ResponseEntity<List<SalesOpportunityResponseDTO>> getOpportunitiesBySalesStage(SalesStage salesStage) {
+        List<SalesOpportunityResponseDTO> result = service.getOpportunitiesBySalesStage(salesStage);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * Retrieves leads by estimated value.
+     * Retrieves sales opportunities by estimated value.
      *
-     * @param estimatedValue the estimated value to filter leads by.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
+     * @param estimatedValue the estimated value to filter sales opportunities by.
+     * @return ResponseEntity containing a list of SalesOpportunityResponseDTO objects representing the retrieved sales opportunities.
      */
     @Override
-    public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByEstimatedValue(BigDecimal estimatedValue) {
-        List<SalesOpportunityDTO> result = service.getOpportunitiesByEstimatedValue(estimatedValue);
+    public ResponseEntity<List<SalesOpportunityResponseDTO>> getOpportunitiesByEstimatedValue(BigDecimal estimatedValue) {
+        List<SalesOpportunityResponseDTO> result = service.getOpportunitiesByEstimatedValue(estimatedValue);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * Retrieves sales leads by closing date.
+     * Retrieves sales opportunities by closing date.
      *
-     * @param closingDate the closing date to filter leads by.
-     * @return a list of SalesOpportunityDTO objects representing the retrieved leads.
+     * @param closingDate the closing date to filter sales opportunities by.
+     * @return ResponseEntity containing a list of SalesOpportunityResponseDTO objects representing the retrieved sales opportunities.
      */
     @Override
-    public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByClosingDate(LocalDate closingDate) {
-        List<SalesOpportunityDTO> result = service.getOpportunitiesByClosingDate(closingDate);
+    public ResponseEntity<List<SalesOpportunityResponseDTO>> getOpportunitiesByClosingDate(LocalDate closingDate) {
+        List<SalesOpportunityResponseDTO> result = service.getOpportunitiesByClosingDate(closingDate);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * Retrieves leads by follow-up reminder date.
+     * Retrieves sales opportunities by follow-up reminder date.
      *
-     * @param followUpReminder the follow-up reminder date to filter leads by.
-     * @returna list of SalesOpportunityDTO objects representing the retrieved leads.
+     * @param followUpReminder the follow-up reminder date to filter sales opportunities by.
+     * @return ResponseEntity containing a list of SalesOpportunityResponseDTO objects representing the retrieved sales opportunities.
      */
     @Override
-    public ResponseEntity<List<SalesOpportunityDTO>> getOpportunitiesByFollowUpReminder(LocalDate followUpReminder) {
-        List<SalesOpportunityDTO> result = service.getOpportunitiesByFollowUpReminder(followUpReminder);
+    public ResponseEntity<List<SalesOpportunityResponseDTO>> getOpportunitiesByFollowUpReminder(LocalDate followUpReminder) {
+        List<SalesOpportunityResponseDTO> result = service.getOpportunitiesByFollowUpReminder(followUpReminder);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * Schedules a follow-up reminder for a lead.
+     * Schedules a follow-up reminder for a sales opportunity.
      *
-     * @param opportunityId the ID of the lead to schedule the reminder for.
-     * @param reminderDate the date and time for the follow-up reminder.
-     * @return the updated SalesOpportunityDTO object.
+     * @param opportunityId the ID of the sales opportunity to schedule the reminder for.
+     * @param reminderDate  the date for the follow-up reminder.
+     * @return ResponseEntity containing the updated SalesOpportunityResponseDTO object.
      */
     @Override
-    public ResponseEntity<SalesOpportunityDTO> scheduleFollowUpReminder(Long opportunityId, LocalDate reminderDate) {
-        SalesOpportunityDTO result = service.scheduleFollowUpReminder(opportunityId, reminderDate);
+    public ResponseEntity<SalesOpportunityResponseDTO> scheduleFollowUpReminder(Long opportunityId, LocalDate reminderDate) {
+        SalesOpportunityResponseDTO result = service.scheduleFollowUpReminder(opportunityId, reminderDate);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
-     * Deletes a sales lead by its opportunity ID.
+     * Deletes a sales opportunity by its opportunity ID.
      *
-     * @param opportunityId the ID of the lead to be deleted.
-     * @return ResponseEntity with success message if the deletion was successful, ErrorResponseDTO otherwise.
+     * @param opportunityId the ID of the sales opportunity to be deleted.
+     * @return ResponseEntity containing a success message if the deletion was successful.
      */
     @Override
     public ResponseEntity<String> deleteByOpportunityID(Long opportunityId) {
         boolean success = service.deleteByOpportunityID(opportunityId);
-        if(success){
+        if (success) {
             return new ResponseEntity<>("{\"message\": \"Successfully deleted Lead with ID " + opportunityId + "\"}", HttpStatus.OK);
-        }
-        else{
-            throw new UnknownErrorOccurredException("Some error occurred while deleting Lead with ID "+ opportunityId);
+        } else {
+            throw new UnknownErrorOccurredException("Some error occurred while deleting Lead with ID " + opportunityId);
         }
     }
 
     /**
-     * @param scheduleConfigDTO containing the new cron expression.
-     * @return the updated scheduleConfigDTO object.
+     * Configures the cron job schedule for follow-up reminders.
+     *
+     * @param scheduleConfigRequestDTO containing the new cron expression.
+     * @return ResponseEntity containing the updated ScheduleConfigDTO object.
      */
     @Override
-    public ResponseEntity<ScheduleConfigDTO> configCronJob(ScheduleConfigDTO scheduleConfigDTO) {
-        ScheduleConfigDTO result = schedulerService.updateCronExpression(scheduleConfigDTO);
+    public ResponseEntity<ScheduleConfigResponseDTO> configCronJob(ScheduleConfigRequestDTO scheduleConfigRequestDTO) {
+        ScheduleConfigResponseDTO result = schedulerService.updateCronExpression(scheduleConfigRequestDTO);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

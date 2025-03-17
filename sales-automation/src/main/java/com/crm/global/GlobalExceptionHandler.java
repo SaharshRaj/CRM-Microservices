@@ -15,9 +15,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Global exception handler for the Sales Automation Module.
+ * Handles various exceptions and returns appropriate error responses.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
+    /**
+     * Handles NoSuchElementException and returns a 404 Not Found error response.
+     *
+     * @param ex         The NoSuchElementException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 404 status.
+     */
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponseDTO> handleNotFound(NoSuchElementException ex, WebRequest webRequest) {
 
@@ -31,6 +41,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
+     *
+     * @param ex         The InvalidSalesDetailsException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 400 status.
+     */
     @ExceptionHandler(InvalidSalesDetailsException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadRequest(InvalidSalesDetailsException ex, WebRequest webRequest) {
 
@@ -44,6 +61,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles InvalidDateTimeException and returns a 400 Bad Request error response.
+     *
+     * @param ex         The InvalidDateTimeException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 400 status.
+     */
     @ExceptionHandler(InvalidDateTimeException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadRequestInvalidDateTime(InvalidDateTimeException ex, WebRequest webRequest) {
 
@@ -57,6 +81,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles InvalidOpportunityIdException and returns a 400 Bad Request error response.
+     *
+     * @param ex         The InvalidOpportunityIdException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 400 status.
+     */
     @ExceptionHandler(InvalidOpportunityIdException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadRequestInvalidOpportunityId(InvalidOpportunityIdException ex, WebRequest webRequest) {
 
@@ -70,7 +101,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-@ExceptionHandler(UnknownErrorOccurredException.class)
+    /**
+     * Handles UnknownErrorOccurredException and returns a 500 Internal Server Error response.
+     *
+     * @param ex         The UnknownErrorOccurredException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 500 status.
+     */
+    @ExceptionHandler(UnknownErrorOccurredException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadRequestInvalidOpportunityId(UnknownErrorOccurredException ex, WebRequest webRequest) {
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
@@ -83,6 +121,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Handles InvalidCronExpressionException and returns a 400 Bad Request error response.
+     *
+     * @param ex         The InvalidCronExpressionException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 400 status.
+     */
     @ExceptionHandler(InvalidCronExpressionException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidCronExpression(InvalidCronExpressionException ex, WebRequest webRequest) {
 
@@ -96,18 +141,25 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles MethodArgumentNotValidException and returns a 400 Bad Request error response with validation error messages.
+     *
+     * @param ex      The MethodArgumentNotValidException.
+     * @param request The WebRequest.
+     * @return ResponseEntity containing ValidationErrorResponseDTO with 400 status and validation error messages.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponseDTO> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
         List<String> errorMessage = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach(e -> errorMessage.add(e.getDefaultMessage()));
 
         ValidationErrorResponseDTO errorResponse = ValidationErrorResponseDTO.builder()
-                    .timestamp(LocalDateTime.now())
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .error("Validation Failed")
-                    .messages(errorMessage)
-                    .path(request.getDescription(false))
-                    .build();
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Validation Failed")
+                .messages(errorMessage)
+                .path(request.getDescription(false))
+                .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }

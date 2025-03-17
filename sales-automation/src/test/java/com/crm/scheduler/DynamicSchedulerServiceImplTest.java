@@ -1,6 +1,7 @@
 package com.crm.scheduler;
 
-import com.crm.dto.ScheduleConfigDTO;
+import com.crm.dto.ScheduleConfigRequestDTO;
+import com.crm.dto.ScheduleConfigResponseDTO;
 import com.crm.entities.ScheduleConfig;
 import com.crm.exception.InvalidCronExpressionException;
 import com.crm.mapper.SalesOpportunityMapper;
@@ -36,8 +37,8 @@ class DynamicSchedulerServiceImplTest {
     private DynamicSchedulerServiceImpl dynamicSchedulerService;
 
     @Test
-    void updateCronExpression_ValidCronExpression() {
-        ScheduleConfigDTO scheduleConfigDTO = ScheduleConfigDTO.builder()
+    void updateCronExpressionShouldUpdateAndReturnConfigWhenValidCronExpressionProvided() {
+        ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
                 .taskName("Send Reminder")
                 .cronExpression("0 0/5 * * * ?")
                 .build();
@@ -51,15 +52,15 @@ class DynamicSchedulerServiceImplTest {
         when(scheduleConfigRepository.findByTaskName("Send Reminder")).thenReturn(Optional.of(config));
         when(scheduleConfigRepository.save(any(ScheduleConfig.class))).thenReturn(config);
 
-        ScheduleConfigDTO result = dynamicSchedulerService.updateCronExpression(scheduleConfigDTO);
+        ScheduleConfigResponseDTO result = dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO);
 
         verify(scheduleConfigRepository).save(config);
         assertEquals("0 0/5 * * * ?", result.getCronExpression());
     }
 
     @Test
-    void updateCronExpression_InvalidCronExpression() {
-        ScheduleConfigDTO scheduleConfigDTO = ScheduleConfigDTO.builder()
+    void updateCronExpressionShouldThrowExceptionWhenInvalidCronExpressionProvided() {
+        ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
                 .taskName("Sample Task")
                 .cronExpression("invalid-cron")
                 .build();
@@ -67,7 +68,7 @@ class DynamicSchedulerServiceImplTest {
         when(scheduleConfigRepository.findByTaskName("Send Reminder")).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(InvalidCronExpressionException.class, () -> {
-            dynamicSchedulerService.updateCronExpression(scheduleConfigDTO);
+            dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO);
         });
 
         String expectedMessage = "Invalid Cron Expression invalid-cron";
