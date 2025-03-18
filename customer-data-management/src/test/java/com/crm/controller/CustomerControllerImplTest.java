@@ -95,9 +95,9 @@ class CustomerControllerImplTest {
     @Test
     void testGetCustomerById_Negative() throws Exception {
         when(service.getCustomerById(anyLong())).thenThrow(new ResourceNotFoundException("No customers found"));
-        mockMvc.perform(get("/api/customers/{customerId}","1"))
+        mockMvc.perform(get("/api/customers/{customerId}", "1"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Customer Profile Not Found"));
+                .andExpect(jsonPath("$.message").value("No customers found"));
     }
 
     @Test
@@ -111,9 +111,9 @@ class CustomerControllerImplTest {
     @Test
     void testSearchCustomerBasedOnEmailId_Negative() throws Exception {
         when(service.searchCustomerBasedOnEmailId(anyString())).thenThrow(new ResourceNotFoundException("No customers found with the given email"));
-        mockMvc.perform(get("/api/customers/email/{emailId}","Thamz@example.com"))
+        mockMvc.perform(get("/api/customers/email/{emailId}", "Thamz@example.com"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No customers found with the given email"));
     }
 
     @Test
@@ -126,11 +126,11 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnName_Negative() throws Exception{
+    void testSearchCustomerBasedOnName_Negative() throws Exception {
         when(service.searchCustomerBasedOnName(anyString())).thenThrow(new ResourceNotFoundException("No customers found with the given name"));
-        mockMvc.perform(get("/api/customers/name/{name}","Thamzhini"))
+        mockMvc.perform(get("/api/customers/name/{name}", "Thamzhini"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No customers found with the given name"));
     }
 
     @Test
@@ -143,11 +143,11 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnPhoneNumber_Negative() throws Exception{
+    void testSearchCustomerBasedOnPhoneNumber_Negative() throws Exception {
         when(service.searchCustomerBasedOnPhoneNumber(anyString())).thenThrow(new ResourceNotFoundException("No customers found with the given phonenumber"));
-        mockMvc.perform(get("/api/customers/phoneNumber/{phoneNumber}","1234567890"))
+        mockMvc.perform(get("/api/customers/phoneNumber/{phoneNumber}", "1234567890"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No customers found with the given phonenumber"));
     }
 
     @Test
@@ -161,11 +161,11 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnRegion_Negative() throws Exception{
+    void testSearchCustomerBasedOnRegion_Negative() throws Exception {
         when(service.searchCustomerBasedOnRegion(Region.NORTH)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
-        mockMvc.perform(get("/api/customers/region/{region}","NORTH"))
+        mockMvc.perform(get("/api/customers/region/{region}", "NORTH"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
 
     @Test
@@ -179,16 +179,16 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnInterest_Negative() throws Exception{
+    void testSearchCustomerBasedOnInterest_Negative() throws Exception {
         when(service.searchCustomerBasedOnInterest(Interest.MUSIC)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
-        mockMvc.perform(get("/api/customers/interest/{interest}","MUSIC"))
+        mockMvc.perform(get("/api/customers/interest/{interest}", "MUSIC"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
 
     @Test
     public void testSearchCustomerBasedOnPurchasingHabit_Positive() throws Exception {
-        when(service.searchCustomerBasedOnPurchasingHabit(NEW)).thenReturn(Arrays.asList(customerProfileDTO));
+        when(service.searchCustomerBasedOnPurchasingHabit(PurchasingHabits.NEW)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/purchasingHabit/{purchasingHabits}","NEW"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -197,13 +197,12 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnPurchasingHabit_Negative() throws Exception{
-        when(service.searchCustomerBasedOnPurchasingHabit(NEW)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
-        mockMvc.perform(get("/api/customers/purchasingHabit/{purchasingHabits}","NEW"))
+    void testSearchCustomerBasedOnPurchasingHabit_Negative() throws Exception {
+        when(service.searchCustomerBasedOnPurchasingHabit(PurchasingHabits.NEW)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
+        mockMvc.perform(get("/api/customers/purchasingHabit/{purchasingHabits}", "NEW"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
-
     @Test
     public void testSearchCustomerBasedOnRegionAndPurchasingHabit_Positive() throws Exception {
         when(service.searchCustomerBasedOnRegionAndPurchasingHabit(Region.NORTH, PurchasingHabits.NEW)).thenReturn(Arrays.asList(customerProfileDTO));
@@ -215,11 +214,11 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnRegionAndPurchasingHabit_Negative() throws Exception{
+    void testSearchCustomerBasedOnRegionAndPurchasingHabit_Negative() throws Exception {
         when(service.searchCustomerBasedOnRegionAndPurchasingHabit(Region.NORTH, PurchasingHabits.NEW)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
-        mockMvc.perform(get("/api/customers/region&purchasingHabits/{region}/{purchasingHabits}","NORTH","NEW"))
+        mockMvc.perform(get("/api/customers/region&purchasingHabits/{region}/{purchasingHabits}", "NORTH", "NEW"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
 
     @Test
@@ -233,11 +232,11 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnInterestAndPurchasingHabit_Negative() throws Exception{
+    void testSearchCustomerBasedOnInterestAndPurchasingHabit_Negative() throws Exception {
         when(service.searchCustomerBasedOnInterestAndPurchasingHabit(Interest.MUSIC, PurchasingHabits.NEW)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
-        mockMvc.perform(get("/api/customers/interest&purchasingHabits/{interest}/{purchasingHabits}","MUSIC","NEW"))
+        mockMvc.perform(get("/api/customers/interest&purchasingHabits/{interest}/{purchasingHabits}", "MUSIC", "NEW"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
 
     @Test
@@ -251,11 +250,11 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnRegionAndInterest_Negative() throws Exception{
-        when(service.searchCustomerBasedOnRegionAndInterest(Region.NORTH,Interest.MUSIC)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
-        mockMvc.perform(get("/api/customers/region&interest/{region}/{interest}","NORTH","MUSIC"))
+    void testSearchCustomerBasedOnRegionAndInterest_Negative() throws Exception {
+        when(service.searchCustomerBasedOnRegionAndInterest(Region.NORTH, Interest.MUSIC)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
+        mockMvc.perform(get("/api/customers/region&interest/{region}/{interest}", "NORTH", "MUSIC"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
 
     @Test
@@ -269,11 +268,11 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testSearchCustomerBasedOnRegionAndInterestAndPurchasingHabit_Negative() throws Exception{
-        when(service.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region.NORTH,Interest.MUSIC, PurchasingHabits.NEW)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
-        mockMvc.perform(get("/api/customers/demographics/{region}/{interest}/{purchasingHabits}","NORTH","MUSIC","NEW"))
+    void testSearchCustomerBasedOnRegionAndInterestAndPurchasingHabit_Negative() throws Exception {
+        when(service.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region.NORTH, Interest.MUSIC, PurchasingHabits.NEW)).thenThrow(new ResourceNotFoundException("No Customer Profiles Found"));
+        mockMvc.perform(get("/api/customers/demographics/{region}/{interest}/{purchasingHabits}", "NORTH", "MUSIC", "NEW"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("No Customer Profiles Found"));
+                .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
 
 
@@ -291,13 +290,12 @@ class CustomerControllerImplTest {
 
     @Test
     public void testAddCustomerProfile_Negative() throws Exception {
-
         when(service.addCustomerProfile(customerProfileDTO)).thenThrow(new ResourceNotFoundException("Enter valid Customer Profile Details"));
         mockMvc.perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(customerProfileDTO)))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Customer Profile Cannot Be Empty"));
+                .andExpect(jsonPath("$.message").value("Enter valid Customer Profile Details"));
     }
 
     @Test
@@ -317,13 +315,13 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testUpdateCustomer_Negative() throws Exception{
+    void testUpdateCustomer_Negative() throws Exception {
         when(service.updateCustomer(2L, customerProfileDTO)).thenThrow(new ResourceNotFoundException("Customer not found with id: 2"));
-        mockMvc.perform(post("/api/customers/{customerId}",2)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(customerProfileDTO)))
+        mockMvc.perform(post("/api/customers/{customerId}", 2)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(customerProfileDTO)))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Customer Profile Updation Failed"));
+                .andExpect(jsonPath("$.message").value("Customer not found with id: 2"));
     }
 
 
@@ -341,9 +339,9 @@ class CustomerControllerImplTest {
     void testUpdatePurchasingHabit_Negative() throws Exception {
         when(service.updatePurchasingHabit(1L)).thenThrow(new ResourceNotFoundException("Customer not found with id: 1"));
 
-        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}",1))
+        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}", 1))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Updation Failed - Customerprofile Not Found"));
+                .andExpect(jsonPath("$.message").value("Customer not found with id: 1"));
     }
 
     @Test
@@ -356,14 +354,12 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    void testDeleteCustomer_Negative() throws Exception{
-
+    void testDeleteCustomer_Negative() throws Exception {
         doThrow(new ResourceNotFoundException("Delete failed - Customer Profile Not found"))
                 .when(service).deleteCustomer(1L);
-        mockMvc.perform(delete("/api/customers/{customerId}",1))
+        mockMvc.perform(delete("/api/customers/{customerId}", 1))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Delete failed - Customer Profile Not found"));
-
+                .andExpect(jsonPath("$.message").value("Delete failed - Customer Profile Not found"));
     }
 
     @Test
@@ -380,12 +376,12 @@ class CustomerControllerImplTest {
     @Test
     void testAddToPurchaseHistory_Negative() throws Exception {
         doThrow(new ResourceNotFoundException("Customer Profile Not found"))
-                .when(service).addToPurchaseHistory(2L,"purchase3");
-        mockMvc.perform(post("/api/customers/purchaseHistory/{customerId}",2)
+                .when(service).addToPurchaseHistory(2L, "purchase3");
+        mockMvc.perform(post("/api/customers/purchaseHistory/{customerId}", 2)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(("purchase3")))
+                        .content("purchase3"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Purchasing History updation failed "));
+                .andExpect(jsonPath("$.message").value("Customer Profile Not found"));
     }
 
     @Test
@@ -402,12 +398,12 @@ class CustomerControllerImplTest {
     @Test
     void testAddMultipleToPurchaseHistory_Negative() throws Exception {
         doThrow(new ResourceNotFoundException("Customer Profile Not found"))
-                .when(service).addMultiplePurchasesToPurchaseHistory(2L,List.of("purchase3"));
-        mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}",2)
+                .when(service).addMultiplePurchasesToPurchaseHistory(2L, List.of("purchase3"));
+        mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}", 2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[\"purchase3\"]"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Purchasing History updation failed "));
+                .andExpect(jsonPath("$.message").value("Customer Profile Not found"));
     }
 }
 

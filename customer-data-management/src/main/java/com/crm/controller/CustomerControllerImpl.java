@@ -43,13 +43,8 @@ public class CustomerControllerImpl implements CustomerController{
     })
 
     public ResponseEntity<?> getAllCustomerProfiles() throws ResourceNotFoundException{
-            try{
                 List<CustomerProfileDTO> customerProfileDTOList = service.retrieveAllProfiles();
                 return ResponseEntity.ok(customerProfileDTOList);
-            }catch(ResourceNotFoundException e){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There Are No Exisiting CustomerProfiles");
-            }
-
         }
 
     /**
@@ -63,12 +58,8 @@ public class CustomerControllerImpl implements CustomerController{
     })
 
     public ResponseEntity<?> getCustomerById(long customerId) throws ResourceNotFoundException {
-        try {
             CustomerProfileDTO customerProfileDTO = service.getCustomerById(customerId);
             return ResponseEntity.ok(customerProfileDTO);
-        } catch(ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer Profile Not Found");
-        }
     }
 
     /**
@@ -81,13 +72,9 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnEmailId(String emailId) throws ResourceNotFoundException {
-        try{
             List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnEmailId(emailId);
             return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
         }
-    }
 
     /**
      * {@inheritDoc}
@@ -100,12 +87,8 @@ public class CustomerControllerImpl implements CustomerController{
     })
 
     public ResponseEntity<?> searchCustomerBasedOnName(String name) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnName(name);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnName(name);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -119,14 +102,9 @@ public class CustomerControllerImpl implements CustomerController{
     })
 
     public ResponseEntity<?> searchCustomerBasedOnPhoneNumber(String phoneNumber) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnPhoneNumber(phoneNumber);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnPhoneNumber(phoneNumber);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
-
     /**
      * {@inheritDoc}
      */
@@ -137,12 +115,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegion(region);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegion(region);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -155,12 +129,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnPurchasingHabit(PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnPurchasingHabit(purchasingHabits);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnPurchasingHabit(purchasingHabits);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -173,12 +143,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnInterest(Interest interest) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterest(interest);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterest(interest);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -191,12 +157,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnRegionInterest(Region region, Interest interest) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterest(region,interest);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterest(region,interest);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -209,12 +171,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnInterestPurchasingHabits( Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterestAndPurchasingHabit(interest, purchasingHabits);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterestAndPurchasingHabit(interest, purchasingHabits);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -227,12 +185,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnRegionPurchasingHabits(Region region, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndPurchasingHabit(region, purchasingHabits);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndPurchasingHabit(region, purchasingHabits);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -245,12 +199,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnRegionInterestPurchasingHabits(Region region, Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        try{
-            List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(region, interest,purchasingHabits);
-            return ResponseEntity.ok(customerProfileDTOList);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Customer Profiles Found");
-        }
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(region, interest,purchasingHabits);
+        return ResponseEntity.ok(customerProfileDTOList);
     }
 
     /**
@@ -263,12 +213,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "400", description = "Invalid customer profile data")
     })
     public ResponseEntity<?> addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
-        try{
-            service.addCustomerProfile(customerProfileDTO);
-            return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Added Successfully");
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer Profile Cannot Be Empty");
-        }
+        service.addCustomerProfile(customerProfileDTO);
+        return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Added Successfully");
     }
 
     /**
@@ -281,12 +227,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
     public ResponseEntity<?> updateCustomer(long customerId, CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
-        try {
-            CustomerProfileDTO updatedCustomer = service.updateCustomer(customerId, customerProfileDTO);
-            return ResponseEntity.ok(updatedCustomer);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer Profile Updation Failed");
-        }
+        CustomerProfileDTO updatedCustomer = service.updateCustomer(customerId, customerProfileDTO);
+        return ResponseEntity.ok(updatedCustomer);
     }
 
     /**
@@ -299,12 +241,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
     public ResponseEntity<String> addPurchaseToPurchaseHistory(long customerId, String purchase) throws ResourceNotFoundException {
-       try{
-           service.addToPurchaseHistory(customerId, purchase);
-           return ResponseEntity.ok("Purchase History updated successfully");
-       }catch(ResourceNotFoundException e){
-           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Purchasing History updation failed ");
-       }
+        service.addToPurchaseHistory(customerId, purchase);
+        return ResponseEntity.ok("Purchase History updated successfully");
     }
 
     /**
@@ -317,12 +255,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
     public ResponseEntity<String> addMultiplePurchaseToPurchaseHistory(long customerId, List<String> purchase) throws ResourceNotFoundException {
-        try{
-            service.addMultiplePurchasesToPurchaseHistory(customerId, purchase);
-            return ResponseEntity.ok("Purchase History updated successfully");
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Purchasing History updation failed ");
-        }
+        service.addMultiplePurchasesToPurchaseHistory(customerId, purchase);
+        return ResponseEntity.ok("Purchase History updated successfully");
     }
 
     /**
@@ -335,12 +269,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
     public ResponseEntity<?> updatePurchasingHabit(long customerId) throws ResourceNotFoundException {
-        try{
-            CustomerProfileDTO customerDTO = service.updatePurchasingHabit(customerId);
-            return ResponseEntity.ok(customerDTO);
-        }catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Updation Failed - Customerprofile Not Found");
-        }
+        CustomerProfileDTO customerDTO = service.updatePurchasingHabit(customerId);
+        return ResponseEntity.ok(customerDTO);
     }
 
     /**
@@ -353,12 +283,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
     public ResponseEntity<String> deleteCustomer( long customerId) throws ResourceNotFoundException {
-        try {
-            service.deleteCustomer(customerId);
-            return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Deleted");
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Delete failed - Customer Profile Not found");
-        }
+        service.deleteCustomer(customerId);
+        return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Deleted");
     }
 
 }

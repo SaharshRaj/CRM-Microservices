@@ -1,15 +1,19 @@
 package com.crm.global;
 
+
+import com.crm.dto.ErrorResponseDTO;
+import com.crm.exception.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +21,7 @@ import java.util.Set;
 /**
  * Global exception handler for handling various exceptions across the application.
  */
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler extends RuntimeException {
 
     /**
@@ -59,11 +63,38 @@ public class GlobalExceptionHandler extends RuntimeException {
      * Handles all other exceptions.
      *
      * @param ex the Exception
-     * @param request the WebRequest
+     * @param webRequest the WebRequest
      * @return a ResponseEntity containing the exception message and an INTERNAL_SERVER_ERROR status
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest webRequest) {
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Handles ResourceNotFoundException.
+     *
+     * @param ex the ResourceNotFoundException
+     * @param webRequest the WebRequest
+     * @return a ResponseEntity containing the exception message and a NOT_FOUND status
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBadRequest(ResourceNotFoundException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.NOT_FOUND.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 }
