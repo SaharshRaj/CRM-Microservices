@@ -1,10 +1,14 @@
 package com.crm.dummy;
 
+import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.external.CampaignDTO;
 import com.crm.enums.Type;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,7 +62,13 @@ public class CampaignMockService {
                     .build()
     );
 
-    public List<CampaignDTO> getAllCampaigns() {
-        return list;
+    public ResponseEntity<List<CampaignDTO>> getAllCampaigns()
+    {
+        return ResponseEntity.ok(list);
     }
+//    public ResponseEntity<ErrorResponseDTO> getAllCampaigns()
+//    {
+//        ErrorResponseDTO noCampaignAvailable = ErrorResponseDTO.builder().code("404").timestamp(LocalDateTime.now()).message("No Campaign Available").path("/api/blah").build();
+//        return new ResponseEntity<>(noCampaignAvailable, HttpStatus.NOT_FOUND);
+//    }
 }

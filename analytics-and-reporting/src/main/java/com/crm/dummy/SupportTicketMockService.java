@@ -3,6 +3,7 @@ package com.crm.dummy;
 
 import com.crm.dto.external.SupportTicketDTO;
 import com.crm.enums.Status;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -48,7 +49,7 @@ public class SupportTicketMockService {
                     .build()
     );
 
-    public List<SupportTicketDTO> getAllSupportTickets() {
-        return list;
+    public ResponseEntity<List<SupportTicketDTO>> getAllSupportTickets() {
+        return ResponseEntity.ok(list);
     }
 }

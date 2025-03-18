@@ -2,6 +2,7 @@ package com.crm.dummy;
 
 import com.crm.dto.external.SalesOpportunityResponseDTO;
 import com.crm.enums.SalesStage;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,7 +20,7 @@ public class SalesMockService {
             SalesOpportunityResponseDTO.builder().opportunityID(5L).customerID(5L).estimatedValue(new BigDecimal("50000.0")).salesStage(SalesStage.QUALIFICATION).closingDate(LocalDate.now().plusDays(7)).followUpReminder(LocalDate.now().plusDays(7)).build()
     );
 
-    public List<SalesOpportunityResponseDTO> getAllLeads(){
-        return list;
+    public ResponseEntity<List<SalesOpportunityResponseDTO>> getAllLeads(){
+        return ResponseEntity.ok(list);
     }
 }

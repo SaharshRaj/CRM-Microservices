@@ -1,7 +1,10 @@
 package com.crm.mapper;
 
 import com.crm.dto.ReportResponseDTO;
+import com.crm.dto.ScheduleConfigRequestDTO;
+import com.crm.dto.ScheduleConfigResponseDTO;
 import com.crm.entities.Report;
+import com.crm.entities.ScheduleConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -40,4 +43,8 @@ public interface ReportMapper {
             throw new RuntimeException("Error while converting dataPoints to String: " + e.getMessage(), e);
         }
     }
+
+    ScheduleConfig mapToScheduleConfig(ScheduleConfigRequestDTO scheduleConfigRequestDTO);
+
+    ScheduleConfigResponseDTO mapToScheduleConfigResponseDTO(ScheduleConfig scheduleConfig);
 }

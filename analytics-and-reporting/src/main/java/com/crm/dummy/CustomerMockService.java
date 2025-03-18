@@ -1,6 +1,7 @@
 package com.crm.dummy;
 
 import com.crm.dto.external.CustomerProfileDTO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -35,7 +36,8 @@ public class CustomerMockService {
                     .build()
     );
 
-    public List<CustomerProfileDTO> getAllCustomers() {
-        return list;
+    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomers() {
+
+        return ResponseEntity.ok(list);
     }
 }

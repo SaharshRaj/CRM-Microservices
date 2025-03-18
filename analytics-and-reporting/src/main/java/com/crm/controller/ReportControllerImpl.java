@@ -1,10 +1,15 @@
 package com.crm.controller;
 
 import com.crm.dto.ReportResponseDTO;
+import com.crm.dto.ScheduleConfigRequestDTO;
+import com.crm.dto.ScheduleConfigResponseDTO;
+import com.crm.exception.InvalidDataRecievedException;
+import com.crm.scheduler.DynamicSchedulerService;
+import com.crm.scheduler.SchedulerService;
 import com.crm.service.ReportService;
-import com.crm.service.ReportServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,57 +19,50 @@ public class ReportControllerImpl implements ReportController{
     @Autowired
     private ReportService service;
 
+    @Autowired
+    private DynamicSchedulerService schedulerService;
+
     /**
      * @return
      */
     @Override
-    public ResponseEntity<ReportResponseDTO> generateCustomersReport() {
-        try {
+    public ResponseEntity<ReportResponseDTO> generateCustomersReport() throws InvalidDataRecievedException, JsonProcessingException {
             ReportResponseDTO reportResponseDTO = service.generateCustomerReport();
-            return ResponseEntity.ok(reportResponseDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+            return new ResponseEntity<>(reportResponseDTO, HttpStatus.OK);
     }
 
     /**
      * @return
      */
     @Override
-    public ResponseEntity<ReportResponseDTO> generateSalesReport() {
+    public ResponseEntity<ReportResponseDTO> generateSalesReport() throws InvalidDataRecievedException, JsonProcessingException {
 
-        try {
-           ReportResponseDTO reportResponseDTO = service.generateSalesReport();
+
+        ReportResponseDTO reportResponseDTO = service.generateSalesReport();
         return ResponseEntity.ok(reportResponseDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     /**
      * @return
      */
     @Override
-    public ResponseEntity<ReportResponseDTO> generateSupportTicketsReport() {
-        try {
+    public ResponseEntity<ReportResponseDTO> generateSupportTicketsReport() throws InvalidDataRecievedException, JsonProcessingException {
+
             ReportResponseDTO reportResponseDTO = service.generateSupportReport();
             return ResponseEntity.ok(reportResponseDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     /**
      * @return
      */
     @Override
-    public ResponseEntity<ReportResponseDTO> generateMarketingReport() {
-        try {
+    public ResponseEntity<ReportResponseDTO> generateMarketingReport() throws InvalidDataRecievedException, JsonProcessingException {
+
             ReportResponseDTO reportResponseDTO = service.generateMarketingReport();
             return ResponseEntity.ok(reportResponseDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     /**
@@ -73,6 +71,17 @@ public class ReportControllerImpl implements ReportController{
      */
     @Override
     public ResponseEntity<ReportResponseDTO> getReportById(Long id) {
-        return null;
+        ReportResponseDTO reportResponseDTO = service.getReportById(id);
+        return ResponseEntity.ok(reportResponseDTO);
+    }
+
+    /**
+     * @param scheduleConfigRequestDTO
+     * @return
+     */
+    @Override
+    public ResponseEntity<ScheduleConfigResponseDTO> configCronJob(ScheduleConfigRequestDTO scheduleConfigRequestDTO) {
+        ScheduleConfigResponseDTO result = schedulerService.updateCronExpression(scheduleConfigRequestDTO);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

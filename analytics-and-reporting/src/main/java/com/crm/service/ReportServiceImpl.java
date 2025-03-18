@@ -1,5 +1,6 @@
 package com.crm.service;
 
+import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ReportResponseDTO;
 import com.crm.dto.external.CampaignDTO;
 import com.crm.dto.external.CustomerProfileDTO;
@@ -14,11 +15,14 @@ import com.crm.enums.ReportType;
 import com.crm.enums.SalesStage;
 import com.crm.enums.Status;
 import com.crm.enums.Type;
+import com.crm.exception.InvalidDataRecievedException;
 import com.crm.mapper.ReportMapper;
 import com.crm.repository.ReportRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -48,10 +52,14 @@ public class ReportServiceImpl implements ReportService{
      * @return
      */
     @Override
-    public ReportResponseDTO generateCustomerReport() throws JsonProcessingException {
-        List<CustomerProfileDTO> customerProfiles = customerMockService.getAllCustomers();
-
-        // Aggregating Data for Report
+    public ReportResponseDTO generateCustomerReport() throws JsonProcessingException, InvalidDataRecievedException {
+        ResponseEntity<?> response = customerMockService.getAllCustomers();
+        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
+            ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
+            throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
+        }
+        List<CustomerProfileDTO> customerProfiles = (List<CustomerProfileDTO>) response.getBody();
+// Aggregating Data for Report
         long totalCustomers = customerProfiles.size();
 
         long inactiveCustomers = customerProfiles.stream()
@@ -88,27 +96,40 @@ public class ReportServiceImpl implements ReportService{
      * @return
      */
     @Override
-    public ReportResponseDTO generateSalesReport() throws JsonProcessingException {
-        List<SalesOpportunityResponseDTO> salesOpportunities = salesMockService.getAllLeads();
+    public ReportResponseDTO generateSalesReport() throws JsonProcessingException, InvalidDataRecievedException {
+        ResponseEntity<?> response = salesMockService.getAllLeads();
+        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
+            ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
+            throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
+        }
+        List<SalesOpportunityResponseDTO> salesOpportunities = (List<SalesOpportunityResponseDTO>) response.getBody();
+
 
         // Aggregate Data for Report
         BigDecimal totalEstimatedValue = salesOpportunities.stream()
                 .map(SalesOpportunityResponseDTO::getEstimatedValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long opportunitiesWon = salesOpportunities.stream()
+        BigDecimal opportunitiesWonValue = salesOpportunities.stream()
                 .filter(s -> s.getSalesStage() == SalesStage.CLOSED_WON)
-                .count();
+                .map(SalesOpportunityResponseDTO::getEstimatedValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long opportunitiesLost = salesOpportunities.stream()
+        BigDecimal opportunitiesLostValue = salesOpportunities.stream()
                 .filter(s -> s.getSalesStage() == SalesStage.CLOSED_LOST)
+                .map(SalesOpportunityResponseDTO::getEstimatedValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        long opportunitiesInProgress = salesOpportunities.stream()
+                .filter(s -> s.getSalesStage() == SalesStage.PROSPECTING || s.getSalesStage() == SalesStage.QUALIFICATION)
                 .count();
 
         // Create Data Points
         Map<String, Object> dataPoints = new HashMap<>();
         dataPoints.put("totalEstimatedValue", totalEstimatedValue);
-        dataPoints.put("opportunitiesWon", opportunitiesWon);
-        dataPoints.put("opportunitiesLost", opportunitiesLost);
+        dataPoints.put("opportunitiesWon", opportunitiesWonValue);
+        dataPoints.put("opportunitiesLost", opportunitiesLostValue);
+        dataPoints.put("opportunitiesInProgress", opportunitiesInProgress);
 
         // Save Report
         Report report = new Report();
@@ -123,8 +144,13 @@ public class ReportServiceImpl implements ReportService{
      * @return
      */
     @Override
-    public ReportResponseDTO generateSupportReport() throws JsonProcessingException {
-        List<SupportTicketDTO> supportTickets = supportTicketMockService.getAllSupportTickets();
+    public ReportResponseDTO generateSupportReport() throws JsonProcessingException, InvalidDataRecievedException {
+        ResponseEntity<?> response = supportTicketMockService.getAllSupportTickets();
+        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
+            ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
+            throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
+        }
+        List<SupportTicketDTO> supportTickets = (List<SupportTicketDTO>) response.getBody();
 
         // Aggregating Data for Report
         long totalTickets = supportTickets.size();
@@ -171,8 +197,13 @@ public class ReportServiceImpl implements ReportService{
      * @return
      */
     @Override
-    public ReportResponseDTO generateMarketingReport() throws JsonProcessingException {
-        List<CampaignDTO> campaigns = campaignMockService.getAllCampaigns();
+    public ReportResponseDTO generateMarketingReport() throws JsonProcessingException, InvalidDataRecievedException {
+        ResponseEntity<?> response = campaignMockService.getAllCampaigns();
+        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
+            ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
+            throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
+        }
+        List<CampaignDTO> campaigns = (List<CampaignDTO>) response.getBody();
 
         // Aggregating Data for Report
         long totalCampaigns = campaigns.size();
@@ -220,5 +251,20 @@ public class ReportServiceImpl implements ReportService{
 
         Report savedReport = repository.save(report);
         return ReportMapper.MAPPER.mapToDto(savedReport);
+    }
+
+    /**
+     * @return
+     * @throws NoSuchElementException
+     */
+    @Override
+    public ReportResponseDTO getReportById(Long reportId) throws NoSuchElementException {
+        Optional<Report> optionalReport = repository.findById(reportId);
+
+        if(optionalReport.isEmpty()){
+            throw new NoSuchElementException("No report found with ID: " + reportId);
+        }
+
+        return ReportMapper.MAPPER.mapToDto(optionalReport.get());
     }
 }
