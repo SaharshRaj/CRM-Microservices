@@ -1,14 +1,13 @@
 package com.crm.entities;
 
+import com.crm.enums.Interest;
+import com.crm.enums.PurchasingHabits;
+import com.crm.enums.Region;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.crm.enums.Interest;
-import com.crm.enums.PurchasingHabits;
-import com.crm.enums.Region;
 
 /**
  * Entity representing a customer profile.

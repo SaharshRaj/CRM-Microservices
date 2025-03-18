@@ -6,7 +6,10 @@ import com.crm.enums.PurchasingHabits;
 import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
