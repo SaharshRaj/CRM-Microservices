@@ -1,41 +1,25 @@
 package com.crm.repository;
-
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
-
 import com.crm.entities.Campaign;
 import com.crm.enums.Type;
-
 @DataJpaTest
 @ActiveProfiles("test")
 class CamapignRepositoryTestCase {
-	
-	
-	@Autowired
-	private CampaignRepository campaignRepository;
-	@Autowired
-	private TestEntityManager testEntityManager;
-
-	@BeforeEach
-	void setUp() throws Exception {
-		
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
-	}
-
+    private final CampaignRepository campaignRepository;
+    private final TestEntityManager testEntityManager;
+    @Autowired
+    public CamapignRepositoryTestCase(CampaignRepository campaignRepository, TestEntityManager testEntityManager) {
+        this.campaignRepository = campaignRepository;
+        this.testEntityManager = testEntityManager;
+    }
 	@Test
 	void testFindAll_positive() {
 		Campaign campaign=new Campaign();
@@ -69,11 +53,11 @@ class CamapignRepositoryTestCase {
 		assertEquals(LocalDate.of(2023,06,01),foundCampaign.getStartDate());
 		assertEquals(LocalDate.of(2023, 06, 30),foundCampaign.getEndDate());
 	}
-//	@Test
-//	void testFindById_negative() {
-//		Optional<Campaign> optionalCampaign=campaignRepository.findById(999L);
-//		assertFalse(optionalCampaign.isPresent());
-//	}
+	@Test
+	void testFindById_negative() {
+		Optional<Campaign> optionalCampaign=campaignRepository.findById(999L);
+		assertFalse(optionalCampaign.isPresent());
+	}
 	@Test 
 	void testSave_positive() {
 		Campaign campaign=new Campaign();
@@ -88,7 +72,6 @@ class CamapignRepositoryTestCase {
 		assertEquals(LocalDate.of(2023,06,01),savedCampaign.getStartDate());
 		assertEquals(LocalDate.of(2023, 06, 30),savedCampaign.getEndDate());	
 	}
-	
 	@Test
 	void testSave_negative() {
 		try { 

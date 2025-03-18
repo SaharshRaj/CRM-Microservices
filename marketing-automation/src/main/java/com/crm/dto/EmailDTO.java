@@ -24,7 +24,7 @@ public class EmailDTO {
     private String conclusion;
 	@NotNull(message="Type of the Notification should not be null")
 	private Type type;
-	private String Url;
+	private String trackingUrl;
 	private Long campaignId;
 
 }

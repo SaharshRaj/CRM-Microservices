@@ -25,6 +25,8 @@ public class Campaign {
     private LocalDate endDate;
     @Enumerated(EnumType.STRING)
     private Type type;
-    private int customerInteractions=0; 
+    private int customerInteractions=0;
+    @Column(name="tracking_url")
+    private String trackingUrl;
 
 }

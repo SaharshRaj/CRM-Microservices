@@ -6,5 +6,5 @@ import lombok.Data;
 public class SMS {
 
 	private String message;
-	private String Url;
+	private String trackingUrl;
 }

@@ -13,7 +13,7 @@ public class Email {
 	private String msgbody;
 	private String closing;
 	private String conclusion;
-	private String Url;
+	private String trackingUrl;
 	private Long campaignId;
 
     @Override
