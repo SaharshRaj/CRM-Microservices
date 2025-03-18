@@ -1,5 +1,6 @@
-package com.crm.dto;
+package com.crm.dto.external;
 
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,12 +10,13 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class CustomerProfileDTO {
+
     private Long customerID;
     private String name;
-    private String contactInfo;
+    private String emailId;
+    private String phoneNumber;
     private List<String> purchaseHistory;
     private List<String> segmentationData;
+
 }

@@ -1,6 +1,5 @@
 package com.crm.feign;
 
-import com.crm.dto.CustomerProfileDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +12,6 @@ public interface CustomerDataManagement {
     //All the methods you want to use
 
     //Mapping defined in Customer Controller
-    @GetMapping("api/customers")
-    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
+//    @GetMapping("api/customers")
+//    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
 }
