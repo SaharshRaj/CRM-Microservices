@@ -17,13 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST controller implementation for managing customer profiles.
+ */
 @RestController
 @Validated
 public class CustomerControllerImpl implements CustomerController{
 
-    @Autowired
-    private CustomerService service;
 
+    private final CustomerService service;
+
+    @Autowired
+    public CustomerControllerImpl(CustomerService service){
+        this.service=service;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation (summary = "Get All Customer Profiles", description = "Retrieves a list of all customer profiles")
     @ApiResponses(value = {
@@ -41,6 +52,9 @@ public class CustomerControllerImpl implements CustomerController{
 
         }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Get Customer by ID", description = "Retrieves customer profile by ID")
     @ApiResponses(value = {
@@ -57,6 +71,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Email ID", description = "Searches customer profiles based on email ID")
     @ApiResponses(value = {
@@ -72,6 +89,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Name", description = "Searches customer profiles based on name")
     @ApiResponses(value = {
@@ -88,6 +108,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Phone Number", description = "Searches customer profiles based on phone number")
     @ApiResponses(value = {
@@ -104,6 +127,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Region", description = "Searches customer profiles based on region")
     @ApiResponses(value = {
@@ -119,6 +145,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Purchasing Habit", description = "Searches customer profiles based on purchasing habits")
     @ApiResponses(value = {
@@ -134,6 +163,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Interest", description = "Searches customer profiles based on interest")
     @ApiResponses(value = {
@@ -149,6 +181,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Region and Interest", description = "Searches customer profiles based on region and interest")
     @ApiResponses(value = {
@@ -164,6 +199,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Interest and Purchasing Habits", description = "Searches customer profiles based on interest and purchasing habits")
     @ApiResponses(value = {
@@ -179,6 +217,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Region and Purchasing Habits", description = "Searches customer profiles based on region and purchasing habits")
     @ApiResponses(value = {
@@ -194,6 +235,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Search Customer by Region, Interest, and Purchasing Habits", description = "Searches customer profiles based on region, interest, and purchasing habits")
     @ApiResponses(value = {
@@ -209,7 +253,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Add Customer Profile", description = "Adds a new customer profile")
     @ApiResponses(value = {
@@ -225,6 +271,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Update Customer Profile", description = "Updates an existing customer profile")
     @ApiResponses(value = {
@@ -240,6 +289,45 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Operation(summary = "Add a single purchase to the customer's purchase history", description = "Adds a single purchase to the existing purchase history of a customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Customer profile updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Customer profile not found")
+    })
+    public ResponseEntity<String> addPurchaseToPurchaseHistory(long customerId, String purchase) throws ResourceNotFoundException {
+       try{
+           service.addToPurchaseHistory(customerId, purchase);
+           return ResponseEntity.ok("Purchase History updated successfully");
+       }catch(ResourceNotFoundException e){
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Purchasing History updation failed ");
+       }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Operation(summary = "Add multiple purchases to the customer's purchase history", description = "Adds multiple purchases to the existing purchase history of a customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Customer profile updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Customer profile not found")
+    })
+    public ResponseEntity<String> addMultiplePurchaseToPurchaseHistory(long customerId, List<String> purchase) throws ResourceNotFoundException {
+        try{
+            service.addMultiplePurchasesToPurchaseHistory(customerId, purchase);
+            return ResponseEntity.ok("Purchase History updated successfully");
+        }catch(ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Purchasing History updation failed ");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Update Purchasing Habit", description = "Updates the purchasing habit of a customer by ID")
     @ApiResponses(value = {
@@ -255,6 +343,9 @@ public class CustomerControllerImpl implements CustomerController{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Operation(summary = "Delete Customer Profile", description = "Deletes a customer profile by ID")
     @ApiResponses(value = {
@@ -269,7 +360,5 @@ public class CustomerControllerImpl implements CustomerController{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Delete failed - Customer Profile Not found");
         }
     }
-
-
 
 }

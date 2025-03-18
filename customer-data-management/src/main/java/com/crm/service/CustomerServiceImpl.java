@@ -11,13 +11,31 @@ import com.crm.repository.CustomerProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for managing customer profiles.
+ */
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
 
+	private CustomerProfileRepository customerProfileRepository;
+
+
+	private CustomerProfileMapper customerProfileMapper;
+
+	@Autowired
+	public CustomerServiceImpl(CustomerProfileRepository customerProfileRepository, CustomerProfileMapper customerProfileMapper){
+		this.customerProfileRepository = customerProfileRepository;
+		this.customerProfileMapper = customerProfileMapper;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
@@ -29,7 +47,9 @@ public class CustomerServiceImpl implements CustomerService {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
 		return list;	}
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnInterest(Interest interest) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
@@ -41,7 +61,9 @@ public class CustomerServiceImpl implements CustomerService {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
 		return list;	}
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnPurchasingHabit(PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
@@ -55,6 +77,9 @@ public class CustomerServiceImpl implements CustomerService {
 		return list;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterest(Region region, Interest interest) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
@@ -71,6 +96,9 @@ public class CustomerServiceImpl implements CustomerService {
 		return list;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndPurchasingHabit(Region region, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
@@ -87,6 +115,9 @@ public class CustomerServiceImpl implements CustomerService {
 		return list;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnInterestAndPurchasingHabit(Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
@@ -103,12 +134,9 @@ public class CustomerServiceImpl implements CustomerService {
 		return list;
 	}
 
-	@Autowired
-	private CustomerProfileRepository customerProfileRepository;
-
-	@Autowired
-	private CustomerProfileMapper customerProfileMapper;
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CustomerProfileDTO addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
 		if(customerProfileDTO == null){
@@ -119,6 +147,9 @@ public class CustomerServiceImpl implements CustomerService {
 		return customerProfileMapper.mapToDTO(savedCustomer);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> retrieveAllProfiles() throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = (customerProfileRepository.findAll());
@@ -128,6 +159,9 @@ public class CustomerServiceImpl implements CustomerService {
 		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CustomerProfileDTO getCustomerById(Long customerId) throws ResourceNotFoundException {
 		CustomerProfile customerProfile = customerProfileRepository.findById(customerId)
@@ -135,6 +169,9 @@ public class CustomerServiceImpl implements CustomerService {
 		return customerProfileMapper.mapToDTO(customerProfile);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CustomerProfileDTO updateCustomer(Long customerId, CustomerProfileDTO customerProfileDTO)
 			throws ResourceNotFoundException {
@@ -151,6 +188,9 @@ public class CustomerServiceImpl implements CustomerService {
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void deleteCustomer(Long customerId) throws ResourceNotFoundException {
 
@@ -160,8 +200,9 @@ public class CustomerServiceImpl implements CustomerService {
 
 	}
 
-
-	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnEmailId(String email) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAllByEmailId(email);
@@ -170,6 +211,9 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnName(String name) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAllByNames(name);
@@ -178,6 +222,9 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnPhoneNumber(String phoneNumber)
 			throws ResourceNotFoundException {
@@ -187,7 +234,9 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
 	}
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region region, Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
@@ -202,7 +251,35 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 		return list;
 	}
-
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public CustomerProfileDTO addToPurchaseHistory( Long customerId, String purchase) throws ResourceNotFoundException {
+		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
+				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
+		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
+		purchaseHistory.add(purchase);
+		existingCustomer.setPurchaseHistory(purchaseHistory);
+		customerProfileRepository.save(existingCustomer);
+		return customerProfileMapper.mapToDTO(existingCustomer);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory ( Long customerId, List<String> purchase) throws ResourceNotFoundException {
+		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
+				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
+		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
+		purchaseHistory.addAll(purchase);
+		existingCustomer.setPurchaseHistory(purchaseHistory);
+		customerProfileRepository.save(existingCustomer);
+		return customerProfileMapper.mapToDTO(existingCustomer);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CustomerProfileDTO updatePurchasingHabit(Long customerId) throws ResourceNotFoundException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
