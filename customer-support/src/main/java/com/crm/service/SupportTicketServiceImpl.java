@@ -7,6 +7,7 @@ import com.crm.exception.InvalidTicketIdException;
 import com.crm.exception.InvalidTicketDetailsException;
 import com.crm.mapper.SupportTicketMapper;
 import com.crm.repository.SupportTicketRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.Optional;
 @Service
 public class SupportTicketServiceImpl implements SupportTicketService {
 
-    private SupportTicketRepository repository;
+    private final SupportTicketRepository repository;
     
     public SupportTicketServiceImpl(SupportTicketRepository repository) {
         this.repository = repository;
@@ -89,8 +90,8 @@ public class SupportTicketServiceImpl implements SupportTicketService {
         Optional<SupportTicket> ticket = repository.findById(ticketId);
         if (ticket.isPresent()) {
             SupportTicket existingTicket = ticket.get();
-            existingTicket.setStatus(status); /**Update the ticket status*/
-            /**Save and return the updated ticket as a DTO*/
+            existingTicket.setStatus(status); //Update the ticket status
+            //Save and return the updated ticket as a DTO
             return SupportTicketMapper.MAPPER.mapToDTO(repository.save(existingTicket));
         } else {
             throw new InvalidTicketIdException(TICKET_NOT_FOUND_MESSAGE);

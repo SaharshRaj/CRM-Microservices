@@ -12,5 +12,5 @@ import java.util.List;
 public interface CustomerDataManagement {
     //All the methods you want to use
     @GetMapping("")
-    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
+    ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
 }
