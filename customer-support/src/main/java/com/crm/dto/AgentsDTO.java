@@ -1,7 +1,5 @@
 package com.crm.dto;
 
-import com.crm.entities.SupportTicket;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

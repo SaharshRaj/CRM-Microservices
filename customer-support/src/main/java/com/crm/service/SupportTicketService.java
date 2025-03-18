@@ -1,22 +1,36 @@
 package com.crm.service;
 
-//import com.crm.dto.CustomerProfileDTO;
 import com.crm.dto.SupportTicketDTO;
-import com.crm.entities.SupportTicket;
+import com.crm.enums.Status;
+import com.crm.exception.InvalidTicketIdException;
+import com.crm.exception.InvalidTicketDetailsException;
 
 import java.util.List;
-
+import java.util.NoSuchElementException;
 
 public interface SupportTicketService {
-//	public List<SupportTicketDTO> retrieveAllProfiles();
-    
-    SupportTicket createTicket(SupportTicket supportTicket);
-    SupportTicket updateTicket(Long ticketId, SupportTicket ticket);
-    SupportTicket getTicketById(Long ticketId);
-    List<SupportTicket> getAllTickets();
-    void deleteTicket(Long ticketId);
-	List<SupportTicketDTO> retrieveAllProfiles();
+    // Retrieves all support tickets
+    List<SupportTicketDTO> retrieveAllSupportTickets() throws NoSuchElementException;
 
-//    NotificationDTO sendNotification();
-//    boolean  sendNotification();
+    // Creates a new support ticket
+    SupportTicketDTO createSupportTicket(SupportTicketDTO supportTicketDto) throws InvalidTicketDetailsException;
+
+    // Retrieves a specific support ticket by ID
+    SupportTicketDTO getSupportTicketById(Long ticketId) throws NoSuchElementException;
+
+    // Retrieves all support tickets for a specific customer
+    List<SupportTicketDTO> getSupportTicketsByCustomer(Long customerId) throws NoSuchElementException;
+
+    // Retrieves all support tickets by status (Open/Closed)
+    List<SupportTicketDTO> getSupportTicketsByStatus(Status status) throws NoSuchElementException;
+
+    // Updates the status of a support ticket
+    SupportTicketDTO updateTicketStatus(Long ticketId, Status status) throws InvalidTicketIdException;
+
+    // Assigns a support ticket to a specific agent
+    SupportTicketDTO assignTicketToAgent(Long ticketId, Long agentId) throws InvalidTicketIdException;
+
+    // Deletes a support ticket by ID
+    boolean deleteSupportTicketById(Long ticketId) throws InvalidTicketIdException;
+
 }

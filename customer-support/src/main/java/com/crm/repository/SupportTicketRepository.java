@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SupportTicketRepository extends JpaRepository<SupportTicket, Long> {
 
-	List<SupportTicket> findByCustomerID(long l);
+	List <SupportTicket> findByCustomerID(long l);
 
-	List<SupportTicket> findByStatus(Status OPEN);
-
+	List <SupportTicket> findByStatus(Status status);
+	
 }

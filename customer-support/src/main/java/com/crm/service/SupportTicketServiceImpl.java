@@ -2,85 +2,123 @@ package com.crm.service;
 
 import com.crm.dto.SupportTicketDTO;
 import com.crm.entities.SupportTicket;
+import com.crm.enums.Status;
+import com.crm.exception.InvalidTicketIdException;
+import com.crm.exception.InvalidTicketDetailsException;
 import com.crm.mapper.SupportTicketMapper;
 import com.crm.repository.SupportTicketRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 public class SupportTicketServiceImpl implements SupportTicketService {
+
+    private SupportTicketRepository repository;
     
-    @Autowired
-    private SupportTicketRepository supportTicketRepository;
-    
-public List<SupportTicketDTO> retrieveAllProfiles(){
-	
-	 // Retrieve all profiles from repository
-  List<SupportTicket> allProfiles = supportTicketRepository.findAll();
+    public SupportTicketServiceImpl(SupportTicketRepository repository) {
+        this.repository = repository;
+    }
 
-  // Declare DTO list
-  List<SupportTicketDTO> resultList = new ArrayList<>();
+    @Override
+    public List<SupportTicketDTO> retrieveAllSupportTickets() throws NoSuchElementException {
+        List<SupportTicket> tickets = repository.findAll();
+        List<SupportTicketDTO> ticketDTOs = new ArrayList<>();
+        tickets.forEach(ticket -> ticketDTOs.add(SupportTicketMapper.MAPPER.mapToDTO(ticket)));
 
-  // Populate List
-  allProfiles.forEach(e -> {
-      // Use MAPPER method to convert entity to DTO
-      SupportTicketDTO supportTicketDTO = SupportTicketMapper.MAPPER.mapToDTO(e);
-      // Add DTO to list
-      resultList.add(supportTicketDTO);
-  });
-  //Return Result
-  return resultList;
-}
-    
-    /**
-     * Add Method Info for documentation
-   */
-
-	@Override
-	public SupportTicket createTicket(SupportTicket supportTicket) {
-		return supportTicketRepository.save(supportTicket);
-	}
-
-	@Override
-	public SupportTicket updateTicket(Long ticketId, SupportTicket ticket) {
-		Optional<SupportTicket> existingTicket = supportTicketRepository.findById(ticketId);
-        if (existingTicket.isPresent()) {
-            SupportTicket updatedTicket = existingTicket.get();
-            updatedTicket.setIssueDescription(ticket.getIssueDescription());
-            updatedTicket.setAssignedAgent(ticket.getAssignedAgent());
-            updatedTicket.setStatus(ticket.getStatus());
-            return supportTicketRepository.save(updatedTicket);
-        } else {
-            throw new RuntimeException("Ticket not found with id " + ticketId);
+        if (ticketDTOs.isEmpty()) {
+            throw new NoSuchElementException("No support tickets available");
         }
-	}
 
-	@Override
-	public SupportTicket getTicketById(Long ticketId) {
-		return supportTicketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found with id " + ticketId));
-	}
+        return ticketDTOs;
+    }
 
-	@Override
-	public List<SupportTicket> getAllTickets() {
-		return supportTicketRepository.findAll();
-	}
+    @Override
+    public SupportTicketDTO createSupportTicket(SupportTicketDTO supportTicketDto) throws InvalidTicketDetailsException {
+        SupportTicket ticket = SupportTicketMapper.MAPPER.mapToSupportTicket(supportTicketDto);
+        try {
+            SupportTicket savedTicket = repository.save(ticket);
+            return SupportTicketMapper.MAPPER.mapToDTO(savedTicket);
+        } catch (Exception e) {
+            throw new InvalidTicketDetailsException(e.getMessage());
+        }
+    }
 
-	@Override
-	public void deleteTicket(Long ticketId) {
-		Optional<SupportTicket> supportTicket = supportTicketRepository.findById(ticketId);
-		if(supportTicket.isPresent()){
-			supportTicketRepository.delete(supportTicket.get());
-		}
-		else{
-			throw new RuntimeException("OBJECT NOT PRESENT");
-		}
+    @Override
+    public SupportTicketDTO getSupportTicketById(Long ticketId) throws NoSuchElementException {
+        Optional<SupportTicket> ticket = repository.findById(ticketId);
+        if (ticket.isPresent()) {
+            return SupportTicketMapper.MAPPER.mapToDTO(ticket.get());
+        } else {
+            throw new NoSuchElementException("No ticket found with the given ID");
+        }
+    }
 
-	}
+    @Override
+    public List<SupportTicketDTO> getSupportTicketsByCustomer(Long customerId) throws NoSuchElementException {
+        List<SupportTicket> tickets = repository.findByCustomerID(customerId);
+        if (tickets.isEmpty()) {
+            throw new NoSuchElementException("No tickets found for the given customer ID");
+        } else {
+            List<SupportTicketDTO> ticketDTOs = new ArrayList<>();
+            tickets.forEach(ticket -> ticketDTOs.add(SupportTicketMapper.MAPPER.mapToDTO(ticket)));
+            return ticketDTOs;
+        }
+    }
+
+    @Override
+    public List<SupportTicketDTO> getSupportTicketsByStatus(Status status) throws NoSuchElementException {
+        List<SupportTicket> tickets = repository.findByStatus(status);
+        if (tickets.isEmpty()) {
+            throw new NoSuchElementException("No tickets found with the given status");
+        } else {
+            List<SupportTicketDTO> ticketDTOs = new ArrayList<>();
+            tickets.forEach(ticket -> ticketDTOs.add(SupportTicketMapper.MAPPER.mapToDTO(ticket)));
+            return ticketDTOs;
+        }
+    }
+
+    
+    private static final String TICKET_NOT_FOUND_MESSAGE = "Ticket with the given ID does not exist";
+
+    @Override
+    public SupportTicketDTO updateTicketStatus(Long ticketId, Status status) throws InvalidTicketIdException {
+        Optional<SupportTicket> ticket = repository.findById(ticketId);
+        if (ticket.isPresent()) {
+            SupportTicket existingTicket = ticket.get();
+            existingTicket.setStatus(status); /**Update the ticket status*/
+            /**Save and return the updated ticket as a DTO*/
+            return SupportTicketMapper.MAPPER.mapToDTO(repository.save(existingTicket));
+        } else {
+            throw new InvalidTicketIdException(TICKET_NOT_FOUND_MESSAGE);
+        }
+    }
+
+    @Override
+    public SupportTicketDTO assignTicketToAgent(Long ticketId, Long agentId) throws InvalidTicketIdException {
+        Optional<SupportTicket> ticket = repository.findById(ticketId);
+        if (ticket.isPresent()) {
+            SupportTicket existingTicket = ticket.get();
+            existingTicket.setAssignedAgent(agentId);
+            SupportTicket updatedTicket = repository.save(existingTicket);
+            return SupportTicketMapper.MAPPER.mapToDTO(updatedTicket);
+        } else {
+            throw new InvalidTicketIdException(TICKET_NOT_FOUND_MESSAGE);
+        }
+    }
+
+    @Override
+    public boolean deleteSupportTicketById(Long ticketId) throws InvalidTicketIdException {
+        Optional<SupportTicket> ticket = repository.findById(ticketId);
+        if (ticket.isPresent()) {
+            repository.delete(ticket.get());
+            return true;
+        } else {
+            throw new InvalidTicketIdException(TICKET_NOT_FOUND_MESSAGE);
+        }
+    }
 
 }

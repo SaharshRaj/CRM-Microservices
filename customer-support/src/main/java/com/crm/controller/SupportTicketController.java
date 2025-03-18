@@ -1,38 +1,40 @@
 package com.crm.controller;
 
-//import com.crm.dto.SupportTicketDTO;
-import com.crm.entities.SupportTicket;
-
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import com.crm.dto.SupportTicketDTO;
+import com.crm.enums.Status;
 
 import java.util.List;
 
-@RequestMapping("api/support")
+@RestController
+@RequestMapping("/api/support")
 public interface SupportTicketController {
 
-//    @GetMapping("")
-//    public ResponseEntity<List<SupportTicketDTO>> getAllSupportTickets();
-	
-	@PostMapping("/tickets")
-    ResponseEntity<SupportTicket> createTicket(@RequestBody SupportTicket supportTicket);
+    @GetMapping
+    ResponseEntity<List<SupportTicketDTO>> retrieveAllSupportTickets();
 
-    @GetMapping("/tickets/{id}")
-    ResponseEntity<SupportTicket> getTicketById(@PathVariable Long id);
+    @PostMapping("/tickets")
+    ResponseEntity<SupportTicketDTO> createSupportTicket(@Valid @RequestBody SupportTicketDTO supportTicketDto);
 
-    @GetMapping("/tickets")
-    ResponseEntity<List<SupportTicket>> getAllTickets();
+    @GetMapping("/{ticketId}")
+    ResponseEntity<SupportTicketDTO> getSupportTicketById(@PathVariable("ticketId") Long ticketId);
 
-    @PutMapping("/tickets/{id}")
-    ResponseEntity<SupportTicket> updateTicket(@PathVariable Long id, @RequestBody SupportTicket supportTicket);
+    @GetMapping("/customer/{customerId}")
+    ResponseEntity<List<SupportTicketDTO>> getSupportTicketsByCustomer(@PathVariable Long customerId);
 
-    @DeleteMapping("/tickets/{id}")
-    ResponseEntity<Void> deleteTicket(@PathVariable Long id);
-	
+    @GetMapping("/status/{status}")
+    ResponseEntity<List<SupportTicketDTO>> getSupportTicketsByStatus(@PathVariable Status status);
+
+    @PutMapping("/{ticketId}/{status}")
+    ResponseEntity<SupportTicketDTO> updateTicketStatus(@PathVariable("ticketId") Long ticketId, @PathVariable("status") Status status);
+
+    @PutMapping("/{ticketId}/assign")
+    ResponseEntity<SupportTicketDTO> assignTicketToAgent(@PathVariable Long ticketId, @RequestParam Long agentId);
+
+    @DeleteMapping("/{ticketId}")
+    ResponseEntity<String> deleteSupportTicketById(@PathVariable Long ticketId);
+
 }
