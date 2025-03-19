@@ -1,10 +1,12 @@
 package com.crm.controller;
 
 import com.crm.dto.CustomerProfileDTO;
+import com.crm.entities.CustomerProfile;
 import com.crm.enums.Interest;
 import com.crm.enums.PurchasingHabits;
 import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -202,19 +204,19 @@ public interface CustomerController {
      */
 
     @PostMapping("/purchaseHistory/{customerId}")
-    public ResponseEntity<String> addPurchaseToPurchaseHistory(@PathVariable long customerId, @RequestBody String purchase) throws ResourceNotFoundException;
+    public ResponseEntity<CustomerProfileDTO> addPurchaseToPurchaseHistory(@PathVariable long customerId, @RequestBody String purchase) throws ResourceNotFoundException, JsonProcessingException;
 
     /**
      * POST /api/customers/purchaseHistory/multiple/{customerId} : Add multiple purchases to the purchase history of the "customerId" customer profile.
      *
      * @param customerId the id of the customer profile to update
-     * @param purchase the list of purchases to add
+     * @param jsonBody the json containing list of purchases to add
      * @return the ResponseEntity with status 200 (OK) and with body the updated purchase history, or with status 404 (Not Found)
      * @throws ResourceNotFoundException if the customer profile is not found
      */
 
     @PostMapping("/purchaseHistory/multiple/{customerId}")
-    public ResponseEntity<String> addMultiplePurchaseToPurchaseHistory(@PathVariable long customerId, @RequestBody @Valid @NotEmpty List<String> purchase) throws ResourceNotFoundException;
+    public ResponseEntity<CustomerProfileDTO> addMultiplePurchaseToPurchaseHistory(@PathVariable long customerId, @RequestBody @NotEmpty String jsonBody) throws ResourceNotFoundException, JsonProcessingException;
 
     /**
      * DELETE /api/customers/{customerId} : Delete the "customerId" customer profile.

@@ -6,6 +6,7 @@ import com.crm.enums.PurchasingHabits;
 import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
 import com.crm.service.CustomerService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -213,8 +214,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "400", description = "Invalid customer profile data")
     })
     public ResponseEntity<?> addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
-        service.addCustomerProfile(customerProfileDTO);
-        return ResponseEntity.status(HttpStatus.OK).body("Customer Profile Added Successfully");
+        CustomerProfileDTO result = service.addCustomerProfile(customerProfileDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     /**
@@ -240,9 +241,9 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Customer profile updated successfully"),
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
-    public ResponseEntity<String> addPurchaseToPurchaseHistory(long customerId, String purchase) throws ResourceNotFoundException {
-        service.addToPurchaseHistory(customerId, purchase);
-        return ResponseEntity.ok("Purchase History updated successfully");
+    public ResponseEntity<CustomerProfileDTO> addPurchaseToPurchaseHistory(long customerId, String purchase) throws ResourceNotFoundException, JsonProcessingException {
+        CustomerProfileDTO customerProfileDTO = service.addToPurchaseHistory(customerId, purchase);
+        return ResponseEntity.ok(customerProfileDTO);
     }
 
     /**
@@ -254,9 +255,9 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Customer profile updated successfully"),
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
-    public ResponseEntity<String> addMultiplePurchaseToPurchaseHistory(long customerId, List<String> purchase) throws ResourceNotFoundException {
-        service.addMultiplePurchasesToPurchaseHistory(customerId, purchase);
-        return ResponseEntity.ok("Purchase History updated successfully");
+    public ResponseEntity<CustomerProfileDTO> addMultiplePurchaseToPurchaseHistory(long customerId, String jsonBody) throws ResourceNotFoundException, JsonProcessingException {
+        CustomerProfileDTO customerProfileDTO = service.addMultiplePurchasesToPurchaseHistory(customerId, jsonBody);
+        return ResponseEntity.ok(customerProfileDTO);
     }
 
     /**

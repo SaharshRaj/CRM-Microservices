@@ -5,6 +5,7 @@ import com.crm.enums.Interest;
 import com.crm.enums.PurchasingHabits;
 import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 
@@ -169,7 +170,7 @@ public interface CustomerService {
 	 * @return the updated customer profile
 	 * @throws ResourceNotFoundException if the customer profile is not found
 	 */
-	public CustomerProfileDTO addToPurchaseHistory(Long customerId, String purchase) throws ResourceNotFoundException;
+	public CustomerProfileDTO addToPurchaseHistory(Long customerId, String purchase) throws ResourceNotFoundException, JsonProcessingException;
 
 	/**
 	 * Adds multiple purchases to the purchase history of a customer profile.
@@ -179,5 +180,5 @@ public interface CustomerService {
 	 * @return the updated customer profile
 	 * @throws ResourceNotFoundException if the customer profile is not found
 	 */
-	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory(Long customerId, List<String> purchase) throws ResourceNotFoundException;
+	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory(Long customerId, String jsonBody) throws ResourceNotFoundException, JsonProcessingException;
 }

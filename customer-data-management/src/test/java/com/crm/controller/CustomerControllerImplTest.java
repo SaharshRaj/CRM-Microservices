@@ -388,7 +388,9 @@ class CustomerControllerImplTest {
     @Test
     void testAddMultipleToPurchaseHistory_Positive() throws Exception {
         customerProfileDTO.setPurchaseHistory(List.of("purchase1","purchase2","purchase3"));
-        when(service.addMultiplePurchasesToPurchaseHistory(2L,List.of("purchase2","purchase3"))).thenReturn(customerProfileDTO);
+        when(service.addMultiplePurchasesToPurchaseHistory(2L,"{\n" +
+                "    \"purchaseHstory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
+                "}")).thenReturn(customerProfileDTO);
         mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}",2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[\"purchase2\", \"purchase3\"]"))
@@ -399,7 +401,9 @@ class CustomerControllerImplTest {
     @Test
     void testAddMultipleToPurchaseHistory_Negative() throws Exception {
         doThrow(new ResourceNotFoundException("Customer Profile Not found"))
-                .when(service).addMultiplePurchasesToPurchaseHistory(2L, List.of("purchase3"));
+                .when(service).addMultiplePurchasesToPurchaseHistory(2L, "{\n" +
+                        "    \"purchaseHstory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
+                        "}");
         mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}", 2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[\"purchase3\"]"))

@@ -66,17 +66,17 @@ public class GlobalExceptionHandler extends RuntimeException {
      * @param webRequest the WebRequest
      * @return a ResponseEntity containing the exception message and an INTERNAL_SERVER_ERROR status
      */
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest webRequest) {
-//        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-//                .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
-//                .timestamp(LocalDateTime.now())
-//                .path(webRequest.getDescription(false))
-//                .message(ex.getMessage())
-//                .build();
-//
-//        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest webRequest) {
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     /**
      * Handles ResourceNotFoundException.
@@ -97,4 +97,18 @@ public class GlobalExceptionHandler extends RuntimeException {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(IllegalArgumentException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 }

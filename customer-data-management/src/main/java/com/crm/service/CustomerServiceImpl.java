@@ -10,8 +10,10 @@ import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
 import com.crm.service.CustomerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -241,28 +243,48 @@ public class CustomerServiceImpl implements CustomerService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CustomerProfileDTO addToPurchaseHistory(Long customerId, String purchase) throws ResourceNotFoundException {
+	public CustomerProfileDTO addToPurchaseHistory(Long customerId, String purchase) throws ResourceNotFoundException, JsonProcessingException {
+		JsonNode purchaseNode = objectMapper.readTree(purchase);
+		JsonNode purchaseHistoryJson = purchaseNode.get("purchaseHistory");
+		if(purchaseHistoryJson == null){
+			throw new IllegalArgumentException("Data should be in form of: { purchaseHistory : newPurchase }");
+		}
+		String purchaseHistory = purchaseHistoryJson.asText();
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
-		purchaseHistory.add(purchase);
-		existingCustomer.setPurchaseHistory(purchaseHistory);
-		CustomerProfile save = customerProfileRepository.save(existingCustomer);
-		return customerProfileMapper.toDTO(save);
+		// Perform any necessary validation on the purchase string and purchasingHabits here.
+
+		existingCustomer.getPurchaseHistory().add(purchaseHistory); // or purchase, if that is the intended behavior
+		CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
+
+        return customerProfileMapper.toDTO(updatedCustomer);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory(Long customerId, List<String> purchase) throws ResourceNotFoundException {
+	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory(Long customerId, String jsonBody) throws ResourceNotFoundException, JsonProcessingException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
+		JsonNode rootNode = objectMapper.readTree(jsonBody);
+		if(rootNode == null){
+			throw new IllegalArgumentException("Invalid purchaseHistory format in request body.");
+		}
+
+		JsonNode purchaseHistoryNode = rootNode.get("purchaseHistory");
+
+		if (purchaseHistoryNode == null || !purchaseHistoryNode.isArray()) {
+			throw new IllegalArgumentException("Invalid purchaseHistory format in request body.");
+		}
+
+		List<String> newPurchases = objectMapper.convertValue(purchaseHistoryNode, new TypeReference<List<String>>() {});
+
 		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
-		purchaseHistory.addAll(purchase);
+		purchaseHistory.addAll(newPurchases);
 		existingCustomer.setPurchaseHistory(purchaseHistory);
-		customerProfileRepository.save(existingCustomer);
-		return customerProfileMapper.toDTO(existingCustomer);
+		CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
+		return customerProfileMapper.toDTO(updatedCustomer);
 	}
 
 	/**
@@ -272,6 +294,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerProfileDTO updatePurchasingHabit(Long customerId) throws ResourceNotFoundException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
+
 		int numberOfPurchases = existingCustomer.getPurchaseHistory().size();
 		PurchasingHabits newPurchasingHabit;
 
@@ -286,19 +309,37 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 
 		try {
-			JsonNode jsonNode = objectMapper.readTree(existingCustomer.getSegmentationData()).get("segmentationData");
-			if (jsonNode != null) {
-				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode).put("PurchasingHabits", newPurchasingHabit.name());
-				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(objectMapper.createObjectNode().set("segmentationData", jsonNode)));
-				customerProfileRepository.save(existingCustomer);
-				return customerProfileMapper.toDTO(existingCustomer);
+			String segmentationDataString = existingCustomer.getSegmentationData();
+
+			if (segmentationDataString == null || segmentationDataString.isEmpty()) {
+				// Handle the case where segmentationData is null or empty.
+				ObjectNode newSegmentationData = objectMapper.createObjectNode();
+				newSegmentationData.put("Interest", (String) null);
+				newSegmentationData.put("Region", (String) null);
+				newSegmentationData.put("Purchasing Habits", newPurchasingHabit.name());
+
+				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(objectMapper.createObjectNode().set("segmentationData", newSegmentationData)));
 			} else {
-				throw new ResourceNotFoundException("Segmentation data is missing or invalid.");
+
+				JsonNode rootNode = objectMapper.readTree(segmentationDataString);
+				JsonNode segmentationDataNode = rootNode.get("segmentationData");
+
+				if (segmentationDataNode != null && segmentationDataNode.isObject()) {
+					((ObjectNode) segmentationDataNode).put("Purchasing Habits", newPurchasingHabit.name());
+					existingCustomer.setSegmentationData(objectMapper.writeValueAsString(rootNode));
+				} else {
+					throw new ResourceNotFoundException("Segmentation data is missing or invalid.");
+				}
 			}
+
+			CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
+			return customerProfileMapper.toDTO(updatedCustomer);
+
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException("Failed to update purchasing habit in segmentation data.", e);
 		}
 	}
+
 
 	private Region getRegionFromSegmentation(CustomerProfile customerProfile) {
 		return getEnumFromSegmentation(customerProfile, "Region", Region.class);

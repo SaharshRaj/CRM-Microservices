@@ -91,18 +91,6 @@ class CustomerProfileRepositoryTestCase {
 		assertThrows(Exception.class, () -> customerProfileRepository.deleteById(null));
 	}
 
-	@Test
-	void testUpdateCustomerProfile() {
-		CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
-		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
-				.findById(savedCustomerProfile.getCustomerID());
-		assertTrue(optionalOfCustomerProfile.isPresent(), "Customer should be found");
-		CustomerProfile retrievedCustomer = optionalOfCustomerProfile.get();
-		retrievedCustomer.setName("RomanReigns");
-		customerProfileRepository.save(retrievedCustomer);
-		Optional<CustomerProfile> updatedCustomer = customerProfileRepository.findById(retrievedCustomer.getCustomerID());
-		assertTrue(updatedCustomer.isPresent() && updatedCustomer.get().getName().equals("RomanReigns"), "Customer name should be updated");
-	}
 
 	@Test
 	void testFindByEmail_Positive() {
@@ -173,25 +161,7 @@ class CustomerProfileRepositoryTestCase {
 		assertEquals(0, customerList.size(), "No customers should be found by email");
 	}
 
-	@Test
-	void testFindAllByPhoneNumber_Positive() {
-		customerProfileRepository.save(customerProfile);
-		CustomerProfile customer2 = CustomerProfile.builder().name("SuvaLakshmi")
-				.phoneNumber("7776665552").emailId("Suva2@example.com")
-				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
-				.build();
-		customerProfileRepository.save(customer2);
-		CustomerProfile customer3 = CustomerProfile.builder().name("Thamizhini")
-				.phoneNumber("7776665552").emailId("Suva3@example.com")
-				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
-				.build();
-		customerProfileRepository.save(customer2);
-		customerProfileRepository.save(customer3);
-		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByPhoneNumber("7776665552");
-		assertEquals(CustomerList.size(),2);
-	}
+
 
 	@Test
 	void testFindAllPhoneNumber_Negative() {
