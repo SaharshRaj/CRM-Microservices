@@ -28,18 +28,20 @@ public class CustomerProfileMapper {
                 .emailId(customerProfile.getEmailId())
                 .phoneNumber(customerProfile.getPhoneNumber())
                 .purchaseHistory(customerProfile.getPurchaseHistory())
+                .segmentationData(new HashMap<>()) // Initialize segmentationData
                 .build();
 
         if (customerProfile.getSegmentationData() != null && !customerProfile.getSegmentationData().isEmpty()) {
             try {
                 JsonNode jsonNode = objectMapper.readTree(customerProfile.getSegmentationData()).get("segmentationData");
                 if (jsonNode != null) {
-                    dto.setRegion(jsonNode.has("Region") ? com.crm.enums.Region.valueOf(jsonNode.get("Region").asText()) : null);
-                    dto.setInterest(jsonNode.has("Interest") ? com.crm.enums.Interest.valueOf(jsonNode.get("Interest").asText()) : null);
-                    dto.setPurchasingHabits(jsonNode.has("PurchasingHabits") ? com.crm.enums.PurchasingHabits.valueOf(jsonNode.get("PurchasingHabits").asText()) : null);
+                    Map<String, String> segmentationData = dto.getSegmentationData();
+                    segmentationData.put("Region", jsonNode.has("Region") ? jsonNode.get("Region").asText() : null);
+                    segmentationData.put("Interest", jsonNode.has("Interest") ? jsonNode.get("Interest").asText() : null);
+                    segmentationData.put("Purchasing Habits", jsonNode.has("Purchasing Habits") ? jsonNode.get("Purchasing Habits").asText() : null);
                 }
             } catch (JsonProcessingException e) {
-                log.error("JsonParsingException Occured -> {}", e.getMessage());
+                log.error("JsonParsingException Occurred -> {}", e.getMessage());
             }
         }
 
@@ -55,26 +57,15 @@ public class CustomerProfileMapper {
                 .purchaseHistory(customerProfileDTO.getPurchaseHistory())
                 .build();
 
-        if (customerProfileDTO.getRegion() != null || customerProfileDTO.getInterest() != null || customerProfileDTO.getPurchasingHabits() != null) {
-            Map<String, String> segmentationDataMap = new HashMap<>();
-            if (customerProfileDTO.getRegion() != null) {
-                segmentationDataMap.put("Region", customerProfileDTO.getRegion().name());
-            }
-            if (customerProfileDTO.getInterest() != null) {
-                segmentationDataMap.put("Interest", customerProfileDTO.getInterest().name());
-            }
-            if (customerProfileDTO.getPurchasingHabits() != null) {
-                segmentationDataMap.put("PurchasingHabits", customerProfileDTO.getPurchasingHabits().name());
-            }
-
+        Map<String, String> segmentationData = customerProfileDTO.getSegmentationData();
+        if (segmentationData != null && (!segmentationData.isEmpty())) {
             Map<String, Map<String, String>> wrapperMap = new HashMap<>();
-            wrapperMap.put("segmentationData", segmentationDataMap);
+            wrapperMap.put("segmentationData", segmentationData);
 
             try {
                 entity.setSegmentationData(objectMapper.writeValueAsString(wrapperMap));
             } catch (JsonProcessingException e) {
-                // Handle JSON serialization exception (e.g., log error)
-                log.error("JsonParsingException Occured -> {}", e.getMessage());
+                log.error("JsonParsingException Occurred -> {}", e.getMessage());
             }
         }
 

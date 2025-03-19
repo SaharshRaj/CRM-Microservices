@@ -84,7 +84,7 @@ public interface CustomerController {
      */
 
     @GetMapping("/region/{region}")
-    public ResponseEntity<?> searchCustomerBasedOnRegion(@PathVariable Region region) throws ResourceNotFoundException;
+    public ResponseEntity<?> searchCustomerBasedOnRegion(@PathVariable String region) throws ResourceNotFoundException;
 
     /**
      * GET /api/customers/purchasingHabit/{purchasingHabits} : Get the customer profile by purchasing habits.
@@ -95,7 +95,7 @@ public interface CustomerController {
      */
 
     @GetMapping("/purchasingHabit/{purchasingHabits}")
-    public ResponseEntity<?> searchCustomerBasedOnPurchasingHabit(@PathVariable PurchasingHabits purchasingHabits) throws ResourceNotFoundException;
+    public ResponseEntity<?> searchCustomerBasedOnPurchasingHabit(@PathVariable String purchasingHabits) throws ResourceNotFoundException;
 
     /**
      * GET /api/customers/interest/{interest} : Get the customer profile by interest.
@@ -106,7 +106,7 @@ public interface CustomerController {
      */
 
     @GetMapping("/interest/{interest}")
-    public ResponseEntity<?> searchCustomerBasedOnInterest(@PathVariable Interest interest) throws ResourceNotFoundException;
+    public ResponseEntity<?> searchCustomerBasedOnInterest(@PathVariable String interest) throws ResourceNotFoundException;
 
     /**
      * GET /api/customers/region&interest/{region}/{interest} : Get the customer profile by region and interest.
@@ -118,7 +118,7 @@ public interface CustomerController {
      */
 
     @GetMapping("/region&interest/{region}/{interest}")
-    public ResponseEntity<?> searchCustomerBasedOnRegionInterest(@PathVariable Region region,@PathVariable Interest interest) throws ResourceNotFoundException;
+    public ResponseEntity<?> searchCustomerBasedOnRegionInterest(@PathVariable String region,@PathVariable String interest) throws ResourceNotFoundException;
 
     /**
      * GET /api/customers/interest&purchasingHabits/{interest}/{purchasingHabits} : Get the customer profile by interest and purchasing habits.
@@ -130,7 +130,7 @@ public interface CustomerController {
      */
 
     @GetMapping("/interest&purchasingHabits/{interest}/{purchasingHabits}")
-    public ResponseEntity<?> searchCustomerBasedOnInterestPurchasingHabits(@PathVariable Interest interest,@PathVariable PurchasingHabits purchasingHabits) throws ResourceNotFoundException;
+    public ResponseEntity<?> searchCustomerBasedOnInterestPurchasingHabits(@PathVariable String interest,@PathVariable String purchasingHabits) throws ResourceNotFoundException;
 
     /**
      * GET /api/customers/region&purchasingHabits/{region}/{purchasingHabits} : Get the customer profile by region and purchasing habits.
@@ -142,7 +142,7 @@ public interface CustomerController {
      */
 
     @GetMapping("/region&purchasingHabits/{region}/{purchasingHabits}")
-    public ResponseEntity<?> searchCustomerBasedOnRegionPurchasingHabits(@PathVariable Region region,@PathVariable PurchasingHabits purchasingHabits) throws ResourceNotFoundException;
+    public ResponseEntity<?> searchCustomerBasedOnRegionPurchasingHabits(@PathVariable String region,@PathVariable String purchasingHabits) throws ResourceNotFoundException;
 
     /**
      * GET /api/customers/demographics/{region}/{interest}/{purchasingHabits} : Get the customer profile by region, interest, and purchasing habits.
@@ -155,7 +155,7 @@ public interface CustomerController {
      */
 
     @GetMapping("/demographics/{region}/{interest}/{purchasingHabits}")
-    public ResponseEntity<?> searchCustomerBasedOnRegionInterestPurchasingHabits(@PathVariable Region region,@PathVariable Interest interest,@PathVariable PurchasingHabits purchasingHabits) throws ResourceNotFoundException;
+    public ResponseEntity<?> searchCustomerBasedOnRegionInterestPurchasingHabits(@PathVariable String region,@PathVariable String interest,@PathVariable String purchasingHabits) throws ResourceNotFoundException;
 
     /**
      * POST /api/customers : Add a new customer profile.

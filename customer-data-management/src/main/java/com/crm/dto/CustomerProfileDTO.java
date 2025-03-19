@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Data Transfer Object for Customer Profile.
@@ -53,17 +54,9 @@ public class CustomerProfileDTO {
     private List<String> purchaseHistory;
 
     /**
-     * The region of the customer.
+     * The Segmentation Data of the customer.
      */
-    private Region region;
+    private Map<String, String> segmentationData;
 
-    /**
-     * The interest of the customer.
-     */
-    private Interest interest;
 
-    /**
-     * The purchasing habits of the customer.
-     */
-    private PurchasingHabits purchasingHabits;
 }

@@ -12,6 +12,7 @@ public enum Interest {
     /**
      * Interest in technology.
      */
+
     TECH,
 
     /**

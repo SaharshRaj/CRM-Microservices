@@ -247,8 +247,8 @@ public class CustomerServiceImpl implements CustomerService {
 		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
 		purchaseHistory.add(purchase);
 		existingCustomer.setPurchaseHistory(purchaseHistory);
-		customerProfileRepository.save(existingCustomer);
-		return customerProfileMapper.toDTO(existingCustomer);
+		CustomerProfile save = customerProfileRepository.save(existingCustomer);
+		return customerProfileMapper.toDTO(save);
 	}
 
 	/**
@@ -309,21 +309,33 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	private PurchasingHabits getPurchasingHabitsFromSegmentation(CustomerProfile customerProfile) {
-		return getEnumFromSegmentation(customerProfile, "PurchasingHabits", PurchasingHabits.class);
+		return getEnumFromSegmentation(customerProfile, "Purchasing Habits", PurchasingHabits.class);
 	}
 
 	private <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
-		if (customerProfile.getSegmentationData() != null && !customerProfile.getSegmentationData().isEmpty()) {
-			try {
-				JsonNode jsonNode = objectMapper.readTree(customerProfile.getSegmentationData()).get("segmentationData");
-				if (jsonNode != null && jsonNode.has(fieldName)) {
-					return Enum.valueOf(enumType, jsonNode.get(fieldName).asText());
-				}
-			} catch (JsonProcessingException e) {
-				// Handle JSON parsing exception (e.g., log error, set default values)
-				e.printStackTrace();
-			}
+		if (customerProfile.getSegmentationData() == null || customerProfile.getSegmentationData().isEmpty()) {
+			return null;
 		}
-		return null; // Or throw an exception if the field is mandatory
+
+		try {
+			JsonNode segmentationNode = objectMapper.readTree(customerProfile.getSegmentationData()).get("segmentationData");
+			if (segmentationNode == null) {
+				return null;
+			}
+
+			if (segmentationNode.has(fieldName)) {
+				String enumValue = segmentationNode.get(fieldName).asText();
+				try {
+					return Enum.valueOf(enumType, enumValue);
+				} catch (IllegalArgumentException e) {
+					return null;
+				}
+
+			} else {
+				return null;
+			}
+		} catch (JsonProcessingException e) {
+			return null;
+		}
 	}
 }

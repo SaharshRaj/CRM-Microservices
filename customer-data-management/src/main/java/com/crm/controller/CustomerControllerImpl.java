@@ -114,8 +114,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer profiles"),
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
-    public ResponseEntity<?> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
-        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegion(region);
+    public ResponseEntity<?> searchCustomerBasedOnRegion(String region) throws ResourceNotFoundException {
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegion(Region.valueOf(region));
         return ResponseEntity.ok(customerProfileDTOList);
     }
 
@@ -128,8 +128,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer profiles"),
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
-    public ResponseEntity<?> searchCustomerBasedOnPurchasingHabit(PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnPurchasingHabit(purchasingHabits);
+    public ResponseEntity<?> searchCustomerBasedOnPurchasingHabit(String purchasingHabits) throws ResourceNotFoundException {
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnPurchasingHabit(PurchasingHabits.valueOf(purchasingHabits));
         return ResponseEntity.ok(customerProfileDTOList);
     }
 
@@ -142,8 +142,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer profiles"),
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
-    public ResponseEntity<?> searchCustomerBasedOnInterest(Interest interest) throws ResourceNotFoundException {
-        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterest(interest);
+    public ResponseEntity<?> searchCustomerBasedOnInterest(String interest) throws ResourceNotFoundException {
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterest(Interest.valueOf(interest));
         return ResponseEntity.ok(customerProfileDTOList);
     }
 
@@ -156,8 +156,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer profiles"),
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
-    public ResponseEntity<?> searchCustomerBasedOnRegionInterest(Region region, Interest interest) throws ResourceNotFoundException {
-        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterest(region,interest);
+    public ResponseEntity<?> searchCustomerBasedOnRegionInterest(String region, String interest) throws ResourceNotFoundException {
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterest(Region.valueOf(region),Interest.valueOf(interest));
         return ResponseEntity.ok(customerProfileDTOList);
     }
 
@@ -170,8 +170,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer profiles"),
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
-    public ResponseEntity<?> searchCustomerBasedOnInterestPurchasingHabits( Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterestAndPurchasingHabit(interest, purchasingHabits);
+    public ResponseEntity<?> searchCustomerBasedOnInterestPurchasingHabits( String interest, String purchasingHabits) throws ResourceNotFoundException {
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnInterestAndPurchasingHabit(Interest.valueOf(interest), PurchasingHabits.valueOf(purchasingHabits));
         return ResponseEntity.ok(customerProfileDTOList);
     }
 
@@ -184,8 +184,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer profiles"),
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
-    public ResponseEntity<?> searchCustomerBasedOnRegionPurchasingHabits(Region region, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndPurchasingHabit(region, purchasingHabits);
+    public ResponseEntity<?> searchCustomerBasedOnRegionPurchasingHabits(String region, String purchasingHabits) throws ResourceNotFoundException {
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndPurchasingHabit(Region.valueOf(region), PurchasingHabits.valueOf(purchasingHabits));
         return ResponseEntity.ok(customerProfileDTOList);
     }
 
@@ -198,8 +198,8 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer profiles"),
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
-    public ResponseEntity<?> searchCustomerBasedOnRegionInterestPurchasingHabits(Region region, Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
-        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(region, interest,purchasingHabits);
+    public ResponseEntity<?> searchCustomerBasedOnRegionInterestPurchasingHabits(String region, String interest, String purchasingHabits) throws ResourceNotFoundException {
+        List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region.valueOf(region), Interest.valueOf(interest),PurchasingHabits.valueOf(purchasingHabits));
         return ResponseEntity.ok(customerProfileDTOList);
     }
 
