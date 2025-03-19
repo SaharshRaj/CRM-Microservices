@@ -1,5 +1,8 @@
 package com.crm.dto;
 
+import com.crm.enums.Interest;
+import com.crm.enums.PurchasingHabits;
+import com.crm.enums.Region;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -27,20 +30,20 @@ public class CustomerProfileDTO {
     /**
      * The name of the customer.
      */
-    @NotBlank
+    @NotBlank(message = "Name cannot be blank")
     private String name;
 
     /**
      * The email ID of the customer.
      */
-    @NotBlank
+    @NotBlank(message = "Email cannot be blank")
     @Email(message = "Invalid email address")
     private String emailId;
 
     /**
      * The phone number of the customer.
      */
-    @NotBlank
+    @NotBlank(message = "Phone number cannot be blank")
     @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     private String phoneNumber;
 
@@ -50,8 +53,17 @@ public class CustomerProfileDTO {
     private List<String> purchaseHistory;
 
     /**
-     * The segmentation data of the customer.
+     * The region of the customer.
      */
-    private List<String> segmentationData;
+    private Region region;
 
+    /**
+     * The interest of the customer.
+     */
+    private Interest interest;
+
+    /**
+     * The purchasing habits of the customer.
+     */
+    private PurchasingHabits purchasingHabits;
 }

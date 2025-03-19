@@ -8,6 +8,10 @@ import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
+import com.crm.service.CustomerService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +25,17 @@ import java.util.stream.Collectors;
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
-
-	private CustomerProfileRepository customerProfileRepository;
-
-
-	private CustomerProfileMapper customerProfileMapper;
+	private final CustomerProfileRepository customerProfileRepository;
+	private final CustomerProfileMapper customerProfileMapper;
+	private final ObjectMapper objectMapper;
 
 	@Autowired
-	public CustomerServiceImpl(CustomerProfileRepository customerProfileRepository, CustomerProfileMapper customerProfileMapper){
+	public CustomerServiceImpl(CustomerProfileRepository customerProfileRepository,
+							   CustomerProfileMapper customerProfileMapper,
+							   ObjectMapper objectMapper) {
 		this.customerProfileRepository = customerProfileRepository;
 		this.customerProfileMapper = customerProfileMapper;
+		this.objectMapper = objectMapper;
 	}
 
 	/**
@@ -39,42 +44,43 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
-		if(customerProfiles.isEmpty()){
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		List<CustomerProfileDTO> list = customerProfiles.stream().filter(c-> c.getRegion() == region).map(customerProfileMapper::mapToDTO).toList();
-		if(list.isEmpty()){
-			throw new ResourceNotFoundException("There are no Customers");
-		}
-		return list;	}
+		return customerProfiles.stream()
+				.filter(c -> getRegionFromSegmentation(c) == region)
+				.map(customerProfileMapper::toDTO)
+				.collect(Collectors.toList());
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnInterest(Interest interest) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
-		if(customerProfiles.isEmpty()){
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		List<CustomerProfileDTO> list = customerProfiles.stream().filter(c-> c.getInterest() == interest).map(customerProfileMapper::mapToDTO).toList();
-		if(list.isEmpty()){
-			throw new ResourceNotFoundException("There are no Customers");
-		}
-		return list;	}
+		return customerProfiles.stream()
+				.filter(c -> getInterestFromSegmentation(c) == interest)
+				.map(customerProfileMapper::toDTO)
+				.collect(Collectors.toList());
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnPurchasingHabit(PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
-		if(customerProfiles.isEmpty()){
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		List<CustomerProfileDTO> list = customerProfiles.stream().filter(c-> c.getPurchasingHabits() == purchasingHabits).map(customerProfileMapper::mapToDTO).toList();
-		if(list.isEmpty()){
-			throw new ResourceNotFoundException("There are no Customers");
-		}
-		return list;
+		return customerProfiles.stream()
+				.filter(c -> getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
+				.map(customerProfileMapper::toDTO)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -83,17 +89,13 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterest(Region region, Interest interest) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
-		if(customerProfiles.isEmpty()){
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		List<CustomerProfileDTO> list = customerProfiles.stream()
-				.filter(c-> (c.getRegion() == region) && (c.getInterest() == interest))
-				.map(customerProfileMapper::mapToDTO)
-				.toList();
-		if(list.isEmpty()){
-			throw new ResourceNotFoundException("There are no Customers");
-		}
-		return list;
+		return customerProfiles.stream()
+				.filter(c -> getRegionFromSegmentation(c) == region && getInterestFromSegmentation(c) == interest)
+				.map(customerProfileMapper::toDTO)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -102,17 +104,13 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndPurchasingHabit(Region region, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
-		if(customerProfiles.isEmpty()){
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		List<CustomerProfileDTO> list = customerProfiles.stream()
-				.filter(c-> (c.getRegion() == region) && (c.getPurchasingHabits() == purchasingHabits))
-				.map(customerProfileMapper::mapToDTO)
-				.toList();
-		if(list.isEmpty()){
-			throw new ResourceNotFoundException("There are no Customers");
-		}
-		return list;
+		return customerProfiles.stream()
+				.filter(c -> getRegionFromSegmentation(c) == region && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
+				.map(customerProfileMapper::toDTO)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -121,17 +119,13 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnInterestAndPurchasingHabit(Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
-		if(customerProfiles.isEmpty()){
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		List<CustomerProfileDTO> list = customerProfiles.stream()
-				.filter(c-> (c.getInterest() == interest) && (c.getPurchasingHabits() == purchasingHabits))
-				.map(customerProfileMapper::mapToDTO)
-				.toList();
-		if(list.isEmpty()){
-			throw new ResourceNotFoundException("There are no Customers");
-		}
-		return list;
+		return customerProfiles.stream()
+				.filter(c -> getInterestFromSegmentation(c) == interest && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
+				.map(customerProfileMapper::toDTO)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -139,12 +133,12 @@ public class CustomerServiceImpl implements CustomerService {
 	 */
 	@Override
 	public CustomerProfileDTO addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
-		if(customerProfileDTO == null){
+		if (customerProfileDTO == null) {
 			throw new ResourceNotFoundException("Enter valid Customer Profile Details");
 		}
-		CustomerProfile customerProfile = customerProfileMapper.mapToCustomer(customerProfileDTO);
+		CustomerProfile customerProfile = customerProfileMapper.toEntity(customerProfileDTO);
 		CustomerProfile savedCustomer = customerProfileRepository.save(customerProfile);
-		return customerProfileMapper.mapToDTO(savedCustomer);
+		return customerProfileMapper.toDTO(savedCustomer);
 	}
 
 	/**
@@ -152,11 +146,11 @@ public class CustomerServiceImpl implements CustomerService {
 	 */
 	@Override
 	public List<CustomerProfileDTO> retrieveAllProfiles() throws ResourceNotFoundException {
-		List<CustomerProfile> customerProfiles = (customerProfileRepository.findAll());
-		if(customerProfiles.isEmpty()){
+		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("No customers found");
 		}
-		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
+		return customerProfiles.stream().map(customerProfileMapper::toDTO).collect(Collectors.toList());
 	}
 
 	/**
@@ -166,26 +160,20 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerProfileDTO getCustomerById(Long customerId) throws ResourceNotFoundException {
 		CustomerProfile customerProfile = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-		return customerProfileMapper.mapToDTO(customerProfile);
+		return customerProfileMapper.toDTO(customerProfile);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CustomerProfileDTO updateCustomer(Long customerId, CustomerProfileDTO customerProfileDTO)
-			throws ResourceNotFoundException {
-
+	public CustomerProfileDTO updateCustomer(Long customerId, CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-		existingCustomer.setName(customerProfileDTO.getName());
-		existingCustomer.setPhoneNumber(customerProfileDTO.getPhoneNumber());
-		existingCustomer.setEmailId(customerProfileDTO.getEmailId());
-		existingCustomer.setSegmentationData(customerProfileDTO.getSegmentationData());
-		existingCustomer.setPurchaseHistory(customerProfileDTO.getPurchaseHistory());
-		CustomerProfile updatedCustomerProfile = customerProfileRepository.save(existingCustomer);
-		return customerProfileMapper.mapToDTO(updatedCustomerProfile);
-
+		CustomerProfile updatedCustomerProfile = customerProfileMapper.toEntity(customerProfileDTO);
+		updatedCustomerProfile.setCustomerID(existingCustomer.getCustomerID());
+		updatedCustomerProfile = customerProfileRepository.save(updatedCustomerProfile);
+		return customerProfileMapper.toDTO(updatedCustomerProfile);
 	}
 
 	/**
@@ -193,11 +181,9 @@ public class CustomerServiceImpl implements CustomerService {
 	 */
 	@Override
 	public void deleteCustomer(Long customerId) throws ResourceNotFoundException {
-
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 		customerProfileRepository.deleteById(existingCustomer.getCustomerID());
-
 	}
 
 	/**
@@ -209,8 +195,9 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("No customers found with the given email");
 		}
-		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
+		return customerProfiles.stream().map(customerProfileMapper::toDTO).collect(Collectors.toList());
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -220,63 +207,64 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("No customers found with the given name");
 		}
-		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
+		return customerProfiles.stream().map(customerProfileMapper::toDTO).collect(Collectors.toList());
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<CustomerProfileDTO> searchCustomerBasedOnPhoneNumber(String phoneNumber)
-			throws ResourceNotFoundException {
+	public List<CustomerProfileDTO> searchCustomerBasedOnPhoneNumber(String phoneNumber) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAllByPhoneNumber(phoneNumber);
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("No customers found with the given phonenumber");
 		}
-		return customerProfiles.stream().map(customerProfileMapper::mapToDTO).collect(Collectors.toList());
+		return customerProfiles.stream().map(customerProfileMapper::toDTO).collect(Collectors.toList());
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region region, Interest interest, PurchasingHabits purchasingHabits) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
-		if(customerProfiles.isEmpty()){
+		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		List<CustomerProfileDTO> list = customerProfiles.stream()
-				.filter(c-> (c.getInterest() == interest) && (c.getRegion() == region) && (c.getPurchasingHabits() == purchasingHabits))
-				.map(customerProfileMapper::mapToDTO).toList();
-		if(list.isEmpty()){
-			throw new ResourceNotFoundException("There are no Customers");
-		}
-		return list;
+		return customerProfiles.stream()
+				.filter(c -> getInterestFromSegmentation(c) == interest && getRegionFromSegmentation(c) == region && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
+				.map(customerProfileMapper::toDTO)
+				.collect(Collectors.toList());
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CustomerProfileDTO addToPurchaseHistory( Long customerId, String purchase) throws ResourceNotFoundException {
+	public CustomerProfileDTO addToPurchaseHistory(Long customerId, String purchase) throws ResourceNotFoundException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
 		purchaseHistory.add(purchase);
 		existingCustomer.setPurchaseHistory(purchaseHistory);
 		customerProfileRepository.save(existingCustomer);
-		return customerProfileMapper.mapToDTO(existingCustomer);
+		return customerProfileMapper.toDTO(existingCustomer);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory ( Long customerId, List<String> purchase) throws ResourceNotFoundException {
+	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory(Long customerId, List<String> purchase) throws ResourceNotFoundException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
 		purchaseHistory.addAll(purchase);
 		existingCustomer.setPurchaseHistory(purchaseHistory);
 		customerProfileRepository.save(existingCustomer);
-		return customerProfileMapper.mapToDTO(existingCustomer);
+		return customerProfileMapper.toDTO(existingCustomer);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -285,17 +273,57 @@ public class CustomerServiceImpl implements CustomerService {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 		int numberOfPurchases = existingCustomer.getPurchaseHistory().size();
+		PurchasingHabits newPurchasingHabit;
+
 		if (numberOfPurchases <= 3) {
-			existingCustomer.setPurchasingHabits(PurchasingHabits.NEW);
+			newPurchasingHabit = PurchasingHabits.NEW;
 		} else if (numberOfPurchases < 10) {
-			existingCustomer.setPurchasingHabits(PurchasingHabits.SPARSE);
+			newPurchasingHabit = PurchasingHabits.SPARSE;
 		} else if (numberOfPurchases < 25) {
-			existingCustomer.setPurchasingHabits(PurchasingHabits.REGULAR);
+			newPurchasingHabit = PurchasingHabits.REGULAR;
 		} else {
-			existingCustomer.setPurchasingHabits(PurchasingHabits.FREQUENT);
+			newPurchasingHabit = PurchasingHabits.FREQUENT;
 		}
-		customerProfileRepository.save(existingCustomer);
-		return customerProfileMapper.mapToDTO(existingCustomer);
+
+		try {
+			JsonNode jsonNode = objectMapper.readTree(existingCustomer.getSegmentationData()).get("segmentationData");
+			if (jsonNode != null) {
+				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode).put("PurchasingHabits", newPurchasingHabit.name());
+				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(objectMapper.createObjectNode().set("segmentationData", jsonNode)));
+				customerProfileRepository.save(existingCustomer);
+				return customerProfileMapper.toDTO(existingCustomer);
+			} else {
+				throw new ResourceNotFoundException("Segmentation data is missing or invalid.");
+			}
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException("Failed to update purchasing habit in segmentation data.", e);
+		}
 	}
 
+	private Region getRegionFromSegmentation(CustomerProfile customerProfile) {
+		return getEnumFromSegmentation(customerProfile, "Region", Region.class);
+	}
+
+	private Interest getInterestFromSegmentation(CustomerProfile customerProfile) {
+		return getEnumFromSegmentation(customerProfile, "Interest", Interest.class);
+	}
+
+	private PurchasingHabits getPurchasingHabitsFromSegmentation(CustomerProfile customerProfile) {
+		return getEnumFromSegmentation(customerProfile, "PurchasingHabits", PurchasingHabits.class);
+	}
+
+	private <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
+		if (customerProfile.getSegmentationData() != null && !customerProfile.getSegmentationData().isEmpty()) {
+			try {
+				JsonNode jsonNode = objectMapper.readTree(customerProfile.getSegmentationData()).get("segmentationData");
+				if (jsonNode != null && jsonNode.has(fieldName)) {
+					return Enum.valueOf(enumType, jsonNode.get(fieldName).asText());
+				}
+			} catch (JsonProcessingException e) {
+				// Handle JSON parsing exception (e.g., log error, set default values)
+				e.printStackTrace();
+			}
+		}
+		return null; // Or throw an exception if the field is mandatory
+	}
 }

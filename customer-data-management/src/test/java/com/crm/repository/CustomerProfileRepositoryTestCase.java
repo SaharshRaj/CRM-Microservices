@@ -20,8 +20,7 @@ import com.crm.entities.CustomerProfile;
 class CustomerProfileRepositoryTestCase {
 
 	private CustomerProfile customerProfile;
-	
-	
+
 	@Autowired
 	private CustomerProfileRepository customerProfileRepository;
 
@@ -30,190 +29,176 @@ class CustomerProfileRepositoryTestCase {
 		customerProfile = CustomerProfile.builder().name("John Doe")
 				.phoneNumber("9998887777").emailId("john.doe@example.com")
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData(Arrays.asList()).build();
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
+				.build();
 	}
 
 	@AfterEach
 	void tearDown() throws Exception {
+		customerProfileRepository.deleteAll();
 		customerProfile = null;
 	}
 
 	@Test
 	void testAddCustomerProfile_positive() {
-
 		CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
-		assertTrue(savedCustomerProfile.getCustomerID() > 0, "");
+		assertTrue(savedCustomerProfile.getCustomerID() > 0, "Customer ID should be generated");
 	}
 
 	@Test
 	void testAddCustomerProfile_Negative() {
-
-		try {
-			CustomerProfile savedCustomerProfile = customerProfileRepository.save(null);
-			assertTrue(false);
-		} catch (Exception e) {
-			assertTrue(true);
-		}
-
+		assertThrows(Exception.class, () -> customerProfileRepository.save(null));
 	}
 
 	@Test
 	void testFindCustomerProfileById_Positive() {
-
 		CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
 		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
 				.findById(savedCustomerProfile.getCustomerID());
-		assertTrue(optionalOfCustomerProfile.isPresent());
-
+		assertTrue(optionalOfCustomerProfile.isPresent(), "Customer should be found by ID");
 	}
 
 	@Test
 	void testFindCustomerProfileById_Negative() {
-
 		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository.findById(1L);
-		assertTrue(optionalOfCustomerProfile.isEmpty());
-
+		assertTrue(optionalOfCustomerProfile.isEmpty(), "Customer with ID 1 should not exist");
 	}
 
 	@Test
 	void testFindAllCustomerProfile_Positive() {
-		CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
-		Iterable<CustomerProfile> listOfCustomerProfile = customerProfileRepository.findAll();
-		assertTrue(listOfCustomerProfile.iterator().hasNext());
+		customerProfileRepository.save(customerProfile);
+		List<CustomerProfile> listOfCustomerProfile = customerProfileRepository.findAll();
+		assertFalse(listOfCustomerProfile.isEmpty(), "List of customers should not be empty");
 	}
 
 	@Test
 	void testFindAllCustomerProfile_Negative() {
-
-		Iterable<CustomerProfile> listOfCustomerProfile = customerProfileRepository.findAll();
-		assertFalse(listOfCustomerProfile.iterator().hasNext());
-
+		List<CustomerProfile> listOfCustomerProfile = customerProfileRepository.findAll();
+		assertTrue(listOfCustomerProfile.isEmpty(), "List of customers should be empty");
 	}
 
 	@Test
 	void testDeleteCustomerProfileById_Positive() {
-
 		CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
 		customerProfileRepository.deleteById(savedCustomerProfile.getCustomerID());
-		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository.findById(1L);
-		assertTrue(optionalOfCustomerProfile.isEmpty());
+		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
+				.findById(savedCustomerProfile.getCustomerID());
+		assertTrue(optionalOfCustomerProfile.isEmpty(), "Customer should be deleted");
 	}
 
 	@Test
 	void testDeleteCustomerProfileById_Negative() {
-		try {
-			customerProfileRepository.deleteById(null);
-			assertTrue(false);
-		} catch (Exception e) {
-			assertTrue(true);
-		}
+		assertThrows(Exception.class, () -> customerProfileRepository.deleteById(null));
 	}
 
 	@Test
 	void testUpdateCustomerProfile() {
-
 		CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
 		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
 				.findById(savedCustomerProfile.getCustomerID());
-		assertTrue(optionalOfCustomerProfile.isPresent());
-		savedCustomerProfile.setName("RomanReigns");
-		assertEquals(savedCustomerProfile.getName(), "RomanReigns");
+		assertTrue(optionalOfCustomerProfile.isPresent(), "Customer should be found");
+		CustomerProfile retrievedCustomer = optionalOfCustomerProfile.get();
+		retrievedCustomer.setName("RomanReigns");
+		customerProfileRepository.save(retrievedCustomer);
+		Optional<CustomerProfile> updatedCustomer = customerProfileRepository.findById(retrievedCustomer.getCustomerID());
+		assertTrue(updatedCustomer.isPresent() && updatedCustomer.get().getName().equals("RomanReigns"), "Customer name should be updated");
+	}
 
-	}
-	
 	@Test
-	void testFindByEmail_Positive(){
-		  CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
-	        Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
-	                .findByEmail(savedCustomerProfile.getEmailId());
-	        assertTrue(optionalOfCustomerProfile.isPresent());
-	}
-	@Test
-	void testFindByEmail_Negative(){
+	void testFindByEmail_Positive() {
+		customerProfileRepository.save(customerProfile);
 		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
-				.findByEmail("john.doe@example.com");
-		assertFalse(optionalOfCustomerProfile.isPresent());
+				.findByEmail(customerProfile.getEmailId());
+		assertTrue(optionalOfCustomerProfile.isPresent(), "Customer should be found by email");
 	}
-	
+
 	@Test
-	void testFindByContactNumber_Positive(){
-		CustomerProfile savedCustomerProfile = customerProfileRepository.save(customerProfile);
+	void testFindByEmail_Negative() {
 		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
-				.findByContactNumber(savedCustomerProfile.getPhoneNumber());
-		assertTrue(optionalOfCustomerProfile.isPresent());
+				.findByEmail("nonexistent@example.com");
+		assertFalse(optionalOfCustomerProfile.isPresent(), "Customer should not be found by email");
 	}
+
 	@Test
-	void testFindByContactNumber_Negative(){
+	void testFindByContactNumber_Positive() {
+		customerProfileRepository.save(customerProfile);
 		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
-				.findByContactNumber("9998887777");
-		assertFalse(optionalOfCustomerProfile.isPresent());
+				.findByContactNumber(customerProfile.getPhoneNumber());
+		assertTrue(optionalOfCustomerProfile.isPresent(), "Customer should be found by phone number");
 	}
-	
+
+	@Test
+	void testFindByContactNumber_Negative() {
+		Optional<CustomerProfile> optionalOfCustomerProfile = customerProfileRepository
+				.findByContactNumber("0000000000");
+		assertFalse(optionalOfCustomerProfile.isPresent(), "Customer should not be found by phone number");
+	}
+
 	@Test
 	void testFindByName_Positive() {
 		customerProfileRepository.save(customerProfile);
 		Optional<CustomerProfile> customerProfiles = customerProfileRepository.findByNameContaining("Doe");
-	    assertFalse(customerProfiles.isEmpty());
-	    assertTrue(customerProfiles.stream().anyMatch(c -> c.getName().equals("John Doe")));
+		assertFalse(customerProfiles.isEmpty(), "Customer should be found by name containing");
+		assertTrue(customerProfiles.stream().anyMatch(c -> c.getName().equals("John Doe")), "Customer name should match");
 	}
-	
+
 	@Test
 	void testFindByName_Negative() {
-		
 		Optional<CustomerProfile> customerProfiles = customerProfileRepository.findByNameContaining("Smith");
-
-	    // Verify the results
-	    assertTrue(customerProfiles.isEmpty());
+		assertTrue(customerProfiles.isEmpty(), "Customer should not be found by name containing");
 	}
-	
+
 	@Test
 	void testFindAllByEmail_Positive() {
 		customerProfileRepository.save(customerProfile);
 		CustomerProfile customer2 = CustomerProfile.builder().name("SuvaLakshmi")
 				.phoneNumber("7776665552").emailId("Suva2@example.com")
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData(Arrays.asList()).build();
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
+				.build();
 		customerProfileRepository.save(customer2);
 		CustomerProfile customer3 = CustomerProfile.builder().name("Thamizhini")
 				.phoneNumber("2223334445").emailId("Suva2@example.com")
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData(Arrays.asList()).build();
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
+				.build();
 		customerProfileRepository.save(customer3);
-		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByEmailId("Suva2@example.com");
-		assertEquals(CustomerList.size(),2);
+		List<CustomerProfile> customerList = customerProfileRepository.findAllByEmailId("Suva2@example.com");
+		assertEquals(2, customerList.size(), "Two customers should be found by email");
 	}
-	
-	@Test
-	void testFindAllByEmail_Negative() {
-		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByEmailId("Suva2@example.com");
-		assertEquals(CustomerList.size(),0);
-	}
-	
-	
 
 	@Test
-	void testFindAllByPhonrNumber_Positive() {
+	void testFindAllByEmail_Negative() {
+		List<CustomerProfile> customerList = customerProfileRepository.findAllByEmailId("Suva2@example.com");
+		assertEquals(0, customerList.size(), "No customers should be found by email");
+	}
+
+	@Test
+	void testFindAllByPhoneNumber_Positive() {
 		customerProfileRepository.save(customerProfile);
 		CustomerProfile customer2 = CustomerProfile.builder().name("SuvaLakshmi")
 				.phoneNumber("7776665552").emailId("Suva2@example.com")
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData(Arrays.asList()).build();
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
+				.build();
 		customerProfileRepository.save(customer2);
 		CustomerProfile customer3 = CustomerProfile.builder().name("Thamizhini")
-				.phoneNumber("7776665552").emailId("Suva2@example.com")
+				.phoneNumber("7776665552").emailId("Suva3@example.com")
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData(Arrays.asList()).build();
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
+				.build();
+		customerProfileRepository.save(customer2);
 		customerProfileRepository.save(customer3);
 		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByPhoneNumber("7776665552");
 		assertEquals(CustomerList.size(),2);
 	}
-	
+
 	@Test
 	void testFindAllPhoneNumber_Negative() {
 		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByPhoneNumber("7776665552");
 		assertEquals(CustomerList.size(),0);
 	}
-	
+
 
 	@Test
 	void testFindAllByName_Positive() {
@@ -221,25 +206,25 @@ class CustomerProfileRepositoryTestCase {
 		CustomerProfile customer2 = CustomerProfile.builder().name("Thamizhini")
 				.phoneNumber("7776665552").emailId("Suva2@example.com")
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData(Arrays.asList()).build();
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}").build();
 		customerProfileRepository.save(customer2);
 		CustomerProfile customer3 = CustomerProfile.builder().name("Thamizhini")
 				.phoneNumber("7776665552").emailId("Suva2@example.com")
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
-				.segmentationData(Arrays.asList()).build();
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}").build();
 		customerProfileRepository.save(customer3);
 		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByNames("Thamizhini");
 		assertEquals(CustomerList.size(),2);
 	}
-	
+
 	@Test
 	void testFindAllByName_Negative() {
 		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByNames("Thamizhini");
 		assertEquals(CustomerList.size(),0);
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 }

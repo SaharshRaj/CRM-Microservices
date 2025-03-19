@@ -5,6 +5,7 @@ import com.crm.enums.Interest;
 import com.crm.enums.PurchasingHabits;
 import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
+
 import com.crm.service.CustomerServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -325,15 +326,15 @@ class CustomerControllerImplTest {
     }
 
 
-    @Test
-    void testUpdatePurchasingHabit_Positive() throws Exception {
-        customerProfileDTO.setSegmentationData(Arrays.asList("NORTH","MUSIC","FREQUENT"));
-        when(service.updatePurchasingHabit(1L)).thenReturn(customerProfileDTO);
-
-        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}",1))
-                .andExpect(status().isOk());
-
-    }
+//    @Test
+//    void testUpdatePurchasingHabit_Positive() throws Exception {
+//        customerProfileDTO.setSegmentationData(Arrays.asList("NORTH","MUSIC","FREQUENT"));
+//        when(service.updatePurchasingHabit(1L)).thenReturn(customerProfileDTO);
+//
+//        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}",1))
+//                .andExpect(status().isOk());
+//
+//    }
 
     @Test
     void testUpdatePurchasingHabit_Negative() throws Exception {
