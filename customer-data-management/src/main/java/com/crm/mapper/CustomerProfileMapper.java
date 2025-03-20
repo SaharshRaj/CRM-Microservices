@@ -38,7 +38,7 @@ public class CustomerProfileMapper {
                     Map<String, String> segmentationData = dto.getSegmentationData();
                     segmentationData.put("Region", jsonNode.has("Region") ? jsonNode.get("Region").asText() : null);
                     segmentationData.put("Interest", jsonNode.has("Interest") ? jsonNode.get("Interest").asText() : null);
-                    segmentationData.put("Purchasing Habits", jsonNode.has("Purchasing Habits") ? jsonNode.get("Purchasing Habits").asText() : null);
+                    segmentationData.put("Purchasing Habits", jsonNode.has("Purchasing Habits") ? jsonNode.get("Purchasing Habits").asText() : "NEW");
                 }
             } catch (JsonProcessingException e) {
                 log.error("JsonParsingException Occurred -> {}", e.getMessage());

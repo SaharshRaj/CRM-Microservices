@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -116,8 +117,12 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "404", description = "No customer profiles found")
     })
     public ResponseEntity<?> searchCustomerBasedOnRegion(String region) throws ResourceNotFoundException {
+        try {
         List<CustomerProfileDTO> customerProfileDTOList = service.searchCustomerBasedOnRegion(Region.valueOf(region));
         return ResponseEntity.ok(customerProfileDTOList);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Expected : "+ Arrays.toString(Region.values()) +" , but Received : "+region);
+        }
     }
 
     /**
