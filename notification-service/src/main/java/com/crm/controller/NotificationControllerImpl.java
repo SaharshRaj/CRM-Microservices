@@ -2,25 +2,54 @@ package com.crm.controller;
 
 import com.crm.dto.NotificationDTO;
 import com.crm.service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
+/**
+ * REST controller for handling notification-related requests.
+ */
 @RestController
 public class NotificationControllerImpl implements NotificationController {
-    
-    @Autowired
-    private NotificationService service;
+	
+	private static final Logger logger = LoggerFactory.getLogger(NotificationControllerImpl.class);
+    private final NotificationService service;
     
     /**
-     * Add JavaDoc
+     * Constructs a new NotificationControllerImpl with the specified NotificationService.
+     *
+     * @param service The NotificationService to use for sending notifications.
      */
-    @Override
-    public ResponseEntity<List<NotificationDTO>> getAllNotifications() {
-        List<NotificationDTO> notificationDTOS = service.retrieveAllNotifications();
-        return new ResponseEntity<>(notificationDTOS, HttpStatus.OK);
+    
+    public NotificationControllerImpl(NotificationService service) {
+        this.service = service;
     }
+    
+    /**
+     * Sends a notification based on the provided NotificationDTO.
+     *
+     * @param notificationDTO The NotificationDTO containing the notification details.
+     * @return ResponseEntity with a success message or a BAD_REQUEST status if an error occurs.
+     */
+    
+   @Override
+    public ResponseEntity<String> sendNotification(@RequestBody NotificationDTO notificationDTO) {
+	   	 if (notificationDTO == null) {
+             return ResponseEntity.badRequest().build();
+         }
+        try {
+            NotificationDTO savedNotification = service.sendNotification(notificationDTO);
+            logger.info("Notification sent successfully: {}", savedNotification);
+            return ResponseEntity.ok("Notification Sent Successfully");
+        } catch (Exception e) {
+        	logger.error("Error occurred", e);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+	
+	
 }
