@@ -1,6 +1,7 @@
 package com.crm.controller;
 
 import com.crm.dto.CampaignDTO;
+import com.crm.enums.Type;
 import com.crm.exception.CampaignNotFoundException;
 import com.crm.service.CampaignService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,8 +14,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for managing marketing campaigns.
@@ -196,6 +199,15 @@ public class CampaignControllerImpl implements CampaignController {
                     .build();
         } catch (CampaignNotFoundException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+    @Override
+    public ResponseEntity<Map<Type, Map<String, Object>>> getReachAnalysisByType() {
+        try {
+            Map<Type, Map<String, Object>> analysisResults = service.getCampaignReachAnalysisByType();
+            return ResponseEntity.ok(analysisResults);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

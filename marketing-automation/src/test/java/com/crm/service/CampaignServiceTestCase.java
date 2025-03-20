@@ -1,5 +1,5 @@
 package com.crm.service;
-import static org.junit.jupiter.api.Assertions.*;   
+import static org.junit.jupiter.api.Assertions.*;    
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -8,7 +8,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+
 import com.crm.mapper.CampaignMapperImpl;
 import com.crm.repository.CampaignRepository;
 import com.crm.dto.CampaignDTO;
@@ -30,9 +33,32 @@ class CampaignServiceTestCase {
 	private CampaignMapperImpl mapper;
 	@InjectMocks
 	private CampaignServiceImpl campaignServiceImpl;
+	private List<Campaign> campaigns;
+    private CampaignDTO campaignDTO;
+    private Campaign campaign;
+	@BeforeEach
+	void setup() {
+		campaign=new Campaign();
+		campaign.setCampaignID(1L);
+		campaign.setName("Summer Sale");
+		campaign.setStartDate(LocalDate.of(2023, 06, 01));
+		campaign.setEndDate(LocalDate.of(2023, 06, 30));
+		campaign.setType(Type.EMAIL);
+		campaign.setCustomerInteractions(1500);
+		campaign.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
+		campaignDTO=new CampaignDTO();
+		campaignDTO.setCampaignID(1L);
+		campaignDTO.setName("Summer Sale");
+		campaignDTO.setStartDate(LocalDate.of(2023, 06, 01));
+		campaignDTO.setEndDate(LocalDate.of(2023, 06, 30));
+		campaignDTO.setType(Type.EMAIL);
+		campaignDTO.setCustomerInteractions(1500);
+		campaignDTO.setTrackingUrl(campaign.getTrackingUrl());
+		
+	}
    @Test
 	void test_getAllCampaigns_positive() throws CampaignNotFoundException{
-		Campaign campaign=new Campaign();
+		campaign=new Campaign();
 		when(campaignRepository.findAll()).thenReturn(Arrays.asList(campaign));
 		try {
 			List<CampaignDTO> actual=campaignServiceImpl.retrieveAllCampaigns();
@@ -98,7 +124,7 @@ class CampaignServiceTestCase {
 		campaignDTO1.setEndDate(LocalDate.of(2023, 06, 30));
 		campaignDTO1.setType(Type.EMAIL);
 		campaignDTO1.setCustomerInteractions(1500);
-		Campaign campaign=new Campaign();
+		campaign=new Campaign();
 		campaign.setCampaignID(1L);
 		campaign.setName("Summer Sale");
 		campaign.setStartDate(LocalDate.of(2023, 06, 01));
@@ -111,7 +137,7 @@ class CampaignServiceTestCase {
 	}
 	@Test
 	void test_saveCamapigns_negative() {
-		CampaignDTO campaignDTO=new CampaignDTO();
+		campaignDTO=new CampaignDTO();
 		when(campaignRepository.save(any())).thenThrow(new CampaignNotFoundException("Campaign not saved"));
 		assertThrows(CampaignNotFoundException.class,()->campaignServiceImpl.saveCampaigns(campaignDTO));
 	}
@@ -123,7 +149,7 @@ class CampaignServiceTestCase {
 			Optional<Campaign> optionalCampaign=null;
 			Long campaignId=(Long) invocation.getArgument(0);
 			if(campaignId==1L) {
-				 Campaign campaign=new Campaign();
+				 campaign=new Campaign();
 				 campaign.setCampaignID(1L);
 				 campaign.setName("Summer Sale");
 				 campaign.setStartDate(LocalDate.of(2023, 06, 01));
@@ -136,7 +162,7 @@ class CampaignServiceTestCase {
 		}
 		
 	});
-	    CampaignDTO campaignDTO=new CampaignDTO();
+	    campaignDTO=new CampaignDTO();
 	    campaignDTO.setCampaignID(1L);
 	    campaignDTO.setName("Summer Sale");
 	    campaignDTO.setStartDate(LocalDate.of(2023, 06, 01));
@@ -153,7 +179,7 @@ class CampaignServiceTestCase {
 	}
 	 @Test
 	    void test_updateCampaign_positive() throws CampaignNotFoundException {
-	        Campaign campaign = new Campaign();
+	        campaign = new Campaign();
 	        campaign.setCampaignID(1L);
 	        campaign.setName("Summer Sale");
 	        campaign.setStartDate(LocalDate.of(2023, 06, 01));
@@ -163,7 +189,7 @@ class CampaignServiceTestCase {
 	        when(campaignRepository.findById(1L)).thenReturn(Optional.of(campaign));
 	        CampaignDTO updatedCampaignDTO = new CampaignDTO();
 	        updatedCampaignDTO.setName("Summer Sale Bonanza");
-	        CampaignDTO campaignDTO = new CampaignDTO();
+	        campaignDTO = new CampaignDTO();
 	        campaignDTO.setCampaignID(1L);
 	        campaignDTO.setName("Summer Sale Bonanza");
 	        campaignDTO.setStartDate(LocalDate.of(2023, 06, 01));
@@ -192,7 +218,7 @@ class CampaignServiceTestCase {
 				Optional<Campaign> optionalCampaign=null;
 	        	 Long campaignId=(Long)invocation.getArgument(0);
 	        	 if(campaignId==1L) {
-	        		 Campaign campaign=new Campaign();
+	        		 campaign=new Campaign();
 	        		 campaign.setCampaignID(1L);
 	        		 campaign.setName("Summer Sale");
 	        		 campaign.setStartDate(LocalDate.of(2023, 06, 01));
@@ -219,22 +245,7 @@ class CampaignServiceTestCase {
 	}
 	@Test
     void test_getByType_validType_returnsCampaigns() {
-		Campaign campaign=new Campaign();
-		campaign.setCampaignID(1L);
-		 campaign.setName("Summer Sale");
-		 campaign.setStartDate(LocalDate.of(2023, 06, 01));
-		 campaign.setEndDate(LocalDate.of(2023, 06, 30));
-		 campaign.setType(Type.EMAIL);
-		 campaign.setCustomerInteractions(1500);
-		 campaign.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
-		CampaignDTO campaignDTO=new CampaignDTO();
-		campaignDTO.setCampaignID(1L);
-		campaignDTO.setName("Summer Sale");
-		campaignDTO.setStartDate(LocalDate.of(2023, 06, 01));
-		campaignDTO.setEndDate(LocalDate.of(2023, 06, 30));
-		campaignDTO.setType(Type.EMAIL);
-		campaignDTO.setCustomerInteractions(1500);
-		campaignDTO.setTrackingUrl(campaign.getTrackingUrl());
+		
 		when(campaignRepository.findByType(Type.EMAIL)).thenReturn(Arrays.asList(campaign));
         when(mapper.mapToDTO(campaign)).thenReturn(campaignDTO);       
         List<CampaignDTO> actual = campaignServiceImpl.getByType(Type.EMAIL);
@@ -250,7 +261,7 @@ class CampaignServiceTestCase {
     @Test
     void test_trackCampaignClick_campaignFound_updatesInteractions() throws CampaignNotFoundException {
         Long campaignId = 1L;
-        Campaign campaign = new Campaign();
+        campaign = new Campaign();
         campaign.setCampaignID(campaignId);
         campaign.setCustomerInteractions(10); // Initial interactions
 
@@ -277,8 +288,7 @@ class CampaignServiceTestCase {
         inputDTO.setType(Type.EMAIL);
         inputDTO.setName("Test Campaign");
         inputDTO.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
-
-        Campaign campaign = new Campaign();
+        campaign = new Campaign();
         campaign.setCampaignID(1L);
         campaign.setStartDate(inputDTO.getStartDate());
         campaign.setEndDate(inputDTO.getEndDate());
@@ -358,5 +368,56 @@ class CampaignServiceTestCase {
         List<CampaignDTO> createdDTOs = campaignServiceImpl.createCampaigns(inputDTOs);
         assertEquals(0, createdDTOs.size());
     }
-
+    @Test
+    void getCampaignReachAnalysisByType_shouldReturnPositiveAnalysis() {
+    	campaigns=new ArrayList<>();
+    	campaign=new Campaign();
+    	Campaign campaign1=new Campaign();
+		campaign.setCampaignID(1L);
+		campaign.setName("Summer Sale");
+		campaign.setStartDate(LocalDate.of(2023, 06, 01));
+		campaign.setEndDate(LocalDate.of(2023, 06, 30));
+		campaign.setType(Type.EMAIL);
+		campaign.setCustomerInteractions(1500);
+		campaign.setTrackingUrl("http://localhost:3004/api/marketing/1/track");
+		campaigns.add(campaign);
+		campaign1.setCampaignID(2L);
+		campaign1.setName("Spring Sale");
+		campaign1.setStartDate(LocalDate.of(2025, 06, 01));
+		campaign1.setEndDate(LocalDate.of(2025, 06, 20));
+		campaign1.setCustomerInteractions(1400);
+		campaign1.setType(Type.EMAIL);
+		campaign1.setTrackingUrl("http://localhost:3004/api/marketing/2/track");
+		campaigns.add(campaign1);
+		Campaign campaign2=new Campaign();
+		campaign2.setCampaignID(3L);
+		campaign2.setName("Diwali Sale");
+		campaign2.setStartDate(LocalDate.of(2025, 04, 01));
+		campaign2.setEndDate(LocalDate.of(2025, 04, 20));
+		campaign2.setCustomerInteractions(1200);
+		campaign2.setType(Type.SMS);
+		campaign2.setTrackingUrl("http://localhost:3004/api/marketing/3/track");
+		campaigns.add(campaign2);
+        when(campaignRepository.findAll()).thenReturn(campaigns);
+        Map<Type, Map<String, Object>> results = campaignServiceImpl.getCampaignReachAnalysisByType();
+        assertNotNull(results);
+        Map<String, Object> emailResults = results.get(Type.EMAIL);
+        Map<String,Object> smsResults=results.get(Type.SMS);
+        assertNotNull(emailResults);
+        assertEquals("Summer Sale", emailResults.get("highestReachCampaignName"));
+        assertEquals(1400, emailResults.get("lowestReachInteractions"));
+        assertEquals("Spring Sale", emailResults.get("lowestReachCampaignName"));
+        assertEquals(1500, emailResults.get("highestReachInteractions"));
+        assertEquals(1450.0,emailResults.get("averageInteractions"));
+        assertEquals("Diwali Sale",smsResults.get("highestReachCampaignName"));
+        assertEquals(1200,smsResults.get("lowestReachInteractions"));
+        assertEquals(1200,smsResults.get("highestReachInteractions"));
+     }
+    @Test
+    void getCampaignReachAnalysisByType_shouldReturnEmptyMap_whenNoCampaigns() {
+        when(campaignRepository.findAll()).thenReturn(new ArrayList<>());
+        Map<Type, Map<String, Object>> results = campaignServiceImpl.getCampaignReachAnalysisByType();
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+    }
 }

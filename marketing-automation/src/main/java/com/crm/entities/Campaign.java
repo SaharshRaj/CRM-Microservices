@@ -1,12 +1,8 @@
 package com.crm.entities;
-
 import com.crm.enums.Type; 
-
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
-
 @Setter
 @Getter
 @Entity
@@ -24,8 +20,9 @@ public class Campaign {
     private LocalDate startDate;
     private LocalDate endDate;
     @Enumerated(EnumType.STRING)
+    @Column(name="type")
     private Type type;
-    private int customerInteractions=0;
+    private int customerInteractions;
     @Column(name="tracking_url")
     private String trackingUrl;
 

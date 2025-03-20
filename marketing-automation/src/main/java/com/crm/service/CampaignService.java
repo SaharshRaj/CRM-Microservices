@@ -3,6 +3,7 @@ import com.crm.dto.CampaignDTO;
 import com.crm.enums.Type;
 import com.crm.exception.CampaignNotFoundException;
 import java.util.List;
+import java.util.Map;
 public interface CampaignService {
     public List<CampaignDTO> retrieveAllCampaigns();
     public CampaignDTO getCampaignById(Long campaignId);
@@ -13,4 +14,5 @@ public interface CampaignService {
     List<CampaignDTO> getByType(Type type);
 	List<CampaignDTO> createCampaigns(List<CampaignDTO> campaignDTOs) throws CampaignNotFoundException;
 	public String trackCampaignClick(Long campaignId) throws CampaignNotFoundException;
+	public Map<Type, Map<String, Object>> getCampaignReachAnalysisByType();
 } 

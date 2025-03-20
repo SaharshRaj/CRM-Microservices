@@ -1,6 +1,7 @@
 package com.crm.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,8 +12,11 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -60,6 +64,37 @@ class CampaignControllerTestCase {
     void tearDown() {
         campaignServiceImpl = null;
         campaignControllerImpl = null;
+    }
+    /**
+     * Helper method to create a sample {@link CampaignDTO}.
+     * @return a {@link CampaignDTO} object.
+     */
+    private CampaignDTO createCampaignDTO() {
+        CampaignDTO campaignDTO = new CampaignDTO();
+        campaignDTO.setCampaignID(1L);
+        campaignDTO.setName("Summer Sale");
+        campaignDTO.setStartDate(LocalDate.of(2023, 06, 01));
+        campaignDTO.setEndDate(LocalDate.of(2023, 06, 30));
+        campaignDTO.setType(Type.EMAIL);
+        campaignDTO.setCustomerInteractions(1500);
+        campaignDTO.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
+        return campaignDTO;
+    }
+
+    /**
+     * Helper method to create a sample {@link Campaign}.
+     * @return a {@link Campaign} object.
+     */
+    private Campaign createCampaign() {
+        Campaign campaign = new Campaign();
+        campaign.setCampaignID(1L);
+        campaign.setName("Summer Sale");
+        campaign.setStartDate(LocalDate.of(2023, 06, 01));
+        campaign.setEndDate(LocalDate.of(2023, 06, 30));
+        campaign.setType(Type.EMAIL);
+        campaign.setCustomerInteractions(1500);
+        campaign.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
+        return campaign;
     }
 
     /**
@@ -209,38 +244,7 @@ class CampaignControllerTestCase {
         assertEquals(HttpStatus.NOT_FOUND, actual.getStatusCode());
     }
 
-    /**
-     * Helper method to create a sample {@link CampaignDTO}.
-     * @return a {@link CampaignDTO} object.
-     */
-    private CampaignDTO createCampaignDTO() {
-        CampaignDTO campaignDTO = new CampaignDTO();
-        campaignDTO.setCampaignID(1L);
-        campaignDTO.setName("Summer Sale");
-        campaignDTO.setStartDate(LocalDate.of(2023, 06, 01));
-        campaignDTO.setEndDate(LocalDate.of(2023, 06, 30));
-        campaignDTO.setType(Type.EMAIL);
-        campaignDTO.setCustomerInteractions(1500);
-        campaignDTO.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
-        return campaignDTO;
-    }
-
-    /**
-     * Helper method to create a sample {@link Campaign}.
-     * @return a {@link Campaign} object.
-     */
-    private Campaign createCampaign() {
-        Campaign campaign = new Campaign();
-        campaign.setCampaignID(1L);
-        campaign.setName("Summer Sale");
-        campaign.setStartDate(LocalDate.of(2023, 06, 01));
-        campaign.setEndDate(LocalDate.of(2023, 06, 30));
-        campaign.setType(Type.EMAIL);
-        campaign.setCustomerInteractions(1500);
-        campaign.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
-        return campaign;
-    }
-
+    
     /**
      * Tests the positive scenario for creating multiple campaigns.
      * Verifies that the controller returns HTTP status CREATED and the list of created campaigns.
@@ -318,5 +322,33 @@ class CampaignControllerTestCase {
         ResponseEntity<Void> response = campaignControllerImpl.trackCampaignClick(campaignId);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(campaignServiceImpl).trackCampaignClick(campaignId);
+    }
+    @Test
+    void getReachAnalysisByType_shouldReturnOkWithAnalysis() {
+        Map<Type, Map<String, Object>> mockAnalysis = new HashMap<>();
+        Map<String, Object> emailAnalysis = new HashMap<>();
+        emailAnalysis.put("averageInteractions", 10.0);
+        emailAnalysis.put("highestReachCampaign", "Test Email");
+        mockAnalysis.put(Type.EMAIL, emailAnalysis);
+        when(campaignServiceImpl.getCampaignReachAnalysisByType()).thenReturn(mockAnalysis);
+        ResponseEntity<Map<Type, Map<String, Object>>> response = campaignControllerImpl.getReachAnalysisByType();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockAnalysis, response.getBody());
+    }
+    @Test
+    void getReachAnalysisByType_shouldReturnOkWithNullAnalysis() {
+        when(campaignServiceImpl.getCampaignReachAnalysisByType()).thenReturn(null);
+        ResponseEntity<Map<Type, Map<String, Object>>> responseEntity = campaignControllerImpl.getReachAnalysisByType();
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(null, responseEntity.getBody());
+    }
+    @Test
+    void getReachAnalysisByType_shouldReturnInternalServerErrorOnException() {
+        when(campaignServiceImpl.getCampaignReachAnalysisByType()).thenThrow(new RuntimeException("Test Exception"));
+        ResponseEntity<Map<Type, Map<String, Object>>> responseEntity = campaignControllerImpl.getReachAnalysisByType();
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(null, responseEntity.getBody());
     }
 }

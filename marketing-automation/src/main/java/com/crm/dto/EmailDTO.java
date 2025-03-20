@@ -26,5 +26,11 @@ public class EmailDTO {
 	private Type type;
 	private String trackingUrl;
 	private Long campaignId;
+	@Override
+	public String toString() {
+		return "EmailDTO [subject=" + subject + ", openingLine=" + openingLine + ", msgBody=" + msgBody + ", closing="
+				+ closing + ", conclusion=" + conclusion + ", type=" + type + ", trackingUrl=" + trackingUrl
+				+ ", campaignId=" + campaignId + "]";
+	}
 
 }

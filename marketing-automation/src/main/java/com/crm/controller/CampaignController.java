@@ -1,5 +1,6 @@
 package com.crm.controller;
-import com.crm.dto.CampaignDTO; 
+import com.crm.dto.CampaignDTO;
+import com.crm.enums.Type;
 import com.crm.exception.CampaignNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
+import java.util.Map;
 @RequestMapping("api/marketing")
 public interface CampaignController {
 	@GetMapping("GetAllCampaigns")
@@ -27,4 +29,6 @@ public interface CampaignController {
 	public ResponseEntity<CampaignDTO> deleteCampaign(@PathVariable("campaignId") Long campaignId);
 	@GetMapping("/{campaignId}/track")
 	public ResponseEntity<Void> trackCampaignClick(@PathVariable("campaignId") Long campaignId) throws CampaignNotFoundException;
+    @GetMapping("/reach-analysis-by-type")
+    public ResponseEntity<Map<Type, Map<String, Object>>> getReachAnalysisByType();
 }
