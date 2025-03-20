@@ -218,7 +218,7 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Customer profile added successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid customer profile data")
     })
-    public ResponseEntity<?> addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
+    public ResponseEntity<CustomerProfileDTO> addCustomerProfile(CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException {
         CustomerProfileDTO result = service.addCustomerProfile(customerProfileDTO);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }

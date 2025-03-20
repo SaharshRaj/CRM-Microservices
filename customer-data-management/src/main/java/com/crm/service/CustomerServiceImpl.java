@@ -8,9 +8,7 @@ import com.crm.enums.Region;
 import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
-import com.crm.service.CustomerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -19,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -244,12 +243,8 @@ public class CustomerServiceImpl implements CustomerService {
 	 */
 	@Override
 	public CustomerProfileDTO addToPurchaseHistory(Long customerId, String purchase) throws ResourceNotFoundException, JsonProcessingException {
-		JsonNode purchaseNode = objectMapper.readTree(purchase);
-		JsonNode purchaseHistoryJson = purchaseNode.get("purchaseHistory");
-		if(purchaseHistoryJson == null){
-			throw new IllegalArgumentException("Data should be in form of: { purchaseHistory : newPurchase }");
-		}
-		String purchaseHistory = purchaseHistoryJson.asText();
+		Map<String, String> jsonObject = objectMapper.readValue(purchase, Map.class);
+		String purchaseHistory = jsonObject.get("purchaseHistory");
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 		// Perform any necessary validation on the purchase string and purchasingHabits here.
@@ -267,18 +262,10 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerProfileDTO addMultiplePurchasesToPurchaseHistory(Long customerId, String jsonBody) throws ResourceNotFoundException, JsonProcessingException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-		JsonNode rootNode = objectMapper.readTree(jsonBody);
-		if(rootNode == null){
-			throw new IllegalArgumentException("Invalid purchaseHistory format in request body.");
-		}
 
-		JsonNode purchaseHistoryNode = rootNode.get("purchaseHistory");
+		Map<String, List<String>> jsonObject = objectMapper.readValue(jsonBody, Map.class);
 
-		if (purchaseHistoryNode == null || !purchaseHistoryNode.isArray()) {
-			throw new IllegalArgumentException("Invalid purchaseHistory format in request body.");
-		}
-
-		List<String> newPurchases = objectMapper.convertValue(purchaseHistoryNode, new TypeReference<List<String>>() {});
+		List<String> newPurchases = jsonObject.get("purchaseHistory");
 
 		List<String> purchaseHistory = new ArrayList<>(existingCustomer.getPurchaseHistory());
 		purchaseHistory.addAll(newPurchases);

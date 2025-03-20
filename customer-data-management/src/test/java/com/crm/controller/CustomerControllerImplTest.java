@@ -21,13 +21,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.crm.enums.PurchasingHabits.NEW;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.MockMvcExtensionsKt.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.springframework.http.MediaType;
@@ -276,17 +275,19 @@ class CustomerControllerImplTest {
                 .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
 
-
-
-
     @Test
     public void testAddCustomerProfile_Positive() throws Exception {
-
+        CustomerProfileDTO newCustomerProfile = customerProfileDTO;
+        newCustomerProfile.setCustomerID(1L);
+        when(service.addCustomerProfile(customerProfileDTO)).thenReturn(newCustomerProfile);
         mockMvc.perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(customerProfileDTO)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Customer Profile Added Successfully"));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.customerID").value(customerProfileDTO.getCustomerID()))
+                .andExpect(jsonPath("$.name").value(customerProfileDTO.getName()))
+                .andExpect(jsonPath("$.emailId").value(customerProfileDTO.getEmailId()));
     }
 
     @Test
@@ -310,7 +311,6 @@ class CustomerControllerImplTest {
                 .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
-        System.out.println("Response Body: " + responseBody);
 
         assertEquals(new ObjectMapper().writeValueAsString(customerProfileDTO), responseBody);
     }
@@ -365,14 +365,18 @@ class CustomerControllerImplTest {
 
     @Test
     void testAddToPurchaseHistory_Positive() throws Exception {
-        customerProfileDTO.setPurchaseHistory(List.of("purchase1","purchase2","purchase3"));
-        when(service.addToPurchaseHistory(2L,"purchase3")).thenReturn(customerProfileDTO);
-        mockMvc.perform(post("/api/customers/purchaseHistory/{customerId}",2)
+        customerProfileDTO.setPurchaseHistory(List.of("purchase1", "purchase2", "purchase3"));
+
+        when(service.addToPurchaseHistory(2L, "{\"purchaseHistory\":\"purchase3\"}")).thenReturn(customerProfileDTO);
+
+        MvcResult result = mockMvc.perform(post("/api/customers/purchaseHistory/{customerId}", 2L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(("purchase3")))
+                        .content("{\"purchaseHistory\":\"purchase3\"}"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Purchase History updated successfully"));
- }
+                .andReturn();
+        String responseBody = result.getResponse().getContentAsString();
+        assertEquals(new ObjectMapper().writeValueAsString(customerProfileDTO), responseBody);
+    }
 
     @Test
     void testAddToPurchaseHistory_Negative() throws Exception {
@@ -387,26 +391,34 @@ class CustomerControllerImplTest {
 
     @Test
     void testAddMultipleToPurchaseHistory_Positive() throws Exception {
-        customerProfileDTO.setPurchaseHistory(List.of("purchase1","purchase2","purchase3"));
-        when(service.addMultiplePurchasesToPurchaseHistory(2L,"{\n" +
-                "    \"purchaseHstory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
+        customerProfileDTO.setPurchaseHistory(List.of("purchase1", "purchase2", "purchase3"));
+
+        when(service.addMultiplePurchasesToPurchaseHistory(2L, "{\n" +
+                "    \"purchaseHistory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
                 "}")).thenReturn(customerProfileDTO);
-        mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}",2)
+
+        MvcResult result = mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}", 2)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("[\"purchase2\", \"purchase3\"]"))
+                        .content("{\n" +
+                                "    \"purchaseHistory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
+                                "}"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Purchase History updated successfully"));
+                .andReturn();
+        String responseBody = result.getResponse().getContentAsString();
+        assertEquals(new ObjectMapper().writeValueAsString(customerProfileDTO), responseBody);
     }
 
     @Test
     void testAddMultipleToPurchaseHistory_Negative() throws Exception {
         doThrow(new ResourceNotFoundException("Customer Profile Not found"))
                 .when(service).addMultiplePurchasesToPurchaseHistory(2L, "{\n" +
-                        "    \"purchaseHstory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
+                        "    \"purchaseHistory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
                         "}");
-        mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}", 2)
+        mockMvc.perform(post("/api/customers/purchaseHistory/multiple/{customerId}", 2L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("[\"purchase3\"]"))
+                        .content("{\n" +
+                                "    \"purchaseHistory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
+                                "}"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Customer Profile Not found"));
     }

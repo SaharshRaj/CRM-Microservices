@@ -176,7 +176,7 @@ public interface CustomerService {
 	 * Adds multiple purchases to the purchase history of a customer profile.
 	 *
 	 * @param customerId the ID of the customer profile to update
-	 * @param purchase the list of purchases to add
+	 * @param jsonBody the list of purchases to add
 	 * @return the updated customer profile
 	 * @throws ResourceNotFoundException if the customer profile is not found
 	 */

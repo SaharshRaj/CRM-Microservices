@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -167,8 +168,8 @@ public interface CustomerController {
      * @throws ResourceNotFoundException if the customer profile cannot be added
      */
 
-    @PostMapping()
-    public ResponseEntity<?> addCustomerProfile(@RequestBody @Valid CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException;
+    @PostMapping
+    public ResponseEntity<CustomerProfileDTO> addCustomerProfile(@RequestBody @Valid CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException;
 
 
     /**

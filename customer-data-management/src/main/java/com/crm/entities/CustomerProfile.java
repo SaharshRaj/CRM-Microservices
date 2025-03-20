@@ -1,8 +1,5 @@
 package com.crm.entities;
 
-import com.crm.enums.Interest;
-import com.crm.enums.PurchasingHabits;
-import com.crm.enums.Region;
 import jakarta.persistence.*;
 import lombok.*;
 

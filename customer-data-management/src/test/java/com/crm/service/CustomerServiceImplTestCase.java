@@ -9,7 +9,9 @@ import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +23,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceImplTestCase {
 
@@ -322,28 +324,37 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
-	void testAddToPurchaseHistory_Positive() {
+	void testAddToPurchaseHistory_Positive() throws JsonProcessingException {
 		CustomerProfile existingCustomer = customerProfiles.get(0);
-		existingCustomer.setPurchaseHistory(Arrays.asList("purchase1", "purchase2"));
+		existingCustomer.setPurchaseHistory(new ArrayList<>(Arrays.asList("purchase1", "purchase2")));
 
 		CustomerProfile updatedCustomer = customerProfiles.get(0);
-		existingCustomer.setPurchaseHistory(Arrays.asList("purchase1", "purchase2", "purchase3"));
+		updatedCustomer.setPurchaseHistory(new ArrayList<>(Arrays.asList("purchase1", "purchase2", "purchase3")));
 
 		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.get(0);
 		customerProfileDTO.setPurchaseHistory(Arrays.asList("purchase1", "purchase2", "purchase3"));
 
+		Map<String, String> purchase = new HashMap<>();
+		purchase.put("purchaseHistory", "purchase3");
+
+		// Correct the JSON string
+		String json = "{\"purchaseHistory\":\"purchase3\"}";
+
+		// Mock the ObjectMapper methods
+		when(objectMapper.readValue(json, Map.class)).thenReturn(purchase);
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(existingCustomer));
 		when(customerProfileRepository.save(existingCustomer)).thenReturn(updatedCustomer);
 		when(customerProfileMapper.toDTO(updatedCustomer)).thenReturn(customerProfileDTO);
-        CustomerProfileDTO result = null;
-        try {
-            result = customerServiceImpl.addToPurchaseHistory(1L, "purchase3");
-        } catch (JsonProcessingException e) {
-            assertTrue(false);
-        }
 
+		CustomerProfileDTO result = null;
 
-        assertNotNull(result);
+		try {
+			result = customerServiceImpl.addToPurchaseHistory(1L, json);
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+
+		assertNotNull(result);
 		assertEquals(3, result.getPurchaseHistory().size());
 		assertTrue(result.getPurchaseHistory().contains("purchase3"));
 
@@ -352,9 +363,12 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
-	void testAddToPurchaseHistory_Negative() {
+	void testAddToPurchaseHistory_Negative() throws JsonProcessingException {
+		Map<String, String> purchase = new HashMap<>();
+		purchase.put("purchaseHistory","newPurchase");
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
-		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addToPurchaseHistory(1L, "purchase3"));
+		when(objectMapper.readValue("{\"purchaseHistory\":\"newPurchase\"}",Map.class)).thenReturn(purchase);
+		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addToPurchaseHistory(1L, "{\"purchaseHistory\":\"newPurchase\"}"));
 	}
 
 	@Test
@@ -366,14 +380,21 @@ class CustomerServiceImplTestCase {
 		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.get(0);
 		List<String> fullPurchaseList = new ArrayList<>(existingPurchases);
 		fullPurchaseList.addAll(Arrays.asList("newPurchase1", "newPurchase2", "newPurchase3"));
+		CustomerProfile updatedCustomer = existingCustomer;
+		updatedCustomer.setPurchaseHistory(fullPurchaseList);
 
 		customerProfileDTO.setPurchaseHistory(fullPurchaseList);
 
+		Map<String, List<String>> purchase = new HashMap<>();
+		List<String> purchaseList = Arrays.asList("newPurchase1","newPurchase2","newPurchase3");
+		purchase.put("purchaseHistory",purchaseList);
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(existingCustomer));
 		when(customerProfileMapper.toDTO(existingCustomer)).thenReturn(customerProfileDTO);
-
-		CustomerProfileDTO result = customerServiceImpl.addMultiplePurchasesToPurchaseHistory(1L, "{\"purchaseHistory\": [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]}");
-
+		String json = objectMapper.writeValueAsString(purchase);
+		when(objectMapper.writeValueAsString(purchase)).thenReturn(json);
+		when(objectMapper.readValue(json, Map.class)).thenReturn(purchase);
+		when(customerProfileRepository.save(any(CustomerProfile.class))).thenReturn(updatedCustomer);
+		CustomerProfileDTO result = customerServiceImpl.addMultiplePurchasesToPurchaseHistory(1L, objectMapper.writeValueAsString(purchase));
 		assertNotNull(result);
 		assertEquals(5, result.getPurchaseHistory().size());
 		assertTrue(result.getPurchaseHistory().containsAll(fullPurchaseList));
