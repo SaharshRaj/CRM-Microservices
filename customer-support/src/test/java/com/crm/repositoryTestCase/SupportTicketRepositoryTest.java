@@ -29,7 +29,9 @@ class SupportTicketRepositoryTest {
     @Autowired
     private SupportTicketRepository supportTicketRepository; // Injects the repository being tested
 
-    /** JUnit test cases for SupportTicket repository methods */
+    /**
+    JUnit test cases for SupportTicket repository methods
+    */
 
     /**
      * Test to validate saving a support ticket (positive scenario).
