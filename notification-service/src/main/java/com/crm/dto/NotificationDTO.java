@@ -29,7 +29,7 @@ public class NotificationDTO {
     /**
      * Employee ID to whom the notification should be sent.
      */
-    private Long employeeID;
+    private String employeeID;
     /**
      * Type of notification (e.g., EMAIL, SMS).
      * Must be provided and cannot be null.

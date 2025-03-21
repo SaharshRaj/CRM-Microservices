@@ -107,11 +107,11 @@ public class EmailOrSmsServiceImpl implements EmailOrSmsService {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             mimeMessageHelper.setSubject(notificationDTO.getSubject());
             mimeMessageHelper.setFrom(sender);
-            mimeMessageHelper.setTo(employeeDTO.getEmail());
+            mimeMessageHelper.setTo(notificationDTO.getEmployeeID());
             mimeMessageHelper.setText(notificationDTO.getBody());
             mailSender.send(mimeMessageHelper.getMimeMessage());
         } catch (MessagingException e) {
-            logger.error(EMAIL_SEND_ERROR_MESSAGE, employeeDTO.getEmail(), e.getMessage(), e);
+            logger.error(EMAIL_SEND_ERROR_MESSAGE, employeeDTO.getEmployeeEmail(), e.getMessage(), e);
         }
     }
 

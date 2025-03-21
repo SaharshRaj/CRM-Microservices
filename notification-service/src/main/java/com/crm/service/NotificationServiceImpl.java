@@ -114,8 +114,8 @@ public class NotificationServiceImpl implements NotificationService {
 	 * @throws NotificationNotFoundException if an invalid type is provided. 
 	 */
 	private void processEmployeeNotification(NotificationDTO notificationDTO) {
-		notificationDTO.setEmployeeID(101L);
 	    if (notificationDTO.getEmployeeID()!= null) {
+	    	employeeDTO.setEmployeeEmail(notificationDTO.getEmployeeID());
 	        if (notificationDTO.getType() == Type.EMAIL) {
 	        	try {
 	    			emailOrSmsService.sendEmailToEmployee(notificationDTO,employeeDTO);

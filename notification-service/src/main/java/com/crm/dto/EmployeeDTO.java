@@ -13,24 +13,23 @@ public class EmployeeDTO {
      * The email address of the employee. Defaults to "sohithkalavakuri71@gmail.com".
      * The phone number of the employee. Defaults to "+917330783299".
      */
-    private Long employeeID = 101L;
+    private String employeeEmail;
     private String name = "Manager";
-    private String email = "sohithkalavakuri71@gmail.com";
     private String phoneNumber = "+917330783299";
     /**
      * Retrieves the employee ID.
      * @return The employee ID.
      */
-    public Long getEmployeeID() {
-        return employeeID;
+    public String getEmployeeEmail() {
+        return employeeEmail;
     }
 
     /**
      * Sets the employee ID.
      * @param employeeID The employee ID to set.
      */
-    public void setEmployeeID(Long employeeID) {
-        this.employeeID = employeeID;
+    public void setEmployeeEmail(String employeeEmail) {
+        this.employeeEmail = employeeEmail;
     }
 
     /**
@@ -38,7 +37,7 @@ public class EmployeeDTO {
      * @return The employee name.
      */
     public String getName() {
-        return name;
+        return name; 
     }
 
     /**
@@ -47,22 +46,6 @@ public class EmployeeDTO {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * Retrieves the employee email address.
-     * @return The employee email address.
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets the employee email address.
-     * @param email The employee email address to set.
-     */
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     /**
