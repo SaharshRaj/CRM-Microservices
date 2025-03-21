@@ -1,6 +1,6 @@
 package com.crm.aop;
 
-import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.JoinPoint; 
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class CampaignAspect {
-
 	private static final Logger logger = LoggerFactory.getLogger(CampaignAspect.class);
 	/**
      * Logs method execution before repository methods are invoked.
@@ -137,7 +136,5 @@ public class CampaignAspect {
 		logger.error("Method execution failed: {}.{}", joinPoint.getSignature().getName(),
 				joinPoint.getSignature().getDeclaringTypeName());
 		logger.error("Error: {}", error.getMessage());
-
 	}
-
 }

@@ -1,5 +1,5 @@
 package com.crm.service;
-import static org.junit.jupiter.api.Assertions.*;    
+import static org.junit.jupiter.api.Assertions.*;     
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -162,15 +162,16 @@ class CampaignServiceTestCase {
 		}
 		
 	});
-	    campaignDTO=new CampaignDTO();
-	    campaignDTO.setCampaignID(1L);
-	    campaignDTO.setName("Summer Sale");
-	    campaignDTO.setStartDate(LocalDate.of(2023, 06, 01));
-	    campaignDTO.setEndDate(LocalDate.of(2023, 06, 30));
-	    campaignDTO.setType(Type.EMAIL);
-	    campaignDTO.setCustomerInteractions(1500);
-		CampaignDTO actual=campaignServiceImpl.getCampaignById(1L);	
-		assertEquals(1L,actual.getCampaignID());	
+	   CampaignDTO expectedDTO=new CampaignDTO();
+	   expectedDTO.setCampaignID(1L);
+	   expectedDTO.setName("Summer Sale");
+	   expectedDTO.setStartDate(LocalDate.of(2023, 06, 01));
+	   expectedDTO.setEndDate(LocalDate.of(2023, 06, 30));
+	   expectedDTO.setType(Type.EMAIL);
+	   expectedDTO.setCustomerInteractions(1500);
+	   when(mapper.mapToDTO(any())).thenReturn(expectedDTO);
+	   CampaignDTO actual=campaignServiceImpl.getCampaignById(1L);	
+	   assertEquals(1L,actual.getCampaignID());	
 	}
 	@Test
 	void test_getCampaignById_negative() {

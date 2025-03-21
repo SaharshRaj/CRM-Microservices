@@ -1,5 +1,5 @@
 package com.crm.global;
-import java.time.LocalDateTime;
+import java.time.LocalDateTime; 
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import com.crm.dto.ErrorResponseDTO;
 import com.crm.exception.CampaignNotFoundException;
+import com.crm.exception.CampaignNotificationFailedException;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -115,5 +117,16 @@ public class GlobalExceptionHandler {
             .message(ex.getMessage())
             .build();
         return ResponseEntity.badRequest().body(errorResponse);
+    }
+    @ExceptionHandler(CampaignNotificationFailedException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<ErrorResponseDTO> handleCampaignNotCreated(CampaignNotificationFailedException e,WebRequest request){
+    	ErrorResponseDTO errorResponse=ErrorResponseDTO.builder()
+    			.code(String.valueOf(HttpStatus.NOT_ACCEPTABLE.value()))
+    			.timeStamp(LocalDateTime.now())
+    			.path(request.getDescription(false))
+    			.message("Campaign Not Created")
+    			.build();
+    	return ResponseEntity.badRequest().body(errorResponse);
     }
 }

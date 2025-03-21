@@ -29,10 +29,11 @@
 	<properties>
 		<java.version>21</java.version>
 		<spring-cloud.version>2024.0.0</spring-cloud.version>
+		<checkstyle-maven-plugin.version>3.0.0</checkstyle-maven-plugin.version>
 		<!--		MapStruct-->
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<org.projectlombok.version>1.18.30</org.projectlombok.version>
-
+		
 		<!--		.-->
 	</properties>
 	<dependencies>
@@ -177,4 +178,20 @@
 			</plugin>
 		</plugins> 
 	</build>
+	<reporting>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>3.6.0</version>
+          <reportSets>
+            <reportSet>
+              <reports>
+                <report>checkstyle</report>
+              </reports>
+            </reportSet>
+          </reportSets>
+        </plugin>
+      </plugins>
+    </reporting>
 </project>
