@@ -2,7 +2,7 @@ package com.crm.service;
 
 import com.crm.dto.SupportTicketDTO;
 import com.crm.enums.Status;
-import com.crm.exception.InvalidTicketIdException;
+import com.crm.exception.InvalidSupportTicketException;
 import com.crm.exception.InvalidTicketDetailsException;
 
 import java.util.List;
@@ -25,12 +25,12 @@ public interface SupportTicketService {
     List<SupportTicketDTO> getSupportTicketsByStatus(Status status) throws NoSuchElementException;
 
     // Updates the status of a support ticket
-    SupportTicketDTO updateTicketStatus(Long ticketId, Status status) throws InvalidTicketIdException;
+    SupportTicketDTO updateTicketStatus(Long ticketId, Status status) throws InvalidSupportTicketException;
 
     // Assigns a support ticket to a specific agent
-    SupportTicketDTO assignTicketToAgent(Long ticketId, Long agentId) throws InvalidTicketIdException;
+    SupportTicketDTO assignTicketToAgent(Long ticketId, Long agentId) throws InvalidSupportTicketException;
 
     // Deletes a support ticket by ID
-    boolean deleteSupportTicketById(Long ticketId) throws InvalidTicketIdException;
+    boolean deleteSupportTicketById(Long ticketId) throws InvalidSupportTicketException;
 
 }

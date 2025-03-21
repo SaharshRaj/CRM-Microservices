@@ -184,23 +184,21 @@ class SupportTicketRepositoryTest {
 		List <SupportTicket> supportTicketList = supportTicketRepository.findByStatus(Status.CLOSED);
 		assertTrue(supportTicketList.isEmpty(),"SupportTicket list not found");
 	}
-
 	@Test
 	@DisplayName("saveSupportTicket() - Negative")
 	void testSaveSupportTicket_negative() {
-		try {
-			SupportTicket ticket = new SupportTicket();
-			ticket.setTicketID(1L);
-			ticket.setCustomerID(1L);
-			ticket.setIssueDescription("The ticket has been closed");
-			ticket.setAssignedAgent(1L);
-			ticket.setStatus(Status.CLOSED);
-			
-			SupportTicket ticketSaved = supportTicketRepository.save(ticket);
-			assertEquals(1L,ticketSaved.getTicketID());
-		}catch( Exception e) {
-			assertTrue(true);
-		}
+	    SupportTicket ticket = new SupportTicket();
+	    ticket.setTicketID(1L);  // Conflict with @GeneratedValue
+	    ticket.setCustomerID(1L);
+	    ticket.setIssueDescription("The ticket has been closed");
+	    ticket.setAssignedAgent(1L);
+	    ticket.setStatus(Status.CLOSED);
+
+	    Exception exception = assertThrows(Exception.class, () -> {
+	        supportTicketRepository.save(ticket);
+	    });
+
+	    assertNotNull(exception, "An exception should be thrown when saving an invalid SupportTicket");
 	}
 
 }
