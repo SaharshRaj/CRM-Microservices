@@ -9,6 +9,7 @@ import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,7 +45,7 @@ public class CustomerServiceImpl implements CustomerService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<CustomerProfileDTO> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
+		public List<CustomerProfileDTO> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
@@ -88,7 +90,7 @@ public class CustomerServiceImpl implements CustomerService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterest(Region region, Interest interest) throws ResourceNotFoundException {
+		public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterest(Region region, Interest interest) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
@@ -300,20 +302,21 @@ public class CustomerServiceImpl implements CustomerService {
 
 			if (segmentationDataString == null || segmentationDataString.isEmpty()) {
 				// Handle the case where segmentationData is null or empty.
-				ObjectNode newSegmentationData = objectMapper.createObjectNode();
-				newSegmentationData.put("Interest", (String) null);
-				newSegmentationData.put("Region", (String) null);
-				newSegmentationData.put("Purchasing Habits", newPurchasingHabit.name());
+				Map<String, Map<String, String>> newSegmentationMap = new HashMap<>();
+				Map<String, String> segmentationData = new HashMap<>();
+				segmentationData.put("Interest", null);
+				segmentationData.put("Region", null);
+				segmentationData.put("Purchasing Habits", newPurchasingHabit.name());
+				newSegmentationMap.put("segmentationData", segmentationData);
 
-				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(objectMapper.createObjectNode().set("segmentationData", newSegmentationData)));
+				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(newSegmentationMap));
 			} else {
+				Map<String, Map<String, String>> segmentationMap = objectMapper.readValue(segmentationDataString, Map.class);
 
-				JsonNode rootNode = objectMapper.readTree(segmentationDataString);
-				JsonNode segmentationDataNode = rootNode.get("segmentationData");
-
-				if (segmentationDataNode != null && segmentationDataNode.isObject()) {
-					((ObjectNode) segmentationDataNode).put("Purchasing Habits", newPurchasingHabit.name());
-					existingCustomer.setSegmentationData(objectMapper.writeValueAsString(rootNode));
+				Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+				if (segmentationData != null) {
+					segmentationData.put("Purchasing Habits", newPurchasingHabit.name());
+					existingCustomer.setSegmentationData(objectMapper.writeValueAsString(segmentationMap));
 				} else {
 					throw new ResourceNotFoundException("Segmentation data is missing or invalid.");
 				}
@@ -328,6 +331,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 
+
 	private Region getRegionFromSegmentation(CustomerProfile customerProfile) {
 		return getEnumFromSegmentation(customerProfile, "Region", Region.class);
 	}
@@ -340,30 +344,31 @@ public class CustomerServiceImpl implements CustomerService {
 		return getEnumFromSegmentation(customerProfile, "Purchasing Habits", PurchasingHabits.class);
 	}
 
-	private <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
+	public <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
 		if (customerProfile.getSegmentationData() == null || customerProfile.getSegmentationData().isEmpty()) {
 			return null;
 		}
 
 		try {
-			JsonNode segmentationNode = objectMapper.readTree(customerProfile.getSegmentationData()).get("segmentationData");
-			if (segmentationNode == null) {
+			Map<String, Map<String, String>> segmentationMap = objectMapper.readValue(customerProfile.getSegmentationData(), Map.class);
+
+			Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+			if (segmentationData == null) {
 				return null;
 			}
 
-			if (segmentationNode.has(fieldName)) {
-				String enumValue = segmentationNode.get(fieldName).asText();
+			String enumValue = segmentationData.get(fieldName);
+			if (enumValue != null) {
 				try {
 					return Enum.valueOf(enumType, enumValue);
 				} catch (IllegalArgumentException e) {
-					return null;
+					throw e;
 				}
-
 			} else {
-				return null;
+				throw new RuntimeException("enum is null");
 			}
-		} catch (JsonProcessingException e) {
-			return null;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

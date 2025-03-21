@@ -9,6 +9,7 @@ import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,8 @@ class CustomerServiceImplTestCase {
 				.name("John Doe")
 				.emailId("john@example.com")
 				.phoneNumber("1234567890")
-				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"Purchasing Habits\": \"NEW\"}}")
 				.build();
 
 		CustomerProfile customerProfile2 = CustomerProfile.builder()
@@ -58,7 +60,8 @@ class CustomerServiceImplTestCase {
 				.name("Jane Doe")
 				.emailId("jane@example.com")
 				.phoneNumber("0987654321")
-				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"Purchasing Habits\": \"NEW\"}}")
 				.build();
 
 		customerProfiles = Arrays.asList(customerProfile1, customerProfile2);
@@ -69,20 +72,18 @@ class CustomerServiceImplTestCase {
 						.name("John Doe")
 						.emailId("john@example.com")
 						.phoneNumber("1234567890")
-						.segmentationData(
-								Map.of("Region","NORTH", "Interest","SPORT", "Purchasing Habits","NEW")
-						)
+						.purchaseHistory(Arrays.asList("obj1", "obj2"))
+						.segmentationData(Map.of("Region", "NORTH", "Interest", "SPORTS", "Purchasing Habits", "NEW"))
 						.build(),
 				CustomerProfileDTO.builder()
 						.customerID(2L)
 						.name("Jane Doe")
 						.emailId("jane@example.com")
 						.phoneNumber("0987654321")
-						.segmentationData(Map.of("Region","SOUTH", "Interest","MUSIC", "Purchasing Habits","REGULAR"))
+						.purchaseHistory(Arrays.asList("obj1", "obj2"))
+						.segmentationData(Map.of("Region", "NORTH", "Interest", "SPORTS", "Purchasing Habits", "NEW"))
 						.build()
 		);
-
-
 	}
 
 	@Test
@@ -133,14 +134,6 @@ class CustomerServiceImplTestCase {
 
 	@Test
 	void testUpdateCustomer_Positive() throws ResourceNotFoundException {
-		CustomerProfileDTO customerDTO = CustomerProfileDTO.builder()
-				.customerID(1L)
-				.name("John Doe")
-				.emailId("john@example.com")
-				.phoneNumber("1234567890")
-				.segmentationData(Map.of("Region","NORTH", "Interest","SPORT", "Purchasing Habits","NEW"))
-				.build();
-
 		when(customerProfileMapper.toDTO(any(CustomerProfile.class))).thenAnswer(invocation -> {
 			CustomerProfile customer = invocation.getArgument(0);
 			return customerProfilesDTOs.stream().filter(dto -> dto.getCustomerID().equals(customer.getCustomerID())).findFirst().orElse(null);
@@ -155,8 +148,8 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.get(0)));
 		when(customerProfileRepository.save(any(CustomerProfile.class))).thenReturn(customerProfiles.get(0));
 
-		CustomerProfileDTO result = customerServiceImpl.updateCustomer(1L, customerDTO);
-		assertEquals(customerDTO, result);
+		CustomerProfileDTO result = customerServiceImpl.updateCustomer(1L, customerProfilesDTOs.getFirst());
+		assertEquals(customerProfilesDTOs.getFirst(), result);
 	}
 
 	@Test
@@ -166,7 +159,7 @@ class CustomerServiceImplTestCase {
 				.name("John Doe")
 				.emailId("john@example.com")
 				.phoneNumber("1234567890")
-				.segmentationData(Map.of("Region","NORTH", "Interest","SPORTS", "Purchasing Habits","NEW"))
+				.segmentationData(Map.of("Region", "NORTH", "Interest", "SPORTS", "Purchasing Habits", "NEW"))
 				.build();
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.updateCustomer(1L, customerDTO));
@@ -264,13 +257,11 @@ class CustomerServiceImplTestCase {
 	}
 
 
-
 	@Test
 	void testSearchCustomerBasedOnRegion_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnRegion(Region.NORTH));
 	}
-
 
 
 	@Test
@@ -286,7 +277,6 @@ class CustomerServiceImplTestCase {
 	}
 
 
-
 	@Test
 	void testSearchCustomerBasedOnRegionAndPurchasingHabit_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
@@ -294,13 +284,11 @@ class CustomerServiceImplTestCase {
 	}
 
 
-
 	@Test
 	void testSearchCustomerBasedOnInterestAndPurchasingHabit_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnInterestAndPurchasingHabit(Interest.SPORTS, PurchasingHabits.NEW));
 	}
-
 
 
 	@Test
@@ -365,9 +353,9 @@ class CustomerServiceImplTestCase {
 	@Test
 	void testAddToPurchaseHistory_Negative() throws JsonProcessingException {
 		Map<String, String> purchase = new HashMap<>();
-		purchase.put("purchaseHistory","newPurchase");
+		purchase.put("purchaseHistory", "newPurchase");
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
-		when(objectMapper.readValue("{\"purchaseHistory\":\"newPurchase\"}",Map.class)).thenReturn(purchase);
+		when(objectMapper.readValue("{\"purchaseHistory\":\"newPurchase\"}", Map.class)).thenReturn(purchase);
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addToPurchaseHistory(1L, "{\"purchaseHistory\":\"newPurchase\"}"));
 	}
 
@@ -386,8 +374,8 @@ class CustomerServiceImplTestCase {
 		customerProfileDTO.setPurchaseHistory(fullPurchaseList);
 
 		Map<String, List<String>> purchase = new HashMap<>();
-		List<String> purchaseList = Arrays.asList("newPurchase1","newPurchase2","newPurchase3");
-		purchase.put("purchaseHistory",purchaseList);
+		List<String> purchaseList = Arrays.asList("newPurchase1", "newPurchase2", "newPurchase3");
+		purchase.put("purchaseHistory", purchaseList);
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(existingCustomer));
 		when(customerProfileMapper.toDTO(existingCustomer)).thenReturn(customerProfileDTO);
 		String json = objectMapper.writeValueAsString(purchase);
@@ -406,12 +394,282 @@ class CustomerServiceImplTestCase {
 	@Test
 	void testAddMultiplePurchasesToPurchaseHistory_Negative() {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
-
-		List<String> list = Arrays.asList("purchase3", "purchase4");
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addMultiplePurchasesToPurchaseHistory(1L, "{\n" +
 				"    \"purchaseHstory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
 				"}"));
 
 		verify(customerProfileRepository, times(1)).findById(1L);
 	}
-}
+
+	@Test
+	void testSearchCustomerBasedOnRegion_Positive() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+
+		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegion(Region.NORTH);
+
+		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+	}
+
+	@Test
+	void testSearchCustomerBasedOnInterest_Positive() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+
+		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnInterest(Interest.SPORTS);
+
+		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+	}
+
+	@Test
+	void testSearchCustomerBasedOnPurchasingHabit_Positive() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+
+		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnPurchasingHabit(PurchasingHabits.NEW);
+
+		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+	}
+
+	@Test
+	void testSearchCustomerBasedOnRegionAndInterest_Positive() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+
+		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegionAndInterest(Region.NORTH, Interest.SPORTS);
+
+		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+	}
+
+	@Test
+	void testSearchCustomerBasedOnRegionAndPurchasingHabit_Positive() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+
+		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegionAndPurchasingHabit(Region.NORTH, PurchasingHabits.NEW);
+
+		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+	}
+
+
+	@Test
+	void testSearchCustomerBasedOnInterestAndPurchasingHabit_Positive() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+
+		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnInterestAndPurchasingHabit(Interest.SPORTS, PurchasingHabits.NEW);
+
+		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+	}
+
+	@Test
+	void testSearchCustomerBasedOnRegionAndInterestAndPurchasingHabit_Positive() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+
+		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region.NORTH, Interest.SPORTS, PurchasingHabits.NEW);
+
+		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+	}
+
+	@Test
+	void testUpdatePurchasingHabit_POSITIVE() {
+		ObjectMapper realMapper = new ObjectMapper();
+		try {
+			Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class);
+			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(segmentationMap);
+			Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+			segmentationData.put("Purchasing Habits", "NEW");
+			when(objectMapper.writeValueAsString(segmentationMap)).thenReturn(realMapper.writeValueAsString(segmentationMap));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.getFirst()));
+		when(customerProfileRepository.save(customerProfiles.getFirst())).thenReturn(customerProfiles.getFirst());
+		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
+		assertEquals(customerProfilesDTOs.getFirst(), customerServiceImpl.updatePurchasingHabit(1L));
+
+	}
+
+	@Test
+	void testUpdatePurchasingHabit_POSITIVE_whenSegmentationDataStringIsEmpty() throws JsonProcessingException {
+		ObjectMapper realMapper = new ObjectMapper();
+		CustomerProfile customerProfile1 = CustomerProfile.builder()
+				.customerID(1L)
+				.name("John Doe")
+				.emailId("john@example.com")
+				.phoneNumber("1234567890")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData(null)
+				.build();
+
+		CustomerProfileDTO customerProfileDTO = CustomerProfileDTO.builder()
+				.customerID(1L)
+				.name("John Doe")
+				.emailId("john@example.com")
+				.phoneNumber("1234567890")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData(Map.of("Region", "null", "Interest", "null", "Purchasing Habits", "NEW"))
+				.build();
+
+		Map<String, Map<String, String>> segmentationMap = new HashMap<>();
+		Map<String, String> segmentationData = new HashMap<>();
+		segmentationData.put("Interest", null);
+		segmentationData.put("Region", null);
+		segmentationData.put("Purchasing Habits", "NEW");
+		segmentationMap.put("segmentationData", segmentationData);
+
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile1));
+		when(objectMapper.writeValueAsString(segmentationMap)).thenReturn(realMapper.writeValueAsString(segmentationMap));
+		when(customerProfileRepository.save(customerProfile1)).thenReturn(customerProfile1);
+		when(customerProfileMapper.toDTO(customerProfile1)).thenReturn(customerProfileDTO);
+
+		CustomerProfileDTO result = customerServiceImpl.updatePurchasingHabit(1L);
+
+		assertEquals(customerProfileDTO, result);
+	}
+
+	@Test
+	void testUpdatePurchasingHabit_NEGATIVE() throws JsonProcessingException {
+		ObjectMapper realMapper = new ObjectMapper();
+
+		CustomerProfile customerProfile1 = CustomerProfile.builder()
+				.customerID(1L)
+				.name("John Doe")
+				.emailId("john@example.com")
+				.phoneNumber("1234567890")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData("{\"segmentationDat\": {}}")
+				.build();
+
+		Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile1.getSegmentationData(), Map.class);
+		when(objectMapper.readValue(customerProfile1.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
+
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile1));
+
+		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.updatePurchasingHabit(1L), "Segmentation data is missing or invalid.");
+	}
+
+	@Test
+	void testUpdatePurchasingHabit_POSITIVE_SPARSE() {
+		ObjectMapper realMapper = new ObjectMapper();
+		CustomerProfile customerProfile = customerProfiles.getFirst();
+		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
+
+		List<String> purchaseHistory = new ArrayList<>();
+		for(int i =0; i<9; i++){
+			purchaseHistory.add("obj"+i);
+		}
+		customerProfile.setPurchaseHistory(purchaseHistory);
+		customerProfileDTO.setPurchaseHistory(purchaseHistory);
+		try {
+			Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile.getSegmentationData(), Map.class);
+			when(objectMapper.readValue(customerProfile.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
+			Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+			segmentationData.put("Purchasing Habits", "SPARSE");
+			when(objectMapper.writeValueAsString(segmentationMap)).thenReturn(realMapper.writeValueAsString(segmentationMap));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
+		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
+		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
+		assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+	}
+
+	@Test
+	void testUpdatePurchasingHabit_POSITIVE_REGULAR() {
+		ObjectMapper realMapper = new ObjectMapper();
+		CustomerProfile customerProfile = customerProfiles.getFirst();
+		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
+
+		List<String> purchaseHistory = new ArrayList<>();
+		for(int i =0; i<24; i++){
+			purchaseHistory.add("obj"+i);
+		}
+		customerProfile.setPurchaseHistory(purchaseHistory);
+		customerProfileDTO.setPurchaseHistory(purchaseHistory);
+		try {
+			Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile.getSegmentationData(), Map.class);
+			when(objectMapper.readValue(customerProfile.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
+			Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+			segmentationData.put("Purchasing Habits", "REGULAR");
+			when(objectMapper.writeValueAsString(segmentationMap)).thenReturn(realMapper.writeValueAsString(segmentationMap));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
+		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
+		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
+		assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+	}
+
+	@Test
+	void testUpdatePurchasingHabit_POSITIVE_FREQUENT() {
+		ObjectMapper realMapper = new ObjectMapper();
+		CustomerProfile customerProfile = customerProfiles.getFirst();
+		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
+
+		List<String> purchaseHistory = new ArrayList<>();
+		for(int i =0; i<26; i++){
+			purchaseHistory.add("obj"+i);
+		}
+		customerProfile.setPurchaseHistory(purchaseHistory);
+		customerProfileDTO.setPurchaseHistory(purchaseHistory);
+		try {
+			Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile.getSegmentationData(), Map.class);
+			when(objectMapper.readValue(customerProfile.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
+			Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+			segmentationData.put("Purchasing Habits", "FREQUENT");
+			when(objectMapper.writeValueAsString(segmentationMap)).thenReturn(realMapper.writeValueAsString(segmentationMap));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
+		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
+		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
+		assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+	}
+	}
