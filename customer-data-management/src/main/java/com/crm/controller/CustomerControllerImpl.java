@@ -274,7 +274,7 @@ public class CustomerControllerImpl implements CustomerController{
             @ApiResponse(responseCode = "200", description = "Successfully updated purchasing habit"),
             @ApiResponse(responseCode = "404", description = "Customer profile not found")
     })
-    public ResponseEntity<?> updatePurchasingHabit(long customerId) throws ResourceNotFoundException, JsonProcessingException {
+    public ResponseEntity<CustomerProfileDTO> updatePurchasingHabit(long customerId) throws ResourceNotFoundException, JsonProcessingException {
         CustomerProfileDTO customerDTO = service.updatePurchasingHabit(customerId);
         return ResponseEntity.ok(customerDTO);
     }

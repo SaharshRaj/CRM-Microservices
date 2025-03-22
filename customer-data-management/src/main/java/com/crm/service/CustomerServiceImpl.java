@@ -5,14 +5,12 @@ import com.crm.entities.CustomerProfile;
 import com.crm.enums.Interest;
 import com.crm.enums.PurchasingHabits;
 import com.crm.enums.Region;
+import com.crm.exception.EnumValueNotFoundException;
 import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +29,9 @@ public class CustomerServiceImpl implements CustomerService {
 	private final CustomerProfileRepository customerProfileRepository;
 	private final CustomerProfileMapper customerProfileMapper;
 	private final ObjectMapper objectMapper;
+
+	private static final String PURCHASING_HABITS = "Purchasing Habit";
+	private static final String SEGMENTATION_DATA = "Segmentation Data";
 
 	@Autowired
 	public CustomerServiceImpl(CustomerProfileRepository customerProfileRepository,
@@ -110,10 +111,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getRegionFromSegmentation(c) == region && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.collect(Collectors.toList());
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("There are no customers from this region with this purchasinghabit");
+		}
+		return list;
 	}
 
 	/**
@@ -306,16 +311,16 @@ public class CustomerServiceImpl implements CustomerService {
 				Map<String, String> segmentationData = new HashMap<>();
 				segmentationData.put("Interest", null);
 				segmentationData.put("Region", null);
-				segmentationData.put("Purchasing Habits", newPurchasingHabit.name());
-				newSegmentationMap.put("segmentationData", segmentationData);
+				segmentationData.put(PURCHASING_HABITS, newPurchasingHabit.name());
+				newSegmentationMap.put(SEGMENTATION_DATA, segmentationData);
 
 				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(newSegmentationMap));
 			} else {
 				Map<String, Map<String, String>> segmentationMap = objectMapper.readValue(segmentationDataString, Map.class);
 
-				Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+				Map<String, String> segmentationData = segmentationMap.get(SEGMENTATION_DATA);
 				if (segmentationData != null) {
-					segmentationData.put("Purchasing Habits", newPurchasingHabit.name());
+					segmentationData.put(PURCHASING_HABITS, newPurchasingHabit.name());
 					existingCustomer.setSegmentationData(objectMapper.writeValueAsString(segmentationMap));
 				} else {
 					throw new ResourceNotFoundException("Segmentation data is missing or invalid.");
@@ -338,7 +343,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	private PurchasingHabits getPurchasingHabitsFromSegmentation(CustomerProfile customerProfile) {
-		return getEnumFromSegmentation(customerProfile, "Purchasing Habits", PurchasingHabits.class);
+		return getEnumFromSegmentation(customerProfile, PURCHASING_HABITS, PurchasingHabits.class);
 	}
 
 	public <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
@@ -349,7 +354,7 @@ public class CustomerServiceImpl implements CustomerService {
 		try {
 			Map<String, Map<String, String>> segmentationMap = objectMapper.readValue(customerProfile.getSegmentationData(), Map.class);
 
-			Map<String, String> segmentationData = segmentationMap.get("segmentationData");
+			Map<String, String> segmentationData = segmentationMap.get(SEGMENTATION_DATA);
 			if (segmentationData == null) {
 				return null;
 			}
@@ -358,7 +363,7 @@ public class CustomerServiceImpl implements CustomerService {
 			if (enumValue != null) {
 					return Enum.valueOf(enumType, enumValue);
 			} else {
-				throw new RuntimeException("enum is null");
+				throw new EnumValueNotFoundException("enum is null");
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);

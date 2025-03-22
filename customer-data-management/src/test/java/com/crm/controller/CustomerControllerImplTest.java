@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -152,7 +151,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testSearchCustomerBasedOnRegion_Positive() throws Exception {
+    void testSearchCustomerBasedOnRegion_Positive() throws Exception {
         when(service.searchCustomerBasedOnRegion(Region.NORTH)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/region/{region}","NORTH"))
                 .andExpect(status().isOk())
@@ -177,7 +176,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testSearchCustomerBasedOnInterest_Positive() throws Exception {
+    void testSearchCustomerBasedOnInterest_Positive() throws Exception {
         when(service.searchCustomerBasedOnInterest(Interest.MUSIC)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/interest/{interest}","MUSIC"))
                 .andExpect(status().isOk())
@@ -195,7 +194,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testSearchCustomerBasedOnPurchasingHabit_Positive() throws Exception {
+    void testSearchCustomerBasedOnPurchasingHabit_Positive() throws Exception {
         when(service.searchCustomerBasedOnPurchasingHabit(PurchasingHabits.NEW)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/purchasingHabit/{purchasingHabits}","NEW"))
                 .andExpect(status().isOk())
@@ -212,7 +211,7 @@ class CustomerControllerImplTest {
                 .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
     }
     @Test
-    public void testSearchCustomerBasedOnRegionAndPurchasingHabit_Positive() throws Exception {
+    void testSearchCustomerBasedOnRegionAndPurchasingHabit_Positive() throws Exception {
         when(service.searchCustomerBasedOnRegionAndPurchasingHabit(Region.NORTH, PurchasingHabits.NEW)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/region&purchasingHabits/{region}/{purchasingHabits}","NORTH","NEW"))
                 .andExpect(status().isOk())
@@ -230,7 +229,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testSearchCustomerBasedOnInterestAndPurchasingHabit_Positive() throws Exception {
+    void testSearchCustomerBasedOnInterestAndPurchasingHabit_Positive() throws Exception {
         when(service.searchCustomerBasedOnInterestAndPurchasingHabit(Interest.MUSIC, PurchasingHabits.NEW)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/interest&purchasingHabits/{interest}/{purchasingHabits}","MUSIC","NEW"))
                 .andExpect(status().isOk())
@@ -248,7 +247,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testSearchCustomerBasedOnRegionAndInterest_Positive() throws Exception {
+    void testSearchCustomerBasedOnRegionAndInterest_Positive() throws Exception {
         when(service.searchCustomerBasedOnRegionAndInterest(Region.NORTH,Interest.MUSIC)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/region&interest/{region}/{interest}","NORTH","MUSIC"))
                 .andExpect(status().isOk())
@@ -266,7 +265,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testSearchCustomerBasedOnRegionAndInterestAndPurchasingHabit_Positive() throws Exception {
+    void testSearchCustomerBasedOnRegionAndInterestAndPurchasingHabit_Positive() throws Exception {
         when(service.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region.NORTH,Interest.MUSIC, PurchasingHabits.NEW)).thenReturn(Arrays.asList(customerProfileDTO));
         mockMvc.perform(get("/api/customers/demographics/{region}/{interest}/{purchasingHabits}","NORTH","MUSIC","NEW"))
                 .andExpect(status().isOk())
@@ -284,7 +283,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testAddCustomerProfile_Positive() throws Exception {
+    void testAddCustomerProfile_Positive() throws Exception {
         CustomerProfileDTO newCustomerProfile = customerProfileDTO;
         newCustomerProfile.setCustomerID(1L);
         when(service.addCustomerProfile(customerProfileDTO)).thenReturn(newCustomerProfile);
@@ -299,7 +298,7 @@ class CustomerControllerImplTest {
     }
 
     @Test
-    public void testAddCustomerProfile_Negative() throws Exception {
+    void testAddCustomerProfile_Negative() throws Exception {
         when(service.addCustomerProfile(customerProfileDTO)).thenThrow(new ResourceNotFoundException("Enter valid Customer Profile Details"));
         mockMvc.perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
