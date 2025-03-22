@@ -14,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -24,27 +25,6 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     /**
-     * Handles NoSuchElementException and returns a 404 Not Found error response.
-     *
-     * @param ex         The NoSuchElementException.
-     * @param webRequest The WebRequest.
-     * @return ResponseEntity containing ErrorResponseDTO with 404 status.
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleAllException(Exception ex, WebRequest webRequest) {
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
-                .timestamp(LocalDateTime.now())
-                .path(webRequest.getDescription(false))
-                .message(ex.getMessage())
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
      *
      * @param ex         The InvalidSalesDetailsException.
      * @param webRequest The WebRequest.
@@ -62,6 +42,41 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    /**
+     * Handles NoSuchElementException and returns a 404 Not Found error response.
+     *
+     * @param ex         The NoSuchElementException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 404 status.
+     */
+
+    @ExceptionHandler(Exception.class)
+    //* Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
+    public ResponseEntity<ErrorResponseDTO> handleAllException(Exception ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    //* Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
+    public ResponseEntity<ErrorResponseDTO> handleAllException(IllegalArgumentException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message("Wrong value provided for 'Type', expected : [SALES, SUPPORT, MARKETING, CUSTOMER], provided : " + Arrays.stream(webRequest.getDescription(false).split("/")).toList().getLast())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 
     /**
      * Handles InvalidDateTimeException and returns a 400 Bad Request error response.

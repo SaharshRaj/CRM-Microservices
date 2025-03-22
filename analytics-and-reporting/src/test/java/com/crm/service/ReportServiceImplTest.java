@@ -1,5 +1,6 @@
 package com.crm.service;
 
+import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ReportResponseDTO;
 import com.crm.dto.external.CampaignDTO;
 import com.crm.dto.external.CustomerProfileDTO;
@@ -14,27 +15,29 @@ import com.crm.enums.ReportType;
 import com.crm.enums.SalesStage;
 import com.crm.enums.Status;
 import com.crm.enums.Type;
+import com.crm.exception.InvalidDataRecievedException;
 import com.crm.mapper.ReportMapper;
 import com.crm.repository.ReportRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import java.util.*;
+import java.util.Map;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReportServiceImplTest {
@@ -141,30 +144,327 @@ class ReportServiceImplTest {
         );
     }
 
-
     @Test
-    void getReportById_Success() {
-        String dataPointsJson = "{\"totalCustomers\":3, \"inactiveCustomers\":0, \"top5Customers\":[{\"customerId\":1, \"purchaseCount\":2, \"name\":\"John Doe\"}, {\"customerId\":2, \"purchaseCount\":2, \"name\":\"Jane Smith\"}, {\"customerId\":3, \"purchaseCount\":2, \"name\":\"Alice Johnson\"}]}";
-        Report report = Report.builder().reportType(ReportType.CUSTOMER).id(1L).dataPoints(dataPointsJson).generatedDate(LocalDateTime.now()).build();
-        when(repository.findById(1L)).thenReturn(Optional.of(report));
-        when(reportMapper.MAPPER.mapToDto(report)).thenAnswer(
-                invocation -> {
-                    return ReportResponseDTO.builder()
-                            .reportType(ReportType.CUSTOMER)
-                            .id(1L)
-                            .build();
-                }
-        );
+    void generateCustomerReport_Success() throws Exception {
+        ResponseEntity<List<CustomerProfileDTO>> responseEntity = new ResponseEntity<>(customerProfiles, HttpStatus.OK);
+        when(customerMockService.getAllCustomers()).thenReturn(responseEntity);
 
-        ReportResponseDTO response = reportService.getReportById(1L);
+        Report report = new Report();
+        report.setId(1L);
+        report.setReportType(ReportType.CUSTOMER);
+        report.setGeneratedDate(LocalDateTime.now());
+        report.setDataPoints("{}");
+        when(repository.save(any(Report.class))).thenReturn(report);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
-        assertNotNull(response);
+        ReportResponseDTO reportResponseDTO = reportService.generateCustomerReport();
+
+        assertNotNull(reportResponseDTO);
+        assertEquals(ReportType.CUSTOMER, reportResponseDTO.getReportType());
+        verify(customerMockService, times(1)).getAllCustomers();
+        verify(repository, times(1)).save(any(Report.class));
     }
 
     @Test
-    void getReportById_NotFound() {
-        when(repository.findById(1L)).thenReturn(Optional.empty());
+    void generateCustomerReport_InvalidData() throws Exception {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .code("400")
+                .message("Invalid data")
+                .path("/customers")
+                .build();
+        ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+        when(customerMockService.getAllCustomers()).thenReturn((ResponseEntity) responseEntity);
 
-        assertThrows(NoSuchElementException.class, () -> reportService.getReportById(1L));
+        assertThrows(InvalidDataRecievedException.class, () -> reportService.generateCustomerReport());
+    }
+
+    @Test
+    void generateSalesReport_Success() throws Exception {
+        ResponseEntity<List<SalesOpportunityResponseDTO>> responseEntity = new ResponseEntity<>(salesOpportunities, HttpStatus.OK);
+        when(salesMockService.getAllLeads()).thenReturn(responseEntity);
+
+        Report report = new Report();
+        report.setId(2L);
+        report.setReportType(ReportType.SALES);
+        report.setGeneratedDate(LocalDateTime.now());
+        report.setDataPoints("{}");
+        when(repository.save(any(Report.class))).thenReturn(report);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        ReportResponseDTO reportResponseDTO = reportService.generateSalesReport();
+
+        assertNotNull(reportResponseDTO);
+        assertEquals(ReportType.SALES, reportResponseDTO.getReportType());
+        verify(salesMockService, times(1)).getAllLeads();
+        verify(repository, times(1)).save(any(Report.class));
+    }
+
+    @Test
+    void generateSalesReport_InvalidData() throws Exception {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .code("400")
+                .message("Invalid data")
+                .path("/sales")
+                .build();
+        ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+        when(salesMockService.getAllLeads()).thenReturn((ResponseEntity) responseEntity);
+
+        assertThrows(InvalidDataRecievedException.class, () -> reportService.generateSalesReport());
+    }
+
+    @Test
+    void generateSupportReport_Success() throws Exception {
+        ResponseEntity<List<SupportTicketDTO>> responseEntity = new ResponseEntity<>(supportTickets, HttpStatus.OK);
+        when(supportTicketMockService.getAllSupportTickets()).thenReturn(responseEntity);
+
+        Report report = new Report();
+        report.setId(3L);
+        report.setReportType(ReportType.SUPPORT);
+        report.setGeneratedDate(LocalDateTime.now());
+        report.setDataPoints("{}");
+        when(repository.save(any(Report.class))).thenReturn(report);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        ReportResponseDTO reportResponseDTO = reportService.generateSupportReport();
+
+        assertNotNull(reportResponseDTO);
+        assertEquals(ReportType.SUPPORT, reportResponseDTO.getReportType());
+        verify(supportTicketMockService, times(1)).getAllSupportTickets();
+        verify(repository, times(1)).save(any(Report.class));
+    }
+
+    @Test
+    void generateSupportReport_InvalidData() throws Exception {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .code("400")
+                .message("Invalid data")
+                .path("/support")
+                .build();
+        ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+        when(supportTicketMockService.getAllSupportTickets()).thenReturn((ResponseEntity) responseEntity);
+
+        assertThrows(InvalidDataRecievedException.class, () -> reportService.generateSupportReport());
+    }
+    @Test
+    void generateMarketingReport_Success() throws Exception {
+        ResponseEntity<List<CampaignDTO>> responseEntity = new ResponseEntity<>(campaigns, HttpStatus.OK);
+        when(campaignMockService.getAllCampaigns()).thenReturn(responseEntity);
+
+        Report report = new Report();
+        report.setId(4L);
+        report.setReportType(ReportType.MARKETING);
+        report.setGeneratedDate(LocalDateTime.now());
+        report.setDataPoints("{}");
+        when(repository.save(any(Report.class))).thenReturn(report);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        ReportResponseDTO reportResponseDTO = reportService.generateMarketingReport();
+
+        assertNotNull(reportResponseDTO);
+        assertEquals(ReportType.MARKETING, reportResponseDTO.getReportType());
+        verify(campaignMockService, times(1)).getAllCampaigns();
+        verify(repository, times(1)).save(any(Report.class));
+    }
+    @Test
+    void generateMarketingReport_InvalidData() throws Exception {
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .code("400")
+                .message("Invalid data")
+                .path("/campaigns")
+                .build();
+        ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+        when(campaignMockService.getAllCampaigns()).thenReturn((ResponseEntity) responseEntity);
+
+        assertThrows(InvalidDataRecievedException.class, () -> reportService.generateMarketingReport());
+    }
+    @Test
+    void generateCustomerReport_NoCustomers() throws Exception {
+        ResponseEntity<List<CustomerProfileDTO>> responseEntity = new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        when(customerMockService.getAllCustomers()).thenReturn(responseEntity);
+
+        Report report = new Report();
+        report.setId(5L);
+        report.setReportType(ReportType.CUSTOMER);
+        report.setGeneratedDate(LocalDateTime.now());
+        report.setDataPoints("{}");
+        when(repository.save(any(Report.class))).thenReturn(report);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        ReportResponseDTO reportResponseDTO = reportService.generateCustomerReport();
+
+        assertNotNull(reportResponseDTO);
+        assertEquals(ReportType.CUSTOMER, reportResponseDTO.getReportType());
+        verify(customerMockService, times(1)).getAllCustomers();
+        verify(repository, times(1)).save(any(Report.class));
+    }
+
+
+    @Test
+    void generateSalesReport_NoOpportunities() throws Exception {
+        ResponseEntity<List<SalesOpportunityResponseDTO>> responseEntity = new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        when(salesMockService.getAllLeads()).thenReturn(responseEntity);
+
+        Report report = new Report();
+        report.setId(6L);
+        report.setReportType(ReportType.SALES);
+        report.setGeneratedDate(LocalDateTime.now());
+        report.setDataPoints("{}");
+        when(repository.save(any(Report.class))).thenReturn(report);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        ReportResponseDTO reportResponseDTO = reportService.generateSalesReport();
+
+        assertNotNull(reportResponseDTO);
+        assertEquals(ReportType.SALES, reportResponseDTO.getReportType());
+        verify(salesMockService, times(1)).getAllLeads();
+        verify(repository, times(1)).save(any(Report.class));
+    }
+    @Test
+    void generateSupportReport_NoTickets() throws Exception {
+        ResponseEntity<List<SupportTicketDTO>> responseEntity = new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        when(supportTicketMockService.getAllSupportTickets()).thenReturn(responseEntity);
+
+        Report report = new Report();
+        report.setId(7L);
+        report.setReportType(ReportType.SUPPORT);
+        report.setGeneratedDate(LocalDateTime.now());
+        report.setDataPoints("{}");
+        when(repository.save(any(Report.class))).thenReturn(report);
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
+
+        ReportResponseDTO reportResponseDTO = reportService.generateSupportReport();
+
+        assertNotNull(reportResponseDTO);
+        assertEquals(ReportType.SUPPORT, reportResponseDTO.getReportType());
+        verify(supportTicketMockService, times(1)).getAllSupportTickets();
+        verify(repository, times(1)).save(any(Report.class));
+    }
+     @Test
+     void getReportById() {
+       String dataPointsJson = "{\"totalCustomers\":3, \"inactiveCustomers\":0, \"top5Customers\":[{\"customerId\":1, \"purchaseCount\":2, \"name\":\"John Doe\"}, {\"customerId\":2, \"purchaseCount\":2, \"name\":\"Jane Smith\"}, {\"customerId\":3, \"purchaseCount\":2, \"name\":\"Alice Johnson\"}]}";
+       Report report = Report.builder().reportType(ReportType.CUSTOMER).id(1L).dataPoints(dataPointsJson).generatedDate(LocalDateTime.now()).build();
+       ReportResponseDTO expectedDto = ReportResponseDTO.builder().reportType(ReportType.CUSTOMER).id(1L).build();
+
+     when(repository.findById(1L)).thenReturn(Optional.of(report));
+       ReportResponseDTO response = reportService.getReportById(1L);
+   assertEquals(expectedDto.getId(), response.getId());
+       assertEquals(expectedDto.getReportType(), response.getReportType());
+  }
+    @Test
+  void getReportById_NotFound() {
+      when(repository.findById(1L)).thenReturn(Optional.empty());
+       assertThrows(NoSuchElementException.class, () -> reportService.getReportById(1L));
+   }
+//    @Test
+//    void getReportByType_NotFound() {
+//        when(repository.findByReportType(ReportType.CUSTOMER)).thenReturn(Collections.emptyList());
+//
+//        assertThrows(NoSuchElementException.class, () -> reportService.getReportByType(ReportType.CUSTOMER));
+//        verify(repository, times(1)).findByReportType(ReportType.CUSTOMER);
+//    }
+
+
+        @Test
+    void getAllReports_EmptyList() {
+        // Arrange
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act
+        List<ReportResponseDTO> result = reportService.getAllReports();
+
+        // Assert
+        assertEquals(0, result.size());
+        verify(repository, times(1)).findAll();
+    }
+
+    @Test
+    void getReportByType_whenReportsNotFound_shouldThrowNoSuchElementException() {
+        // Arrange
+        ReportType reportType = ReportType.SUPPORT;
+        when(repository.findByReportType(reportType)).thenReturn(new ArrayList<>());
+
+        // Act & Assert
+        assertThrows(NoSuchElementException.class, () -> reportService.getReportByType(reportType));
+        verify(repository, times(1)).findByReportType(reportType);
+        verify(reportMapper, never()).mapToDto(any(Report.class));
+    }
+
+
+    @Test
+    void getAllReports_whenReportsNotFound_shouldReturnEmptyList() {
+        // Arrange
+        when(repository.findAll()).thenReturn(new ArrayList<>());
+
+        // Act
+        List<ReportResponseDTO> result = reportService.getAllReports();
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(repository, times(1)).findAll();
+        verify(reportMapper, never()).mapToDto(any(Report.class));
+    }
+
+    @Test
+    void getReportByType_NotFound() {
+        // Arrange
+        ReportType reportType = ReportType.CUSTOMER;
+        when(repository.findByReportType(reportType)).thenReturn(List.of());
+
+        // Act & Assert
+        assertThrows(NoSuchElementException.class, () -> reportService.getReportByType(reportType));
+
+        verify(repository, times(1)).findByReportType(reportType);
+        verify(reportMapper, never()).mapToDto(any(Report.class));
+    }
+
+
+
+
+    @Test
+    void getReportByType_Found() {
+        ReportType reportType = ReportType.CUSTOMER;
+        Report report1 = Report.builder()
+                .id(1L)
+                .reportType(reportType)
+                .generatedDate(LocalDateTime.now())
+                .dataPoints("{}")
+                .build();
+        Report report2 = Report.builder()
+                .id(2L)
+                .reportType(reportType)
+                .generatedDate(LocalDateTime.now())
+                .dataPoints("{}")
+                .build();
+
+        ReportResponseDTO dto1 = ReportResponseDTO.builder()
+                .id(1L)
+                .reportType(reportType)
+                .dataPoints(Map.of())
+                .build();
+        ReportResponseDTO dto2 = ReportResponseDTO.builder()
+                .id(2L)
+                .reportType(reportType)
+                .dataPoints(Map.of())
+                .build();
+
+        when(repository.findByReportType(reportType)).thenReturn(Arrays.asList(report1, report2));
+        when(reportMapper.mapToDto(report1)).thenReturn(dto1);
+        when(reportMapper.mapToDto(report2)).thenReturn(dto2);
+
+        List<ReportResponseDTO> result = reportService.getReportByType(reportType);
+
+        assertEquals(2, result.size());
+        assertEquals(dto1.getDataPoints(), result.get(0).getDataPoints());
+        assertEquals(dto2.getDataPoints(), result.get(1).getDataPoints());
+        assertTrue(EqualsBuilder.reflectionEquals(dto1, result.get(0), "generatedDate", "dataPoints"));
+        assertTrue(EqualsBuilder.reflectionEquals(dto2, result.get(1), "generatedDate", "dataPoints"));
+
+        verify(repository, times(1)).findByReportType(reportType);
+        verify(reportMapper, times(2)).mapToDto(any(Report.class));
     }
 }

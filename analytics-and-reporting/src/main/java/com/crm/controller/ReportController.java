@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/analytics")
 public interface ReportController {
@@ -28,6 +30,12 @@ public interface ReportController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ReportResponseDTO> getReportById(@PathVariable Long id);
+
+    @GetMapping("type/{type}")
+    public ResponseEntity<List<ReportResponseDTO>> getReportByType(@PathVariable String type);
+
+    @GetMapping("/all")
+    public ResponseEntity<List<ReportResponseDTO>> getAllReports();
 
     @PostMapping(value = "/configureCron")
     ResponseEntity<ScheduleConfigResponseDTO> configCronJob(@Valid @RequestBody ScheduleConfigRequestDTO scheduleConfigRequestDTO);

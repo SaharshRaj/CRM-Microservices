@@ -1,5 +1,4 @@
 package com.crm.service;
-
 import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ReportResponseDTO;
 import com.crm.dto.external.CampaignDTO;
@@ -24,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReportServiceImpl implements ReportService{
-    
+
     @Autowired
     private SalesMockService salesMockService;
     @Autowired
@@ -47,7 +47,10 @@ public class ReportServiceImpl implements ReportService{
     private ReportRepository repository;
     @Autowired
     private ObjectMapper objectMapper;
-    
+
+    @Autowired
+    private ReportMapper reportMapper;
+
     /**
      * @return
      */
@@ -267,4 +270,40 @@ public class ReportServiceImpl implements ReportService{
 
         return ReportMapper.MAPPER.mapToDto(optionalReport.get());
     }
+
+
+//    @Override
+//    public List<ReportResponseDTO> getReportByType(ReportType reportType) {
+//        List<Report> reportList = repository.findByReportType(reportType);
+//                if(reportList.isEmpty()){
+//                    throw new NoSuchElementException("Report not found with type: " + reportType);
+//                }
+//        List<ReportResponseDTO> result = new ArrayList<>();
+//        reportList.forEach(report -> {
+//             ReportResponseDTO reportResponseDTO = ReportMapper.MAPPER.mapToDto(report);
+//             result.add(reportResponseDTO);
+//        });
+//        return result;
+//    }
+@Override
+public List<ReportResponseDTO> getReportByType(ReportType reportType) {
+    List<Report> reportList = repository.findByReportType(reportType);
+    if (reportList.isEmpty()) {
+        throw new NoSuchElementException("Report not found with type: " + reportType);
+    }
+    List<ReportResponseDTO> result = new ArrayList<>();
+    reportList.forEach(report -> {
+        ReportResponseDTO reportResponseDTO = reportMapper.mapToDto(report); // Use the injected mapper
+        result.add(reportResponseDTO);
+    });
+    return result;
+}
+    @Override
+    public List<ReportResponseDTO> getAllReports() {
+        List<Report> reports = repository.findAll();
+        return reports.stream()
+                .map(ReportMapper.MAPPER::mapToDto)
+                .collect(Collectors.toList());
+    }
+
 }

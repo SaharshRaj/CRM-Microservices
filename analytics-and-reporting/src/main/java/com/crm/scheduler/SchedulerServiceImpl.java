@@ -24,13 +24,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SchedulerServiceImpl implements SchedulerService {
 
-    private final ReportRepository repository;
     private final DummyClass dummyClass;
     private final ReportService service;
 
     @Autowired
-    public SchedulerServiceImpl(ReportRepository repository, DummyClass dummyClass, ReportService service) {
-        this.repository = repository;
+    public SchedulerServiceImpl(DummyClass dummyClass, ReportService service) {
         this.dummyClass = dummyClass;
         this.service = service;
     }
@@ -41,14 +39,11 @@ public class SchedulerServiceImpl implements SchedulerService {
         List<NotificationDTO> notificationDTOS = new ArrayList<>();
 
         try {
+           //Generating reports
             ReportResponseDTO reportResponseDTOForSalesAutomation = service.generateSalesReport();
             ReportResponseDTO reportResponseDTOForCustomerDataManagement = service.generateCustomerReport();
             ReportResponseDTO reportResponseDTOForCustomerSupport = service.generateSupportReport();
             ReportResponseDTO reportResponseDTOForMarketingAutomation = service.generateMarketingReport();
-            repository.save(ReportMapper.MAPPER.mapToReport(reportResponseDTOForSalesAutomation));
-            repository.save(ReportMapper.MAPPER.mapToReport(reportResponseDTOForCustomerDataManagement));
-            repository.save(ReportMapper.MAPPER.mapToReport(reportResponseDTOForCustomerSupport));
-            repository.save(ReportMapper.MAPPER.mapToReport(reportResponseDTOForMarketingAutomation));
 
             // Generate notifications
             notificationDTOS.add(createAndSendNotification(
