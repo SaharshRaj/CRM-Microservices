@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -87,6 +88,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test retrieving all profiles - Positive case")
 	void testRetrieveAllProfiles_Positive() {
 		when(customerProfileRepository.findAll()).thenReturn(customerProfiles);
 		assertFalse(customerServiceImpl.retrieveAllProfiles().isEmpty());
@@ -94,6 +96,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test retrieving all profiles - Negative case")
 	void testRetrieveAllProfiles_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.retrieveAllProfiles());
@@ -101,6 +104,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test adding customer profile - Positive case")
 	void testAddCustomer_Profile() {
 		CustomerProfile customerProfile = customerProfiles.getFirst();
 		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
@@ -113,11 +117,13 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test adding customer profile - Negative case")
 	void testAddCustomerProfile_Negative() {
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addCustomerProfile(null));
 	}
 
 	@Test
+	@DisplayName("Test getting customer by ID - Positive case")
 	void testGetCustomerById_Positive() {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.get(0)));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
@@ -127,12 +133,14 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test getting customer by ID - Negative case")
 	void testGetCustomerById_Negative() {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.getCustomerById(1L));
 	}
 
 	@Test
+	@DisplayName("Test updating customer profile - Positive case")
 	void testUpdateCustomer_Positive() throws ResourceNotFoundException {
 		when(customerProfileMapper.toDTO(any(CustomerProfile.class))).thenAnswer(invocation -> {
 			CustomerProfile customer = invocation.getArgument(0);
@@ -144,7 +152,6 @@ class CustomerServiceImplTestCase {
 			return customerProfiles.stream().filter(customer -> customer.getCustomerID().equals(dto.getCustomerID())).findFirst().orElse(null);
 		});
 
-
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.get(0)));
 		when(customerProfileRepository.save(any(CustomerProfile.class))).thenReturn(customerProfiles.get(0));
 
@@ -153,6 +160,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test updating customer profile - Negative case")
 	void testUpdateCustomer_Negative() throws ResourceNotFoundException {
 		CustomerProfileDTO customerDTO = CustomerProfileDTO.builder()
 				.customerID(1L)
@@ -167,6 +175,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test deleting customer profile - Positive case")
 	void testDeleteCustomer_Positive() throws ResourceNotFoundException {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.get(0)));
 		customerServiceImpl.deleteCustomer(1L);
@@ -174,12 +183,14 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test deleting customer profile - Negative case")
 	void testDeleteCustomer_Negative() throws ResourceNotFoundException {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.deleteCustomer(1L));
 	}
 
 	@Test
+	@DisplayName("Test searching customer by email ID - Positive case")
 	void testSearchCustomerBasedOnEmailId_Positive() {
 		CustomerProfile customer2 = CustomerProfile.builder().name("Thamizhini")
 				.phoneNumber("7776665552").emailId("Thamz123@example.com")
@@ -198,6 +209,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by email ID - Negative case")
 	void testSearchCustomerBasedOnEmailId_Negative() {
 		List<CustomerProfile> emailList = List.of();
 		when(customerProfileRepository.findAllByEmailId("Thamz123@example.com")).thenReturn(emailList);
@@ -205,6 +217,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by name - Positive case")
 	void testSearchCustomerBasedOnName_Positive() {
 		CustomerProfile customer2 = CustomerProfile.builder().name("Thamizhini")
 				.phoneNumber("7776665552").emailId("Thamz123@example.com")
@@ -224,6 +237,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by name - Negative case")
 	void testSearchCustomerBasedOnName_Negative() {
 		List<CustomerProfile> nameList = List.of();
 		when(customerProfileRepository.findAllByNames("Thamizhini")).thenReturn(nameList);
@@ -231,6 +245,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by phone number - Positive case")
 	void testSearchCustomerBasedOnPhoneNumber_Positive() {
 		CustomerProfile customer2 = CustomerProfile.builder().name("Thamizhini")
 				.phoneNumber("7776665552").emailId("Thamz123@example.com")
@@ -250,68 +265,70 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by phone number - Negative case")
 	void testSearchCustomerBasedOnPhoneNumber_Negative() {
 		List<CustomerProfile> phoneNumberList = List.of();
 		when(customerProfileRepository.findAllByPhoneNumber("7776665552")).thenReturn(phoneNumberList);
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnPhoneNumber("7776665552"));
 	}
 
-
 	@Test
+	@DisplayName("Test searching customer by region - Negative case")
 	void testSearchCustomerBasedOnRegion_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnRegion(Region.NORTH));
 	}
 
-
 	@Test
+	@DisplayName("Test searching customer by interest - Negative case")
 	void testSearchCustomerBasedOnInterest_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnInterest(Interest.SPORTS));
 	}
 
 	@Test
+	@DisplayName("Test searching customer by purchasing habit - Negative case")
 	void testSearchCustomerBasedOnPurchasingHabit_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnPurchasingHabit(PurchasingHabits.REGULAR));
 	}
 
-
 	@Test
+	@DisplayName("Test searching customer by region and purchasing habit - Negative case")
 	void testSearchCustomerBasedOnRegionAndPurchasingHabit_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnRegionAndPurchasingHabit(Region.NORTH, PurchasingHabits.NEW));
 	}
 
-
 	@Test
+	@DisplayName("Test searching customer by interest and purchasing habit - Negative case")
 	void testSearchCustomerBasedOnInterestAndPurchasingHabit_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnInterestAndPurchasingHabit(Interest.SPORTS, PurchasingHabits.NEW));
 	}
 
-
 	@Test
+	@DisplayName("Test searching customer by region, interest, and purchasing habit - Negative case")
 	void testSearchCustomerBasedOnRegionAndInterestAndPurchasingHabit_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region.NORTH, Interest.SPORTS, PurchasingHabits.NEW));
 	}
 
-
 	@Test
+	@DisplayName("Test searching customer by region and interest - Negative case")
 	void testSearchCustomerBasedOnRegionAndInterest_Negative() {
 		when(customerProfileRepository.findAll()).thenReturn(List.of());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.searchCustomerBasedOnRegionAndInterest(Region.NORTH, Interest.SPORTS));
 	}
-
-
 	@Test
+	@DisplayName("Test updating purchasing habit - Negative case")
 	void testUpdatePurchasingHabit_Negative() {
 		when(customerProfileRepository.findById(customerProfiles.get(0).getCustomerID())).thenReturn(Optional.empty());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.updatePurchasingHabit(customerProfiles.get(0).getCustomerID()));
 	}
 
 	@Test
+	@DisplayName("Test adding to purchase history - Positive case")
 	void testAddToPurchaseHistory_Positive() throws JsonProcessingException {
 		CustomerProfile existingCustomer = customerProfiles.get(0);
 		existingCustomer.setPurchaseHistory(new ArrayList<>(Arrays.asList("purchase1", "purchase2")));
@@ -351,6 +368,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test adding to purchase history - Negative case")
 	void testAddToPurchaseHistory_Negative() throws JsonProcessingException {
 		Map<String, String> purchase = new HashMap<>();
 		purchase.put("purchaseHistory", "newPurchase");
@@ -360,6 +378,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test adding multiple purchases to purchase history - Positive case")
 	void testAddMultiplePurchasesToPurchaseHistory_Positive() throws ResourceNotFoundException, JsonProcessingException {
 		CustomerProfile existingCustomer = customerProfiles.get(0);
 		List<String> existingPurchases = Arrays.asList("purchase1", "purchase2");
@@ -392,6 +411,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test adding multiple purchases to purchase history - Negative case")
 	void testAddMultiplePurchasesToPurchaseHistory_Negative() {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addMultiplePurchasesToPurchaseHistory(1L, "{\n" +
@@ -402,6 +422,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by region - Positive case")
 	void testSearchCustomerBasedOnRegion_Positive() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -418,6 +439,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by interest - Positive case")
 	void testSearchCustomerBasedOnInterest_Positive() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -434,6 +456,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by purchasing habit - Positive case")
 	void testSearchCustomerBasedOnPurchasingHabit_Positive() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -448,8 +471,8 @@ class CustomerServiceImplTestCase {
 
 		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
 	}
-
 	@Test
+	@DisplayName("Test searching customer by region and interest - Positive case")
 	void testSearchCustomerBasedOnRegionAndInterest_Positive() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -466,6 +489,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by region and purchasing habit - Positive case")
 	void testSearchCustomerBasedOnRegionAndPurchasingHabit_Positive() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -481,8 +505,8 @@ class CustomerServiceImplTestCase {
 		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
 	}
 
-
 	@Test
+	@DisplayName("Test searching customer by interest and purchasing habit - Positive case")
 	void testSearchCustomerBasedOnInterestAndPurchasingHabit_Positive() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -499,6 +523,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test searching customer by region, interest, and purchasing habit - Positive case")
 	void testSearchCustomerBasedOnRegionAndInterestAndPurchasingHabit_Positive() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -515,6 +540,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test updating purchasing habit - Positive case")
 	void testUpdatePurchasingHabit_POSITIVE() {
 		ObjectMapper realMapper = new ObjectMapper();
 		try {
@@ -529,15 +555,15 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.getFirst()));
 		when(customerProfileRepository.save(customerProfiles.getFirst())).thenReturn(customerProfiles.getFirst());
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
-        try {
-            assertEquals(customerProfilesDTOs.getFirst(), customerServiceImpl.updatePurchasingHabit(1L));
-        } catch (JsonProcessingException e) {
-            assertTrue(false);
-        }
-
-    }
+		try {
+			assertEquals(customerProfilesDTOs.getFirst(), customerServiceImpl.updatePurchasingHabit(1L));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+	}
 
 	@Test
+	@DisplayName("Test updating purchasing habit - Positive case when segmentation data string is empty")
 	void testUpdatePurchasingHabit_POSITIVE_whenSegmentationDataStringIsEmpty() throws JsonProcessingException {
 		ObjectMapper realMapper = new ObjectMapper();
 		CustomerProfile customerProfile1 = CustomerProfile.builder()
@@ -576,6 +602,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test updating purchasing habit - Negative case")
 	void testUpdatePurchasingHabit_NEGATIVE() throws JsonProcessingException {
 		ObjectMapper realMapper = new ObjectMapper();
 
@@ -595,16 +622,16 @@ class CustomerServiceImplTestCase {
 
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.updatePurchasingHabit(1L), "Segmentation data is missing or invalid.");
 	}
-
 	@Test
+	@DisplayName("Test updating purchasing habit to SPARSE - Positive case")
 	void testUpdatePurchasingHabit_POSITIVE_SPARSE() {
 		ObjectMapper realMapper = new ObjectMapper();
 		CustomerProfile customerProfile = customerProfiles.getFirst();
 		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
 
 		List<String> purchaseHistory = new ArrayList<>();
-		for(int i =0; i<9; i++){
-			purchaseHistory.add("obj"+i);
+		for (int i = 0; i < 9; i++) {
+			purchaseHistory.add("obj" + i);
 		}
 		customerProfile.setPurchaseHistory(purchaseHistory);
 		customerProfileDTO.setPurchaseHistory(purchaseHistory);
@@ -620,22 +647,23 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
 		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
 		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
-        try {
-            assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
-        } catch (JsonProcessingException e) {
+		try {
+			assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+		} catch (JsonProcessingException e) {
 			assertTrue(false);
-        }
-    }
+		}
+	}
 
 	@Test
+	@DisplayName("Test updating purchasing habit to REGULAR - Positive case")
 	void testUpdatePurchasingHabit_POSITIVE_REGULAR() {
 		ObjectMapper realMapper = new ObjectMapper();
 		CustomerProfile customerProfile = customerProfiles.getFirst();
 		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
 
 		List<String> purchaseHistory = new ArrayList<>();
-		for(int i =0; i<24; i++){
-			purchaseHistory.add("obj"+i);
+		for (int i = 0; i < 24; i++) {
+			purchaseHistory.add("obj" + i);
 		}
 		customerProfile.setPurchaseHistory(purchaseHistory);
 		customerProfileDTO.setPurchaseHistory(purchaseHistory);
@@ -651,22 +679,23 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
 		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
 		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
-        try {
-            assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
-        } catch (JsonProcessingException e) {
+		try {
+			assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+		} catch (JsonProcessingException e) {
 			assertTrue(false);
-        }
-    }
+		}
+	}
 
 	@Test
+	@DisplayName("Test updating purchasing habit to FREQUENT - Positive case")
 	void testUpdatePurchasingHabit_POSITIVE_FREQUENT() {
 		ObjectMapper realMapper = new ObjectMapper();
 		CustomerProfile customerProfile = customerProfiles.getFirst();
 		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
 
 		List<String> purchaseHistory = new ArrayList<>();
-		for(int i =0; i<26; i++){
-			purchaseHistory.add("obj"+i);
+		for (int i = 0; i < 26; i++) {
+			purchaseHistory.add("obj" + i);
 		}
 		customerProfile.setPurchaseHistory(purchaseHistory);
 		customerProfileDTO.setPurchaseHistory(purchaseHistory);
@@ -682,14 +711,15 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
 		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
 		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
-        try {
-            assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
-        } catch (JsonProcessingException e) {
-            assertTrue(false);
-        }
-    }
+		try {
+			assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+		} catch (JsonProcessingException e) {
+			assertTrue(false);
+		}
+	}
 
 	@Test
+	@DisplayName("Test updating purchasing habit - Negative case throws RuntimeException")
 	void testUpdatePurchasingHabit_NEGATIVE_throwsRuntimeException() throws JsonProcessingException {
 		CustomerProfile customerProfile1 = CustomerProfile.builder()
 				.customerID(1L)
@@ -707,7 +737,8 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
-	void testGetEnumFromSegmentation_returnsNullWhenSegmentationDataIsNotPresent(){
+	@DisplayName("Test getEnumFromSegmentation returns null when segmentation data is not present")
+	void testGetEnumFromSegmentation_returnsNullWhenSegmentationDataIsNotPresent() {
 		CustomerProfile customerProfile1 = CustomerProfile.builder()
 				.customerID(1L)
 				.name("John Doe")
@@ -720,6 +751,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test getEnumFromSegmentation returns null when segmentation data is empty")
 	void testGetEnumFromSegmentation_returnsNullWhenSegmentationDataIsEmpty() throws JsonProcessingException {
 		ObjectMapper realMapper = new ObjectMapper();
 		CustomerProfile customerProfile1 = CustomerProfile.builder()
@@ -738,6 +770,7 @@ class CustomerServiceImplTestCase {
 	}
 
 	@Test
+	@DisplayName("Test getEnumFromSegmentation throws RuntimeException when enum is null")
 	void testGetEnumFromSegmentation_throwsRuntimeExceptionWhenEnumIsNull() throws JsonProcessingException {
 		ObjectMapper realMapper = new ObjectMapper();
 		CustomerProfile customerProfile1 = CustomerProfile.builder()
@@ -752,6 +785,6 @@ class CustomerServiceImplTestCase {
 		Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile1.getSegmentationData(), Map.class);
 		when(objectMapper.readValue(customerProfile1.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
 
-		assertThrows(RuntimeException.class,() -> customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class));
+		assertThrows(RuntimeException.class, () -> customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class));
 	}
 }

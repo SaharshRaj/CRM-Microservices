@@ -46,7 +46,7 @@ public class CustomerServiceImpl implements CustomerService {
 	 * {@inheritDoc}
 	 */
 	@Override
-		public List<CustomerProfileDTO> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
+	public List<CustomerProfileDTO> searchCustomerBasedOnRegion(Region region) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
@@ -91,7 +91,7 @@ public class CustomerServiceImpl implements CustomerService {
 	 * {@inheritDoc}
 	 */
 	@Override
-		public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterest(Region region, Interest interest) throws ResourceNotFoundException {
+	public List<CustomerProfileDTO> searchCustomerBasedOnRegionAndInterest(Region region, Interest interest) throws ResourceNotFoundException {
 		List<CustomerProfile> customerProfiles = customerProfileRepository.findAll();
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException("There are no Customers");
@@ -115,7 +115,7 @@ public class CustomerServiceImpl implements CustomerService {
 				.filter(c -> getRegionFromSegmentation(c) == region && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.collect(Collectors.toList());
-		if(list.isEmpty()){
+		if (list.isEmpty()) {
 			throw new ResourceNotFoundException("There are no customers from this region with this purchasinghabit");
 		}
 		return list;
@@ -259,7 +259,7 @@ public class CustomerServiceImpl implements CustomerService {
 		existingCustomer.getPurchaseHistory().add(purchaseHistory); // or purchase, if that is the intended behavior
 		CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
 
-        return customerProfileMapper.toDTO(updatedCustomer);
+		return customerProfileMapper.toDTO(updatedCustomer);
 	}
 
 	/**
@@ -303,49 +303,76 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 
 
-			String segmentationDataString = existingCustomer.getSegmentationData();
+		String segmentationDataString = existingCustomer.getSegmentationData();
 
-			if (segmentationDataString == null || segmentationDataString.isEmpty()) {
-				// Handle the case where segmentationData is null or empty.
-				Map<String, Map<String, String>> newSegmentationMap = new HashMap<>();
-				Map<String, String> segmentationData = new HashMap<>();
-				segmentationData.put("Interest", null);
-				segmentationData.put("Region", null);
+		if (segmentationDataString == null || segmentationDataString.isEmpty()) {
+			// Handle the case where segmentationData is null or empty.
+			Map<String, Map<String, String>> newSegmentationMap = new HashMap<>();
+			Map<String, String> segmentationData = new HashMap<>();
+			segmentationData.put("Interest", null);
+			segmentationData.put("Region", null);
+			segmentationData.put(PURCHASING_HABITS, newPurchasingHabit.name());
+			newSegmentationMap.put(SEGMENTATION_DATA, segmentationData);
+
+			existingCustomer.setSegmentationData(objectMapper.writeValueAsString(newSegmentationMap));
+		} else {
+			Map<String, Map<String, String>> segmentationMap = objectMapper.readValue(segmentationDataString, Map.class);
+
+			Map<String, String> segmentationData = segmentationMap.get(SEGMENTATION_DATA);
+			if (segmentationData != null) {
 				segmentationData.put(PURCHASING_HABITS, newPurchasingHabit.name());
-				newSegmentationMap.put(SEGMENTATION_DATA, segmentationData);
-
-				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(newSegmentationMap));
+				existingCustomer.setSegmentationData(objectMapper.writeValueAsString(segmentationMap));
 			} else {
-				Map<String, Map<String, String>> segmentationMap = objectMapper.readValue(segmentationDataString, Map.class);
-
-				Map<String, String> segmentationData = segmentationMap.get(SEGMENTATION_DATA);
-				if (segmentationData != null) {
-					segmentationData.put(PURCHASING_HABITS, newPurchasingHabit.name());
-					existingCustomer.setSegmentationData(objectMapper.writeValueAsString(segmentationMap));
-				} else {
-					throw new ResourceNotFoundException("Segmentation data is missing or invalid.");
-				}
+				throw new ResourceNotFoundException("Segmentation data is missing or invalid.");
 			}
+		}
 
-			CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
-			return customerProfileMapper.toDTO(updatedCustomer);
+		CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
+		return customerProfileMapper.toDTO(updatedCustomer);
 
 	}
 
-
-
+	/**
+	 * Retrieves the Region enum value from the customer's segmentation data.
+	 *
+	 * @param customerProfile the customer profile containing segmentation data
+	 * @return the Region enum value, or null if not found
+	 */
 	private Region getRegionFromSegmentation(CustomerProfile customerProfile) {
 		return getEnumFromSegmentation(customerProfile, "Region", Region.class);
 	}
 
+	/**
+	 * Retrieves the Interest enum value from the customer's segmentation data.
+	 *
+	 * @param customerProfile the customer profile containing segmentation data
+	 * @return the Interest enum value, or null if not found
+	 */
 	private Interest getInterestFromSegmentation(CustomerProfile customerProfile) {
 		return getEnumFromSegmentation(customerProfile, "Interest", Interest.class);
 	}
 
+	/**
+	 * Retrieves the PurchasingHabits enum value from the customer's segmentation data.
+	 *
+	 * @param customerProfile the customer profile containing segmentation data
+	 * @return the PurchasingHabits enum value, or null if not found
+	 */
 	private PurchasingHabits getPurchasingHabitsFromSegmentation(CustomerProfile customerProfile) {
 		return getEnumFromSegmentation(customerProfile, PURCHASING_HABITS, PurchasingHabits.class);
 	}
 
+	/**
+	 * Retrieves an enum value from the customer's segmentation data based on the specified field name and enum type.
+	 *
+	 * @param <T>             the type of the enum
+	 * @param customerProfile the customer profile containing segmentation data
+	 * @param fieldName       the name of the field to retrieve the enum value for
+	 * @param enumType        the class of the enum type
+	 * @return the enum value, or null if not found
+	 * @throws EnumValueNotFoundException if the enum value is null
+	 * @throws RuntimeException           if any other exception occurs during processing
+	 */
 	public <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
 		if (customerProfile.getSegmentationData() == null || customerProfile.getSegmentationData().isEmpty()) {
 			return null;
@@ -361,7 +388,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 			String enumValue = segmentationData.get(fieldName);
 			if (enumValue != null) {
-					return Enum.valueOf(enumType, enumValue);
+				return Enum.valueOf(enumType, enumValue);
 			} else {
 				throw new EnumValueNotFoundException("enum is null");
 			}

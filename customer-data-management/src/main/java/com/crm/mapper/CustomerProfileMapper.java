@@ -11,16 +11,30 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Mapper class for converting between CustomerProfile entities and CustomerProfileDTOs.
+ */
 @Component
 @Slf4j
 public class CustomerProfileMapper {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Constructs a CustomerProfileMapper with the specified ObjectMapper.
+     *
+     * @param objectMapper the ObjectMapper to use for JSON processing
+     */
     public CustomerProfileMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Converts a CustomerProfile entity to a CustomerProfileDTO.
+     *
+     * @param customerProfile the CustomerProfile entity to convert
+     * @return the converted CustomerProfileDTO
+     */
     public CustomerProfileDTO toDTO(CustomerProfile customerProfile) {
         CustomerProfileDTO dto = CustomerProfileDTO.builder()
                 .customerID(customerProfile.getCustomerID())
@@ -48,6 +62,12 @@ public class CustomerProfileMapper {
         return dto;
     }
 
+    /**
+     * Converts a CustomerProfileDTO to a CustomerProfile entity.
+     *
+     * @param customerProfileDTO the CustomerProfileDTO to convert
+     * @return the converted CustomerProfile entity
+     */
     public CustomerProfile toEntity(CustomerProfileDTO customerProfileDTO) {
         CustomerProfile entity = CustomerProfile.builder()
                 .customerID(customerProfileDTO.getCustomerID())

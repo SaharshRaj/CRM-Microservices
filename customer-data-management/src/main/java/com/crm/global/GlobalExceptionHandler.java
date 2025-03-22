@@ -98,6 +98,13 @@ public class GlobalExceptionHandler extends RuntimeException {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Handles IllegalArgumentException and returns a structured error response.
+     *
+     * @param ex the IllegalArgumentException thrown
+     * @param webRequest the current web request
+     * @return a ResponseEntity containing the error response and HTTP status code
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(IllegalArgumentException ex, WebRequest webRequest) {
 
