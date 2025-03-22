@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -166,6 +167,13 @@ class CustomerControllerImplTest {
         mockMvc.perform(get("/api/customers/region/{region}", "NORTH"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("No Customer Profiles Found"));
+    }
+
+    @Test
+    void testSearchCustomerBasedOnRegion_Negative_wrongInput() throws Exception {
+        mockMvc.perform(get("/api/customers/region/{region}", "NORH"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Expected : [NORTH, SOUTH, NORTH_AMERICA, LATIN_AMERICA, ASIAN_PACIFIC, MIDDLE_EAST_AND_AFRICA, CENTRAL_AMERICA, EUROPE, EASTERN_EUROPE, WESTERN_EUROPE, NORTHERN_EUROPE, SOUTHERN_EUROPE, SOUTHEAST_ASIA, SOUTH_ASIA, EAST_ASIA, OCEANIA, SUB_SAHARAN_AFRICA] , but Received : NORH"));
     }
 
     @Test
@@ -326,15 +334,15 @@ class CustomerControllerImplTest {
     }
 
 
-//    @Test
-//    void testUpdatePurchasingHabit_Positive() throws Exception {
-//        customerProfileDTO.setSegmentationData(Arrays.asList("NORTH","MUSIC","FREQUENT"));
-//        when(service.updatePurchasingHabit(1L)).thenReturn(customerProfileDTO);
-//
-//        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}",1))
-//                .andExpect(status().isOk());
-//
-//    }
+    @Test
+    void testUpdatePurchasingHabit_Positive() throws Exception {
+        customerProfileDTO.setSegmentationData(Map.of("Region", "NORTH", "Interest","MUSIC","Purchase Habits","FREQUENT"));
+        when(service.updatePurchasingHabit(1L)).thenReturn(customerProfileDTO);
+
+        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}",1))
+                .andExpect(status().isOk());
+
+    }
 
     @Test
     void testUpdatePurchasingHabit_Negative() throws Exception {

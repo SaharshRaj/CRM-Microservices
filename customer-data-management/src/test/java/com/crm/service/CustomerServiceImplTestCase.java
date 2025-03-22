@@ -529,9 +529,13 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.getFirst()));
 		when(customerProfileRepository.save(customerProfiles.getFirst())).thenReturn(customerProfiles.getFirst());
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
-		assertEquals(customerProfilesDTOs.getFirst(), customerServiceImpl.updatePurchasingHabit(1L));
+        try {
+            assertEquals(customerProfilesDTOs.getFirst(), customerServiceImpl.updatePurchasingHabit(1L));
+        } catch (JsonProcessingException e) {
+            assertTrue(false);
+        }
 
-	}
+    }
 
 	@Test
 	void testUpdatePurchasingHabit_POSITIVE_whenSegmentationDataStringIsEmpty() throws JsonProcessingException {
@@ -616,8 +620,12 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
 		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
 		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
-		assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
-	}
+        try {
+            assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+        } catch (JsonProcessingException e) {
+			assertTrue(false);
+        }
+    }
 
 	@Test
 	void testUpdatePurchasingHabit_POSITIVE_REGULAR() {
@@ -638,13 +646,17 @@ class CustomerServiceImplTestCase {
 			segmentationData.put("Purchasing Habits", "REGULAR");
 			when(objectMapper.writeValueAsString(segmentationMap)).thenReturn(realMapper.writeValueAsString(segmentationMap));
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+			assertTrue(false);
 		}
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
 		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
 		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
-		assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
-	}
+        try {
+            assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+        } catch (JsonProcessingException e) {
+			assertTrue(false);
+        }
+    }
 
 	@Test
 	void testUpdatePurchasingHabit_POSITIVE_FREQUENT() {
@@ -670,6 +682,76 @@ class CustomerServiceImplTestCase {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
 		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
 		when(customerProfileMapper.toDTO(customerProfile)).thenReturn(customerProfileDTO);
-		assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+        try {
+            assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
+        } catch (JsonProcessingException e) {
+            assertTrue(false);
+        }
+    }
+
+	@Test
+	void testUpdatePurchasingHabit_NEGATIVE_throwsRuntimeException() throws JsonProcessingException {
+		CustomerProfile customerProfile1 = CustomerProfile.builder()
+				.customerID(1L)
+				.name("John Doe")
+				.emailId("john@example.com")
+				.phoneNumber("1234567890")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData("asdas")
+				.build();
+
+		when(objectMapper.readValue(customerProfile1.getSegmentationData(), Map.class)).thenThrow(JsonProcessingException.class);
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile1));
+
+		assertThrows(JsonProcessingException.class, () -> customerServiceImpl.updatePurchasingHabit(1L));
 	}
+
+	@Test
+	void testGetEnumFromSegmentation_returnsNullWhenSegmentationDataIsNotPresent(){
+		CustomerProfile customerProfile1 = CustomerProfile.builder()
+				.customerID(1L)
+				.name("John Doe")
+				.emailId("john@example.com")
+				.phoneNumber("1234567890")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.build();
+
+		assertTrue(customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class) == null);
 	}
+
+	@Test
+	void testGetEnumFromSegmentation_returnsNullWhenSegmentationDataIsEmpty() throws JsonProcessingException {
+		ObjectMapper realMapper = new ObjectMapper();
+		CustomerProfile customerProfile1 = CustomerProfile.builder()
+				.customerID(1L)
+				.name("John Doe")
+				.emailId("john@example.com")
+				.phoneNumber("1234567890")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData("{\"segmentationDat\": {}}")
+				.build();
+
+		Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile1.getSegmentationData(), Map.class);
+		when(objectMapper.readValue(customerProfile1.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
+
+		assertTrue(customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class) == null);
+	}
+
+	@Test
+	void testGetEnumFromSegmentation_throwsRuntimeExceptionWhenEnumIsNull() throws JsonProcessingException {
+		ObjectMapper realMapper = new ObjectMapper();
+		CustomerProfile customerProfile1 = CustomerProfile.builder()
+				.customerID(1L)
+				.name("John Doe")
+				.emailId("john@example.com")
+				.phoneNumber("1234567890")
+				.purchaseHistory(Arrays.asList("obj1", "obj2"))
+				.segmentationData("{\"segmentationData\": {}}")
+				.build();
+
+		Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile1.getSegmentationData(), Map.class);
+		when(objectMapper.readValue(customerProfile1.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
+
+		assertThrows(RuntimeException.class,() -> customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class));
+	}
+}

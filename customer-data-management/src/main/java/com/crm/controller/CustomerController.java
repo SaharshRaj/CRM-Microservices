@@ -181,7 +181,7 @@ public interface CustomerController {
      */
 
     @PostMapping("/purchasingHabit/{customerId}")
-    public ResponseEntity<?> updatePurchasingHabit(@PathVariable long customerId) throws ResourceNotFoundException;
+    public ResponseEntity<?> updatePurchasingHabit(@PathVariable long customerId) throws ResourceNotFoundException, JsonProcessingException;
 
     /**
      * POST /api/customers/{customerId} : Update the "customerId" customer profile.

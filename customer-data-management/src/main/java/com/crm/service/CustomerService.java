@@ -65,7 +65,7 @@ public interface CustomerService {
 	 * @return the updated customer profile
 	 * @throws ResourceNotFoundException if the customer profile is not found
 	 */
-	public CustomerProfileDTO updatePurchasingHabit(Long customerId) throws ResourceNotFoundException;
+	public CustomerProfileDTO updatePurchasingHabit(Long customerId) throws ResourceNotFoundException, JsonProcessingException;
 
 	/**
 	 * Searches customer profiles based on email ID.

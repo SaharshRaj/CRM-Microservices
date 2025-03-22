@@ -280,7 +280,7 @@ public class CustomerServiceImpl implements CustomerService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CustomerProfileDTO updatePurchasingHabit(Long customerId) throws ResourceNotFoundException {
+	public CustomerProfileDTO updatePurchasingHabit(Long customerId) throws ResourceNotFoundException, JsonProcessingException {
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 
@@ -297,7 +297,7 @@ public class CustomerServiceImpl implements CustomerService {
 			newPurchasingHabit = PurchasingHabits.FREQUENT;
 		}
 
-		try {
+
 			String segmentationDataString = existingCustomer.getSegmentationData();
 
 			if (segmentationDataString == null || segmentationDataString.isEmpty()) {
@@ -325,9 +325,6 @@ public class CustomerServiceImpl implements CustomerService {
 			CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
 			return customerProfileMapper.toDTO(updatedCustomer);
 
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException("Failed to update purchasing habit in segmentation data.", e);
-		}
 	}
 
 
@@ -359,11 +356,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 			String enumValue = segmentationData.get(fieldName);
 			if (enumValue != null) {
-				try {
 					return Enum.valueOf(enumType, enumValue);
-				} catch (IllegalArgumentException e) {
-					throw e;
-				}
 			} else {
 				throw new RuntimeException("enum is null");
 			}
