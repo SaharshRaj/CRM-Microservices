@@ -1,32 +1,44 @@
 package com.crm.service;
 
+import com.crm.dto.NotificationDTO;
 import com.crm.dto.SalesOpportunityRequestDTO;
 import com.crm.dto.SalesOpportunityResponseDTO;
+import com.crm.dummy.DummyClass;
+import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
+import com.crm.exception.CustomerNotFoundException;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidOpportunityIdException;
 import com.crm.exception.InvalidSalesDetailsException;
 import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Slf4j //TODO:Remove this annotation
 public class SalesOpportunityServiceImpl implements SalesOpportunityService {
 
     private final SalesOpportunityRepository repository;
+    private final DummyClass dummyClass;
+    private String errorMsg = "No leads found with given Opportunity ID";
 
     @Autowired
-    public SalesOpportunityServiceImpl(SalesOpportunityRepository repository) {
+    public SalesOpportunityServiceImpl(SalesOpportunityRepository repository, DummyClass dummyClass) {
         this.repository = repository;
+        this.dummyClass = dummyClass;
     }
 
 
@@ -63,6 +75,10 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      */
     @Override
     public SalesOpportunityResponseDTO createSalesOpportunity(SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException {
+        //TODO:Make Call Using Feign to check if Customer exists or not
+        if(false){
+            throw new CustomerNotFoundException("Customer with id: " + salesOpportunityRequestDto.getCustomerID() + " does not exists.");
+        }
         SalesOpportunity salesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityRequestDto);
         try {
             SalesOpportunity savedOpportunity = repository.save(salesOpportunity);
@@ -71,6 +87,71 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
             throw new InvalidSalesDetailsException(e.getMessage());
         }
 
+    }
+
+    /**
+     * Update existing sales opportunity (deal).
+     *
+     * @param opportunityID ID of the lead to be updated.
+     * @param salesOpportunityRequestDto The DTO representing the sales opportunity to be created.
+     * @return The updated SalesOpportunityResponseDTO object.
+     * @throws InvalidSalesDetailsException if there is an error during update.
+     * @throws NoSuchElementException if no sales opportunity is found with the given ID.
+     */
+    @Override
+    public SalesOpportunityResponseDTO updateSalesOpportunity(Long opportunityID ,SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException, NoSuchElementException{
+        try{
+        repository.findById(opportunityID).orElseThrow();
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(errorMsg);
+        }
+        SalesOpportunity newSalesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityRequestDto);
+        return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(newSalesOpportunity));
+    }
+
+    /**
+     * Update sales stage of existing opportunity (deal).
+     *
+     * @param opportunityID ID of the lead to be updated.
+     * @param salesStage New Sales Stage
+     * @return The updated SalesOpportunityResponseDTO object.
+     * @throws IllegalArgumentException if wrong enum is provided.
+     * @throws NoSuchElementException if no sales opportunity is found with the given ID.
+     */
+    public SalesOpportunityResponseDTO updateSalesStage(Long opportunityID ,SalesStage salesStage) throws InvalidSalesDetailsException, NoSuchElementException{
+        try{
+        SalesOpportunity salesOpportunity = repository.findById(opportunityID).orElseThrow();
+
+        salesOpportunity.setSalesStage(salesStage);
+        if(salesStage == SalesStage.CLOSED_LOST || salesStage == SalesStage.CLOSED_WON){
+            salesOpportunity.setClosingDate(LocalDate.now());
+        }
+        EmailFormat email = EmailFormat.builder()
+                .salutation("Dear employee,")
+                .openingLine("I hope this message finds you well.")
+                .body("This is to inform you that Sales Stage for Lead #" + opportunityID + " is changed to " + salesStage.name() + " at " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + ".")
+                .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
+                .closing("SALES-AUTOMATION SERVICE \n CRM")
+                .build();
+
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .subject("Sales Status Changed for Lead with ID " + opportunityID)
+                .body(email.toString())
+                .build();
+        //TODO:Send Email Regarding SalesStage
+        NotificationDTO resultDTO = dummyClass.sendNotificatonDummy(notificationDTO);
+        if (resultDTO.getStatus().equals("SENT")) {
+            log.info("NOTIFICATION SENT FOR LEAD WITH ID #{}", opportunityID);
+        } else {
+            log.error("FAILED TO SEND NOTIFICATION FOR LEAD WITH ID #{}", opportunityID);
+        }
+
+        log.info("EMAIL -> \n{}",email.toString());
+        return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(salesOpportunity));
+        }
+        catch (NoSuchElementException e) {
+            throw new NoSuchElementException(errorMsg);
+        }
     }
 
     /**
@@ -86,7 +167,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         if (salesOpportunity.isPresent()) {
             return SalesOpportunityMapper.MAPPER.mapToResponseDTO(salesOpportunity.get());
         } else {
-            throw new NoSuchElementException("No leads found with given Opportunity ID");
+            throw new NoSuchElementException(errorMsg);
         }
     }
 

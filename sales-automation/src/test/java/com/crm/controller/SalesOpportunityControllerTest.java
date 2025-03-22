@@ -2,10 +2,7 @@ package com.crm.controller;
 
 import com.crm.dto.*;
 import com.crm.enums.SalesStage;
-import com.crm.exception.InvalidCronExpressionException;
-import com.crm.exception.InvalidDateTimeException;
-import com.crm.exception.InvalidOpportunityIdException;
-import com.crm.exception.InvalidSalesDetailsException;
+import com.crm.exception.*;
 import com.crm.scheduler.DynamicSchedulerService;
 import com.crm.service.SalesOpportunityService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -140,7 +137,7 @@ class SalesOpportunityControllerTest {
         assertEquals(expected, actual);
         verify(service, times(1)).createSalesOpportunity(SalesOpportunityRequestDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
     }
-
+    
     @Test
     @DisplayName("POST /api/sales-opportunity ==> 400")
     void createSalesOpportunityShouldReturn400WhenInvalidDetailsProvided() throws Exception {
@@ -170,25 +167,35 @@ class SalesOpportunityControllerTest {
         verify(service, times(1)).createSalesOpportunity(SalesOpportunityRequestDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
     }
 
-
     @Test
-    @DisplayName("GET /api/sales-opportunity/{opportunityID} ==> 200")
-    void getOpportunitiesByOpportunityShouldReturn200AndSalesOpportunity() throws Exception {
-        // api: GET /api/sales-opportunity/{opportunityID} ==> 200 : List<SalesOpportunityDTO>
-        SalesOpportunityResponseDTO expected = salesOpportunityDTOList.getFirst();
+    @DisplayName("POST /api/sales-opportunity ==> 404")
+    void createSalesOpportunityShouldReturn404WhenCustomerNotFound() throws Exception {
+        // api: POST /api/sales-opportunity ==> 404 : ErrorResponseDTO
+        ErrorResponseDTO expected = ErrorResponseDTO.builder()
+                .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity")
+                .message("Customer with Id not found.")
+                .build();
 
-        when(service.getOpportunitiesByOpportunity(anyLong())).thenReturn(expected);
+        when(service.createSalesOpportunity(any(SalesOpportunityRequestDTO.class))).thenThrow(new CustomerNotFoundException("Customer with Id not found."));
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/sales-opportunity/1"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity")
+                        .content("{\"customerID\":1,\"" +
+                                "salesStage\":\"QUALIFICATION\"" +
+                                ",\"estimatedValue\":10000.0" +
+                                ",\"closingDate\":\"2025-04-20\"}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isNotFound()).andReturn();
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
-        SalesOpportunityResponseDTO actual = objectMapper.readValue(jsonResponse, SalesOpportunityResponseDTO.class);
-        assertEquals(expected, actual);
-        verify(service, times(1)).getOpportunitiesByOpportunity(1L);
+        ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
+        verify(service, times(1)).createSalesOpportunity(SalesOpportunityRequestDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
     }
+
 
     @Test
     @DisplayName("GET /api/sales-opportunity/{opportunityID} ==> 404")
@@ -214,6 +221,143 @@ class SalesOpportunityControllerTest {
         assertEquals(expected.getMessage(), actual.getMessage());
         assertEquals(expected.getPath(), actual.getPath());
         verify(service, times(1)).getOpportunitiesByOpportunity(1L);
+    }
+
+    @Test
+    @DisplayName("GET /api/sales-opportunity/{opportunityID} ==> 200")
+    void getOpportunitiesByOpportunityShouldReturn200AndSalesOpportunity() throws Exception {
+        // api: GET /api/sales-opportunity/{opportunityID} ==> 200 : List<SalesOpportunityDTO>
+        SalesOpportunityResponseDTO expected = salesOpportunityDTOList.getFirst();
+
+        when(service.getOpportunitiesByOpportunity(anyLong())).thenReturn(expected);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/sales-opportunity/1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        SalesOpportunityResponseDTO actual = objectMapper.readValue(jsonResponse, SalesOpportunityResponseDTO.class);
+        assertEquals(expected, actual);
+        verify(service, times(1)).getOpportunitiesByOpportunity(1L);
+    }
+
+    @Test
+    @DisplayName("POST /api/sales-opportunity/{opportunityID} ==> 200")
+    void updateSalesOpportunityShouldReturn200AndUpdatedSalesOpportunity() throws Exception {
+        // api: POST /api/sales-opportunity/{opportunityID} ==> 200 : SalesOpportunityDTO
+        SalesOpportunityResponseDTO expected = salesOpportunityDTOList.getFirst();
+
+        when(service.updateSalesOpportunity(anyLong(),any(SalesOpportunityRequestDTO.class))).thenReturn(expected);
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/1")
+                        .content("{\"customerID\":1,\"" +
+                                "salesStage\":\"QUALIFICATION\"" +
+                                ",\"estimatedValue\":10000.0" +
+                                ",\"closingDate\":\"2025-04-20\"}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isOk()).andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        SalesOpportunityResponseDTO actual = objectMapper.readValue(jsonResponse, SalesOpportunityResponseDTO.class);
+        assertEquals(expected, actual);
+        verify(service, times(1)).updateSalesOpportunity(1L,SalesOpportunityRequestDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
+    }
+
+    @Test
+    @DisplayName("POST /api/sales-opportunity/{opportunityID} ==> 404")
+    void updateSalesOpportunityShouldReturn404AndErrorResponseDTO() throws Exception {
+        // api: POST /api/sales-opportunity/{opportunityID} ==> 404 : ErrorResponseDTO
+        when(service.updateSalesOpportunity(anyLong(),any(SalesOpportunityRequestDTO.class))).thenThrow(new NoSuchElementException("Opportunity with given Id not found"));
+
+        ErrorResponseDTO expected = ErrorResponseDTO.builder()
+                .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/1")
+                .message("Opportunity with given Id not found")
+                .build();
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/1")
+                        .content("{\"customerID\":1,\"" +
+                                "salesStage\":\"QUALIFICATION\"" +
+                                ",\"estimatedValue\":10000.0" +
+                                ",\"closingDate\":\"2025-04-20\"}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isNotFound()).andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
+        verify(service, times(1)).updateSalesOpportunity(1L,SalesOpportunityRequestDTO.builder().customerID(1L).salesStage(SalesStage.QUALIFICATION).estimatedValue(new BigDecimal("10000.0")).closingDate(LocalDate.of(2025, Month.APRIL, 20)).build());
+    }
+
+    @Test
+    @DisplayName("PUT /api/sales-opportunity/{opportunityID}/{salesStage} ==> 200")
+    void updateSalesSalesStageShouldReturn200AndUpdatedSalesOpportunity() throws Exception {
+        // api: POST /api/sales-opportunity/{opportunityID}/{salesStage} ==> 200 : SalesOpportunityDTO
+        SalesOpportunityResponseDTO expected = salesOpportunityDTOList.getFirst();
+        expected.setSalesStage(SalesStage.CLOSED_WON);
+        expected.setClosingDate(LocalDate.now());
+
+        when(service.updateSalesStage(1L,SalesStage.CLOSED_WON)).thenReturn(expected);
+
+        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1/CLOSED_WON"))
+                .andDo(print()).andExpect(status().isOk()).andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        SalesOpportunityResponseDTO actual = objectMapper.readValue(jsonResponse, SalesOpportunityResponseDTO.class);
+        assertEquals(expected, actual);
+        verify(service, times(1)).updateSalesStage(1L, SalesStage.CLOSED_WON);
+    }
+
+    @Test
+    @DisplayName("PUT /api/sales-opportunity/{opportunityID}/{salesStage} ==> 404")
+    void updateSalesStageShouldReturn404AndErrorResponseDTO() throws Exception {
+        // api: POST /api/sales-opportunity/{opportunityID}/{salesStage} ==> 404 : ErrorResponseDTO
+        when(service.updateSalesStage(1L, SalesStage.CLOSED_WON)).thenThrow(new NoSuchElementException("Opportunity with given Id not found"));
+
+        ErrorResponseDTO expected = ErrorResponseDTO.builder()
+                .code("404")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/1/CLOSED_WON")
+                .message("Opportunity with given Id not found")
+                .build();
+
+        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1/CLOSED_WON"))
+                .andDo(print()).andExpect(status().isNotFound()).andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
+        verify(service, times(1)).updateSalesStage(1L, SalesStage.CLOSED_WON);
+    }
+
+    @Test
+    @DisplayName("PUT /api/sales-opportunity/{opportunityID}/{salesStage} ==> 400")
+    void updateSalesStageShouldReturn400AndErrorResponseDTO() throws Exception {
+        // api: POST /api/sales-opportunity/{opportunityID}/{salesStage} ==> 400 : ErrorResponseDTO
+        when(service.updateSalesStage(1L, SalesStage.CLOSED_WON)).thenThrow(new IllegalArgumentException());
+
+        ErrorResponseDTO expected = ErrorResponseDTO.builder()
+                .code("400")
+                .timestamp(LocalDateTime.now())
+                .path("uri=/api/sales-opportunity/1/CLOSE_WON")
+                .message("Bad Value for Sales Stage, EXPECTING: [PROSPECTING, QUALIFICATION, CLOSED_WON, CLOSED_LOST], BUT RECEIVED: CLOSE_WON")
+                .build();
+
+        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1/CLOSE_WON"))
+                .andDo(print()).andExpect(status().isBadRequest()).andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getPath(), actual.getPath());
+        verify(service, times(0)).updateSalesStage(1L, SalesStage.CLOSED_WON);
     }
 
 
@@ -631,7 +775,7 @@ class SalesOpportunityControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/sales-opportunity/configureCron ==> 200")
+    @DisplayName("POST /api/sales-opportunity/setReminderSchedule ==> 200")
     void configCronJobShouldReturn200AndUpdatedScheduleConfig() throws Exception {
         ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
                 .cronExpression("* * * * * *")
@@ -644,9 +788,9 @@ class SalesOpportunityControllerTest {
                 .build();
 
 
-        when(schedulerService.updateCronExpression(scheduleConfigRequestDTO)).thenReturn(expected);
+        when(schedulerService.updateCronExpression(scheduleConfigRequestDTO, "Send Reminder")).thenReturn(expected);
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/configureCron")
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/setReminderSchedule")
                         .content("{\"cronExpression\":\"* * * * * *\"}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -656,11 +800,11 @@ class SalesOpportunityControllerTest {
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ScheduleConfigResponseDTO actual = objectMapper.readValue(jsonResponse, ScheduleConfigResponseDTO.class);
         assertEquals(expected, actual);
-        verify(schedulerService, times(1)).updateCronExpression(scheduleConfigRequestDTO);
+        verify(schedulerService, times(1)).updateCronExpression(scheduleConfigRequestDTO, "Send Reminder");
     }
 
     @Test
-    @DisplayName("POST /api/sales-opportunity/configureCron ==> 400")
+    @DisplayName("POST /api/sales-opportunity/setReminderSchedule ==> 400")
     void configCronJobShouldReturn400WhenInvalidCronExpression() throws Exception {
         ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
                 .cronExpression("a 2 c aa 2 1")
@@ -670,13 +814,13 @@ class SalesOpportunityControllerTest {
                 .timestamp(LocalDateTime.now())
                 .code("400")
                 .message("Invalid Cron Expression " + scheduleConfigRequestDTO.getCronExpression())
-                .path("uri=/api/sales-opportunity/configureCron")
+                .path("uri=/api/sales-opportunity/setReminderSchedule")
                 .build();
 
 
-        when(schedulerService.updateCronExpression(scheduleConfigRequestDTO)).thenThrow(new InvalidCronExpressionException("Invalid Cron Expression " + scheduleConfigRequestDTO.getCronExpression()));
+        when(schedulerService.updateCronExpression(scheduleConfigRequestDTO, "Send Reminder")).thenThrow(new InvalidCronExpressionException("Invalid Cron Expression " + scheduleConfigRequestDTO.getCronExpression()));
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/configureCron")
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/setReminderSchedule")
                         .content("{\"cronExpression\":\"a 2 c aa 2 1\"}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -688,21 +832,83 @@ class SalesOpportunityControllerTest {
         assertEquals(expected.getCode(), actual.getCode());
         assertEquals(expected.getPath(), actual.getPath());
         assertEquals(expected.getMessage(), actual.getMessage());
-        verify(schedulerService, times(1)).updateCronExpression(scheduleConfigRequestDTO);
+        verify(schedulerService, times(1)).updateCronExpression(scheduleConfigRequestDTO, "Send Reminder");
+    }
+
+
+    @Test
+    @DisplayName("POST /api/sales-opportunity/setClosingSchedule ==> 200")
+    void configCronJobForClosingShouldReturn200AndUpdatedScheduleConfig() throws Exception {
+        ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
+                .cronExpression("* * * * * *")
+                .build();
+
+        ScheduleConfigResponseDTO expected = ScheduleConfigResponseDTO.builder()
+                .cronExpression("* * * * * *")
+                .taskName("Close Leads")
+                .id(1L)
+                .build();
+
+
+        when(schedulerService.updateCronExpression(scheduleConfigRequestDTO, "Close Leads")).thenReturn(expected);
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/setClosingSchedule")
+                        .content("{\"cronExpression\":\"* * * * * *\"}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        ScheduleConfigResponseDTO actual = objectMapper.readValue(jsonResponse, ScheduleConfigResponseDTO.class);
+        assertEquals(expected, actual);
+        verify(schedulerService, times(1)).updateCronExpression(scheduleConfigRequestDTO, "Close Leads");
+    }
+
+    @Test
+    @DisplayName("POST /api/sales-opportunity/setReminderSchedule ==> 400")
+    void configCronJobForClosingShouldReturn400WhenInvalidCronExpression() throws Exception {
+        ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
+                .cronExpression("a 2 c aa 2 1")
+                .build();
+
+        ErrorResponseDTO expected = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .code("400")
+                .message("Invalid Cron Expression " + scheduleConfigRequestDTO.getCronExpression())
+                .path("uri=/api/sales-opportunity/setClosingSchedule")
+                .build();
+
+
+        when(schedulerService.updateCronExpression(scheduleConfigRequestDTO, "Close Leads")).thenThrow(new InvalidCronExpressionException("Invalid Cron Expression " + scheduleConfigRequestDTO.getCronExpression()));
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/setClosingSchedule")
+                        .content("{\"cronExpression\":\"a 2 c aa 2 1\"}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        ErrorResponseDTO actual = objectMapper.readValue(jsonResponse, ErrorResponseDTO.class);
+        assertEquals(expected.getCode(), actual.getCode());
+        assertEquals(expected.getPath(), actual.getPath());
+        assertEquals(expected.getMessage(), actual.getMessage());
+        verify(schedulerService, times(1)).updateCronExpression(scheduleConfigRequestDTO, "Close Leads");
     }
 
     @Test
     @DisplayName("POST /INVALID-BODY ==> 400")
-    void configCronJobShouldReturn400WhenRequestBodyValidationFails() throws Exception {
+    void configFollowUpReminderScheduleShouldReturn400WhenRequestBodyValidationFails() throws Exception {
         ValidationErrorResponseDTO expected = ValidationErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Validation Failed")
                 .messages(List.of("Cron expression cannot be blank"))
-                .path("uri=/api/sales-opportunity/configureCron")
+                .path("uri=/api/sales-opportunity/setReminderSchedule")
                 .build();
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/configureCron")
+        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/setReminderSchedule")
                         .content("{\"cronExpression\":\"\"}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -714,7 +920,7 @@ class SalesOpportunityControllerTest {
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getPath(), actual.getPath());
         assertEquals(expected.getMessages(), actual.getMessages());
-        verify(schedulerService, times(0)).updateCronExpression(any(ScheduleConfigRequestDTO.class));
+        verify(schedulerService, times(0)).updateCronExpression(any(ScheduleConfigRequestDTO.class), anyString());
     }
 
 }

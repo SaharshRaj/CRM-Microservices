@@ -41,6 +41,26 @@ public interface SalesOpportunityController {
     })
     ResponseEntity<SalesOpportunityResponseDTO> createSalesOpportunity(@Valid @RequestBody SalesOpportunityRequestDTO salesOpportunityRequestDto);
 
+    @PostMapping(value = "/{opportunityId}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update existing Lead in the database", description = "Updates an existing sales opportunity (lead) and stores it in the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated sales opportunity", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SalesOpportunityResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ValidationErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Lead not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    ResponseEntity<SalesOpportunityResponseDTO> updateSalesOpportunity(@PathVariable Long opportunityId,@Valid @RequestBody SalesOpportunityRequestDTO salesOpportunityRequestDto);
+
+    @PutMapping(value = "/{opportunityId}/{salesStage}",consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update sales-stage of existing Lead in the database", description = "Updates sales-stage of an existing sales opportunity (lead) and stores it in the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated sales opportunity", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SalesOpportunityResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ValidationErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Lead not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    ResponseEntity<SalesOpportunityResponseDTO> updateSalesStage(@PathVariable Long opportunityId,@PathVariable String salesStage);
+
     @GetMapping(value = "/{opportunityId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get a particular lead opportunity based on ID", description = "Retrieves a specific sales opportunity based on the provided ID.")
     @ApiResponses(value = {
@@ -107,13 +127,22 @@ public interface SalesOpportunityController {
     })
     ResponseEntity<String> deleteByOpportunityID(@Parameter(description = "ID of the sales opportunity to delete") @PathVariable Long opportunityId);
 
-    @PostMapping(value = "/configureCron", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/setReminderSchedule", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Set the time for sending reminder emails", description = "Configures the cron job schedule for sending follow-up reminder emails.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully configured cron job", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ScheduleConfigRequestDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid cron expression", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
-    ResponseEntity<ScheduleConfigResponseDTO> configCronJob(@Valid @RequestBody ScheduleConfigRequestDTO scheduleConfigRequestDTO);
+    ResponseEntity<ScheduleConfigResponseDTO> configFollowUpReminderSchedule(@Valid @RequestBody ScheduleConfigRequestDTO scheduleConfigRequestDTO);
+
+    @PostMapping(value = "/setClosingSchedule", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set the time for closing leads", description = "Configures the cron job schedule for closing leads.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully configured cron job", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ScheduleConfigRequestDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid cron expression", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    ResponseEntity<ScheduleConfigResponseDTO> configClosingSchedule(@Valid @RequestBody ScheduleConfigRequestDTO scheduleConfigRequestDTO);
 
 }

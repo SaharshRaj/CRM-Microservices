@@ -59,6 +59,34 @@ public class SalesOpportunityControllerImpl implements SalesOpportunityControlle
     }
 
     /**
+     * Updates an existing sales opportunity.
+     *
+     * @param salesOpportunityRequestDto the DTO representing the sales opportunity to be updated.
+     * @param opportunityId ID of lead to be updated.
+     * @return ResponseEntity containing the created SalesOpportunityResponseDTO object.
+     */
+    @Override
+    public ResponseEntity<SalesOpportunityResponseDTO> updateSalesOpportunity(Long opportunityId,SalesOpportunityRequestDTO salesOpportunityRequestDto) {
+        SalesOpportunityResponseDTO salesOpportunity = service.updateSalesOpportunity(opportunityId,salesOpportunityRequestDto);
+        return new ResponseEntity<>(salesOpportunity, HttpStatus.OK);
+    }
+
+
+    /**
+     * Updates sales-stage of an existing sales opportunity.
+     *
+     * @param salesStage New Sales Stage.
+     * @param opportunityId ID of lead to be updated.
+     * @return ResponseEntity containing the created SalesOpportunityResponseDTO object.
+     */
+    @Override
+    public ResponseEntity<SalesOpportunityResponseDTO> updateSalesStage(Long opportunityId, String salesStage){
+        SalesOpportunityResponseDTO salesOpportunity = service.updateSalesStage(opportunityId,SalesStage.valueOf(salesStage));
+        return new ResponseEntity<>(salesOpportunity, HttpStatus.OK);
+    }
+
+
+    /**
      * Retrieves a sales opportunity by its opportunity ID.
      *
      * @param opportunityId the ID of the sales opportunity to be retrieved.
@@ -166,8 +194,20 @@ public class SalesOpportunityControllerImpl implements SalesOpportunityControlle
      * @return ResponseEntity containing the updated ScheduleConfigDTO object.
      */
     @Override
-    public ResponseEntity<ScheduleConfigResponseDTO> configCronJob(ScheduleConfigRequestDTO scheduleConfigRequestDTO) {
-        ScheduleConfigResponseDTO result = schedulerService.updateCronExpression(scheduleConfigRequestDTO);
+    public ResponseEntity<ScheduleConfigResponseDTO> configFollowUpReminderSchedule(ScheduleConfigRequestDTO scheduleConfigRequestDTO) {
+        ScheduleConfigResponseDTO result = schedulerService.updateCronExpression(scheduleConfigRequestDTO, "Send Reminder");
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * Configures the cron job schedule for follow-up reminders.
+     *
+     * @param scheduleConfigRequestDTO containing the new cron expression.
+     * @return ResponseEntity containing the updated ScheduleConfigDTO object.
+     */
+    @Override
+    public ResponseEntity<ScheduleConfigResponseDTO> configClosingSchedule(ScheduleConfigRequestDTO scheduleConfigRequestDTO) {
+        ScheduleConfigResponseDTO result = schedulerService.updateCronExpression(scheduleConfigRequestDTO, "Close Leads");
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

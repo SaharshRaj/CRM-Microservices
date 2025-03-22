@@ -16,7 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,7 +80,7 @@ class SchedulerServiceImplTest {
 
 
     @Test
-    void sendNotificationsShouldReturnListOfSentNotificationsWhenFollowUpRemindersExist() {
+    void sendNotificationsShouldReturnListOfSentFollowUpReminderWhenFollowUpRemindersExist() {
         // Create EmailFormat and NotificationDTO objects for testing
         EmailFormat email1 = EmailFormat.builder()
                 .salutation("Dear employee,")
@@ -130,7 +132,7 @@ class SchedulerServiceImplTest {
         });
 
         // Call the service method
-        List<NotificationDTO> actual = service.sendNotifications();
+        List<NotificationDTO> actual = service.sendFollowUpReminder();
 
         // Verify the results
         assertEquals(expected, actual);
@@ -139,4 +141,66 @@ class SchedulerServiceImplTest {
         verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj3.getSubject())));
     }
 
+
+    @Test
+    void closeLeadsShouldReturnListOfSentFollowUpReminderWhenLeadsExist() {
+        // Create EmailFormat and NotificationDTO objects for testing
+        EmailFormat email1 = EmailFormat.builder()
+                .salutation("Dear employee,")
+                .openingLine("I hope this message finds you well.")
+                .body("This is to inform you that Lead #" + 1L + " is closed at " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + ".")
+                .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
+                .closing("SALES-AUTOMATION SERVICE \n CRM")
+                .build();
+        NotificationDTO obj1 = NotificationDTO.builder()
+                .subject("Status updated for Sales Lead with ID " + 1L)
+                .body(email1.toString())
+                .build();
+        obj1.setStatus("SENT");
+
+        EmailFormat email2 = EmailFormat.builder()
+                .salutation("Dear employee,")
+                .openingLine("I hope this message finds you well.")
+                .body("This is to inform you that Lead #" + 2L + " is closed at " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + ".")
+                .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
+                .closing("SALES-AUTOMATION SERVICE \n CRM")
+                .build();
+        NotificationDTO obj2 = NotificationDTO.builder()
+                .subject("Status updated for Sales Lead with ID " + 2L)
+                .body(email2.toString())
+                .build();
+        obj2.setStatus("SENT");
+
+        EmailFormat email3 = EmailFormat.builder()
+                .salutation("Dear employee,")
+                .openingLine("I hope this message finds you well.")
+                .body("This is to inform you that Lead #" + 3L + " is closed at " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + ".")
+                .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
+                .closing("SALES-AUTOMATION SERVICE \n CRM")
+                .build();
+        NotificationDTO obj3 = NotificationDTO.builder()
+                .subject("Status updated for Sales Lead with ID " + 3L)
+                .body(email3.toString())
+                .build();
+        obj3.setStatus("SENT");
+
+        List<NotificationDTO> expected = Arrays.asList(obj1, obj2, obj3);
+
+        // Stubbing the repository and dummyClass methods
+        when(repository.findByClosingDate(LocalDate.now())).thenReturn(list);
+        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> {
+            NotificationDTO arg = invocation.getArgument(0);
+            arg.setStatus("SENT");
+            return arg;
+        });
+
+        // Call the service method
+        List<NotificationDTO> actual = service.sendClosingNotification();
+
+        // Verify the results
+        assertEquals(expected, actual);
+        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj1.getSubject())));
+        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj2.getSubject())));
+        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj3.getSubject())));
+    }
 }

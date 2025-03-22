@@ -26,6 +26,29 @@ public interface SalesOpportunityService {
     List<SalesOpportunityResponseDTO> retrieveAllSalesOpportunities() throws NoSuchElementException;
 
     /**
+     * Update existing sales opportunity (deal).
+     *
+     * @param opportunityID ID of the lead to be updated.
+     * @param salesOpportunityRequestDto The DTO representing the sales opportunity to be created.
+     * @return The updated SalesOpportunityResponseDTO object.
+     * @throws InvalidSalesDetailsException if there is an error during update.
+     * @throws NoSuchElementException if no sales opportunity is found with the given ID.
+     */
+    SalesOpportunityResponseDTO updateSalesOpportunity(Long opportunityID ,SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException, NoSuchElementException;
+
+    /**
+     * Update sales stage of existing opportunity (deal).
+     *
+     * @param opportunityID ID of the lead to be updated.
+     * @param salesStage New Sales Stage
+     * @return The updated SalesOpportunityResponseDTO object.
+     * @throws IllegalArgumentException if wrong enum is provided.
+     * @throws NoSuchElementException if no sales opportunity is found with the given ID.
+     */
+    SalesOpportunityResponseDTO updateSalesStage(Long opportunityID ,SalesStage salesStage) throws InvalidSalesDetailsException, NoSuchElementException;
+
+
+    /**
      * Creates a new sales opportunity (deal) associated with a customer.
      *
      * @param salesOpportunityRequestDto The DTO representing the sales opportunity to be created.

@@ -14,12 +14,19 @@ public interface DynamicSchedulerService {
      * @param scheduleConfigRequestDTO The DTO containing the new cron expression.
      * @return The updated ScheduleConfigResponseDTO.
      */
-    ScheduleConfigResponseDTO updateCronExpression(ScheduleConfigRequestDTO scheduleConfigRequestDTO);
+    ScheduleConfigResponseDTO updateCronExpression(ScheduleConfigRequestDTO scheduleConfigRequestDTO, String taskName);
 
     /**
      * Restarts the scheduled task with the provided cron expression.
      *
      * @param cronExpression The new cron expression to use.
      */
-    void restartScheduledTask(String cronExpression);
+    void restartReminderTask(String cronExpression);
+
+    /**
+     * Restarts the scheduled task with the provided cron expression.
+     *
+     * @param cronExpression The new cron expression to use.
+     */
+    void restartClosingTask(String cronExpression);
 }

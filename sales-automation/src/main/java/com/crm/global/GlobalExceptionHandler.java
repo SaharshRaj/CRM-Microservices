@@ -2,6 +2,7 @@ package com.crm.global;
 
 import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ValidationErrorResponseDTO;
+import com.crm.enums.SalesStage;
 import com.crm.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -39,6 +41,46 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handles CustomerNotFoundException and returns a 404 Not Found error response.
+     *
+     * @param ex         The CustomerNotFoundException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 404 status.
+     */
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNotFound(CustomerNotFoundException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.NOT_FOUND.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handles IllegalArgumentException and returns a 400 Bad Request error response.
+     *
+     * @param ex         The IllegalArgumentException.
+     * @param webRequest The WebRequest.
+     * @return ResponseEntity containing ErrorResponseDTO with 400 status.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message("Bad Value for Sales Stage, EXPECTING: "+ Arrays.toString(SalesStage.values()) +", BUT RECEIVED: "+ Arrays.stream(webRequest.getDescription(false).split("/")).toList().getLast())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     /**

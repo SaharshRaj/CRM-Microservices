@@ -1,7 +1,10 @@
 package com.crm.service;
 
+import com.crm.dto.NotificationDTO;
 import com.crm.dto.SalesOpportunityRequestDTO;
 import com.crm.dto.SalesOpportunityResponseDTO;
+import com.crm.dummy.DummyClass;
+import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
 import com.crm.exception.InvalidDateTimeException;
@@ -20,7 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +41,9 @@ class SalesOpportunityServiceImplTest {
 
     @Mock
     private SalesOpportunityMapper mapper;
+
+    @Mock
+    private DummyClass dummyClass;
 
 
     @InjectMocks
@@ -138,6 +146,105 @@ class SalesOpportunityServiceImplTest {
         SalesOpportunityRequestDTO salesOpportunityRequestDTO = mapper.mapToRequestDTO(salesOpportunity);
         assertThrows(InvalidSalesDetailsException.class, () -> service.createSalesOpportunity(salesOpportunityRequestDTO));
         verify(repository, times(1)).save(any(SalesOpportunity.class));
+    }
+
+    @Test
+    @DisplayName("updateSalesOpportunity() - Positive")
+    void updateOpportunityShouldUpdateAndReturnOpportunityWhenIdExists(){
+        SalesOpportunity salesOpportunity = SalesOpportunity.builder()
+                .opportunityID(1L)
+                .customerID(1L)
+                .estimatedValue(BigDecimal.valueOf(10000.0))
+                .salesStage(SalesStage.PROSPECTING)
+                .closingDate(LocalDate.now().plusDays(8))
+                .followUpReminder(LocalDate.now().plusDays(14))
+                .build();
+        SalesOpportunity newSalesOpportunity = SalesOpportunity.builder()
+                .customerID(1L)
+                .salesStage(SalesStage.CLOSED_WON)
+                .estimatedValue(BigDecimal.valueOf(20000.0))
+                .closingDate(LocalDate.now().plusDays(8))
+                .followUpReminder(LocalDate.now().plusDays(14))
+                .build();
+        SalesOpportunityRequestDTO salesOpportunityRequestDTO = SalesOpportunityRequestDTO
+                .builder()
+                .salesStage(SalesStage.CLOSED_WON)
+                .estimatedValue(BigDecimal.valueOf(20000.0))
+                .closingDate(newSalesOpportunity.getClosingDate())
+                .customerID(newSalesOpportunity.getCustomerID())
+                .followUpReminder(newSalesOpportunity.getFollowUpReminder())
+                .build();
+        SalesOpportunityResponseDTO salesOpportunityResponseDTO = SalesOpportunityResponseDTO
+                .builder()
+                .opportunityID(1L)
+                .salesStage(SalesStage.CLOSED_WON)
+                .estimatedValue(BigDecimal.valueOf(20000.0))
+                .closingDate(newSalesOpportunity.getClosingDate())
+                .customerID(newSalesOpportunity.getCustomerID())
+                .followUpReminder(newSalesOpportunity.getFollowUpReminder())
+                .build();
+        when(repository.findById(1L)).thenReturn(Optional.of(salesOpportunity));
+        when(repository.save(any(SalesOpportunity.class))).thenAnswer((invocation -> {
+            newSalesOpportunity.setOpportunityID(1L);
+            return newSalesOpportunity;
+        }));
+        assertEquals(salesOpportunityResponseDTO, service.updateSalesOpportunity(1L, salesOpportunityRequestDTO));
+        verify(repository, times(1)).findById(1L);
+        verify(repository, times(1)).save(any(SalesOpportunity.class));
+    }
+
+    @Test
+    @DisplayName("updateSalesOpportunity() - Negative")
+    void updateOpportunityShouldThrowExceptionWhenIdDoesNotExists(){
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        SalesOpportunityRequestDTO salesOpportunityRequestDTO = SalesOpportunityRequestDTO
+                .builder()
+                .build();
+        assertThrows(NoSuchElementException.class,() -> service.updateSalesOpportunity(1L, salesOpportunityRequestDTO));
+    }
+
+    @Test
+    @DisplayName("updateSalesStage() - Positive")
+    void updateSalesStageShouldReturnUpdatedDTOWhenIdExists(){
+        SalesOpportunity salesOpportunity = list.getFirst();
+        SalesOpportunityResponseDTO salesOpportunityResponseDTO = SalesOpportunityResponseDTO
+                .builder()
+                .opportunityID(1L)
+                .salesStage(SalesStage.CLOSED_WON)
+                .estimatedValue(salesOpportunity.getEstimatedValue())
+                .closingDate(LocalDate.now())
+                .customerID(salesOpportunity.getCustomerID())
+                .followUpReminder(salesOpportunity.getFollowUpReminder())
+                .build();
+
+        EmailFormat email = EmailFormat.builder()
+                .salutation("Dear employee,")
+                .openingLine("I hope this message finds you well.")
+                .body("This is to inform you that Sales Stage for Lead #" + 1 + " is changed to " + SalesStage.CLOSED_WON.name() + " at " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + ".")
+                .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
+                .closing("SALES-AUTOMATION SERVICE \n CRM")
+                .build();
+
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .subject("Sales Status Changed for Lead with ID " + 1)
+                .body(email.toString())
+                .status("SENT")
+                .build();
+
+        when(repository.findById(1L)).thenReturn(Optional.of(salesOpportunity));
+        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenReturn(notificationDTO);
+        when(repository.save(any(SalesOpportunity.class))).thenReturn(salesOpportunity);
+        assertEquals(salesOpportunityResponseDTO, service.updateSalesStage(1L , SalesStage.CLOSED_WON));
+        verify(repository, times(1)).findById(1L);
+        verify(repository, times(1)).save(any(SalesOpportunity.class));
+        verify(dummyClass, times(1)).sendNotificatonDummy(any(NotificationDTO.class));
+    }
+
+    @Test
+    @DisplayName("updateSalesStage() - Negative")
+    void updateSalesStageShouldThrowException(){
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class,() -> service.updateSalesStage(1L, SalesStage.CLOSED_WON));
     }
 
     @Test

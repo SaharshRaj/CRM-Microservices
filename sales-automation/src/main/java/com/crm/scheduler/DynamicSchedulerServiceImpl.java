@@ -16,16 +16,16 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.concurrent.ScheduledFuture;
 
-@Slf4j
 @Service
+@Slf4j
 public class DynamicSchedulerServiceImpl implements DynamicSchedulerService {
-
 
     private final ScheduleConfigRepository scheduleConfigRepository;
     private final SchedulerService schedulerService;
     private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-    private ScheduledFuture<?> scheduledTask;
 
+    private ScheduledFuture<?> reminderTask; // For the reminder task
+    private ScheduledFuture<?> closingTask;  // For the closing notification task
 
     @Autowired
     public DynamicSchedulerServiceImpl(ScheduleConfigRepository repository, SchedulerServiceImpl schedulerService) {
@@ -35,15 +35,21 @@ public class DynamicSchedulerServiceImpl implements DynamicSchedulerService {
     }
 
     @Override
-    public ScheduleConfigResponseDTO updateCronExpression(ScheduleConfigRequestDTO scheduleConfigRequestDTO) {
+    public ScheduleConfigResponseDTO updateCronExpression(ScheduleConfigRequestDTO scheduleConfigRequestDTO, String taskName) {
         String newCron = SalesOpportunityMapper.MAPPER.mapToScheduleConfig(scheduleConfigRequestDTO).getCronExpression();
-        ScheduleConfig config = scheduleConfigRepository.findByTaskName("Send Reminder")
+        ScheduleConfig config = scheduleConfigRepository.findByTaskName(taskName)
                 .orElse(new ScheduleConfig());
         if (CronExpression.isValidExpression(newCron)) {
             ZonedDateTime nextExecution = CronExpression.parse(newCron).next(ZonedDateTime.now());
             config.setCronExpression(newCron);
             ScheduleConfig saved = scheduleConfigRepository.save(config);
-            restartScheduledTask(newCron);
+
+            if ("Send Reminder".equals(taskName)) {
+                restartReminderTask(newCron);
+            } else if ("Send Closing".equals(taskName)) {
+                restartClosingTask(newCron);
+            }
+
             log.info("Next execution scheduled for {}", nextExecution);
             return SalesOpportunityMapper.MAPPER.mapToScheduleConfigResponseDTO(saved);
         } else {
@@ -53,12 +59,20 @@ public class DynamicSchedulerServiceImpl implements DynamicSchedulerService {
     }
 
     @Override
-    public void restartScheduledTask(String cronExpression) {
-        if (scheduledTask != null) {
-            scheduledTask.cancel(false);
+    public void restartReminderTask(String cronExpression) {
+        if (reminderTask != null) {
+            reminderTask.cancel(false);
         }
-        scheduledTask = taskScheduler.schedule(schedulerService::sendNotifications, new CronTrigger(cronExpression));
+        reminderTask = taskScheduler.schedule(schedulerService::sendFollowUpReminder, new CronTrigger(cronExpression));
+        log.info("Reminder task rescheduled with Cron: {}", cronExpression);
     }
 
-
+    @Override
+    public void restartClosingTask(String cronExpression) {
+        if (closingTask != null) {
+            closingTask.cancel(false);
+        }
+        closingTask = taskScheduler.schedule(schedulerService::sendClosingNotification, new CronTrigger(cronExpression));
+        log.info("Closing task rescheduled with Cron: {}", cronExpression);
+    }
 }

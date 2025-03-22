@@ -52,7 +52,47 @@ class DynamicSchedulerServiceImplTest {
         when(scheduleConfigRepository.findByTaskName("Send Reminder")).thenReturn(Optional.of(config));
         when(scheduleConfigRepository.save(any(ScheduleConfig.class))).thenReturn(config);
 
-        ScheduleConfigResponseDTO result = dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO);
+        ScheduleConfigResponseDTO result = dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO, "Send Reminder");
+
+        verify(scheduleConfigRepository).save(config);
+        assertEquals("0 0/5 * * * ?", result.getCronExpression());
+    }
+
+    @Test
+    void setReminderScheduleShouldThrowExceptionWhenInvalidCronExpressionProvided() {
+        ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
+                .taskName("Sample Task")
+                .cronExpression("invalid-cron")
+                .build();
+
+        when(scheduleConfigRepository.findByTaskName("Send Reminder")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(InvalidCronExpressionException.class, () -> {
+            dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO, "Send Reminder");
+        });
+
+        String expectedMessage = "Invalid Cron Expression invalid-cron";
+        String actualMessage = exception.getMessage();
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    void setReminderScheduleShouldUpdateAndReturnConfigWhenValidCronExpressionProvided() {
+        ScheduleConfigRequestDTO scheduleConfigRequestDTO = ScheduleConfigRequestDTO.builder()
+                .taskName("Close Leads")
+                .cronExpression("0 0/5 * * * ?")
+                .build();
+
+        ScheduleConfig config = ScheduleConfig.builder()
+                .id(1L)
+                .taskName("Close Leads")
+                .cronExpression("0 0/5 * * * ?")
+                .build();
+
+        when(scheduleConfigRepository.findByTaskName("Close Leads")).thenReturn(Optional.of(config));
+        when(scheduleConfigRepository.save(any(ScheduleConfig.class))).thenReturn(config);
+
+        ScheduleConfigResponseDTO result = dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO, "Close Leads");
 
         verify(scheduleConfigRepository).save(config);
         assertEquals("0 0/5 * * * ?", result.getCronExpression());
@@ -65,10 +105,10 @@ class DynamicSchedulerServiceImplTest {
                 .cronExpression("invalid-cron")
                 .build();
 
-        when(scheduleConfigRepository.findByTaskName("Send Reminder")).thenReturn(Optional.empty());
+        when(scheduleConfigRepository.findByTaskName("Close Leads")).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(InvalidCronExpressionException.class, () -> {
-            dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO);
+            dynamicSchedulerService.updateCronExpression(scheduleConfigRequestDTO, "Close Leads");
         });
 
         String expectedMessage = "Invalid Cron Expression invalid-cron";

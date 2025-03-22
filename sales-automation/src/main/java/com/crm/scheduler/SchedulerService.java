@@ -9,9 +9,16 @@ import java.util.List;
  */
 public interface SchedulerService {
     /**
-     * Sends scheduled notifications.
+     * Sends Follow-Up Reminders.
      *
-     * @return A list of NotificationDTO objects representing the notifications that were sent.
+     * @return A list of NotificationDTO objects representing the emails that were sent.
      */
-    public List<NotificationDTO> sendNotifications();
+    List<NotificationDTO> sendFollowUpReminder();
+
+    /**
+     * Sends Closing notifications.
+     *
+     * @return A list of NotificationDTO objects representing the emails that were sent.
+     */
+    List<NotificationDTO> sendClosingNotification();
 }
