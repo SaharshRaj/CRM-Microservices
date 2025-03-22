@@ -9,8 +9,6 @@ import com.crm.exception.ResourceNotFoundException;
 import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -324,7 +322,8 @@ class CustomerServiceImplTestCase {
 	@DisplayName("Test updating purchasing habit - Negative case")
 	void testUpdatePurchasingHabit_Negative() {
 		when(customerProfileRepository.findById(customerProfiles.get(0).getCustomerID())).thenReturn(Optional.empty());
-		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.updatePurchasingHabit(customerProfiles.get(0).getCustomerID()));
+		Long customerID = customerProfiles.get(0).getCustomerID();
+		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.updatePurchasingHabit(customerID));
 	}
 
 	@Test
@@ -414,9 +413,8 @@ class CustomerServiceImplTestCase {
 	@DisplayName("Test adding multiple purchases to purchase history - Negative case")
 	void testAddMultiplePurchasesToPurchaseHistory_Negative() {
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.empty());
-		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addMultiplePurchasesToPurchaseHistory(1L, "{\n" +
-				"    \"purchaseHstory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n" +
-				"}"));
+		String json ="{\n\"purchaseHstory\" : [\"newPurchase1\", \"newPurchase2\", \"newPurchase3\"]\n}";
+		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.addMultiplePurchasesToPurchaseHistory(1L, json));
 
 		verify(customerProfileRepository, times(1)).findById(1L);
 	}
@@ -464,12 +462,12 @@ class CustomerServiceImplTestCase {
 		} catch (JsonProcessingException e) {
 			assertTrue(false);
 		}
-		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileRepository.findAll()).thenReturn(Collections.singletonList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 
 		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnPurchasingHabit(PurchasingHabits.NEW);
 
-		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+		assertEquals(Collections.singletonList(customerProfilesDTOs.getFirst()), result);
 	}
 	@Test
 	@DisplayName("Test searching customer by region and interest - Positive case")
@@ -747,7 +745,7 @@ class CustomerServiceImplTestCase {
 				.purchaseHistory(Arrays.asList("obj1", "obj2"))
 				.build();
 
-		assertTrue(customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class) == null);
+		assertNull(customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class));
 	}
 
 	@Test
@@ -766,7 +764,7 @@ class CustomerServiceImplTestCase {
 		Map<String, Map<String, String>> segmentationMap = realMapper.readValue(customerProfile1.getSegmentationData(), Map.class);
 		when(objectMapper.readValue(customerProfile1.getSegmentationData(), Map.class)).thenReturn(segmentationMap);
 
-		assertTrue(customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class) == null);
+		assertNull(customerServiceImpl.getEnumFromSegmentation(customerProfile1, "Interest", Interest.class));
 	}
 
 	@Test
