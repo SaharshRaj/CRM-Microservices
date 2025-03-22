@@ -123,10 +123,10 @@ class CustomerServiceImplTestCase {
 	@Test
 	@DisplayName("Test getting customer by ID - Positive case")
 	void testGetCustomerById_Positive() {
-		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.get(0)));
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 		CustomerProfileDTO result = customerServiceImpl.getCustomerById(1L);
-		assertEquals(customerProfilesDTOs.get(0), result);
+		assertEquals(customerProfilesDTOs.getFirst(), result);
 		verify(customerProfileRepository, times(1)).findById(1L);
 	}
 
@@ -150,8 +150,8 @@ class CustomerServiceImplTestCase {
 			return customerProfiles.stream().filter(customer -> customer.getCustomerID().equals(dto.getCustomerID())).findFirst().orElse(null);
 		});
 
-		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.get(0)));
-		when(customerProfileRepository.save(any(CustomerProfile.class))).thenReturn(customerProfiles.get(0));
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.getFirst()));
+		when(customerProfileRepository.save(any(CustomerProfile.class))).thenReturn(customerProfiles.getFirst());
 
 		CustomerProfileDTO result = customerServiceImpl.updateCustomer(1L, customerProfilesDTOs.getFirst());
 		assertEquals(customerProfilesDTOs.getFirst(), result);
@@ -175,7 +175,7 @@ class CustomerServiceImplTestCase {
 	@Test
 	@DisplayName("Test deleting customer profile - Positive case")
 	void testDeleteCustomer_Positive() throws ResourceNotFoundException {
-		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.get(0)));
+		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfiles.getFirst()));
 		customerServiceImpl.deleteCustomer(1L);
 		verify(customerProfileRepository, times(1)).deleteById(1L);
 	}
@@ -321,21 +321,21 @@ class CustomerServiceImplTestCase {
 	@Test
 	@DisplayName("Test updating purchasing habit - Negative case")
 	void testUpdatePurchasingHabit_Negative() {
-		when(customerProfileRepository.findById(customerProfiles.get(0).getCustomerID())).thenReturn(Optional.empty());
-		Long customerID = customerProfiles.get(0).getCustomerID();
+		when(customerProfileRepository.findById(customerProfiles.getFirst().getCustomerID())).thenReturn(Optional.empty());
+		Long customerID = customerProfiles.getFirst().getCustomerID();
 		assertThrows(ResourceNotFoundException.class, () -> customerServiceImpl.updatePurchasingHabit(customerID));
 	}
 
 	@Test
 	@DisplayName("Test adding to purchase history - Positive case")
 	void testAddToPurchaseHistory_Positive() throws JsonProcessingException {
-		CustomerProfile existingCustomer = customerProfiles.get(0);
+		CustomerProfile existingCustomer = customerProfiles.getFirst();
 		existingCustomer.setPurchaseHistory(new ArrayList<>(Arrays.asList("purchase1", "purchase2")));
 
-		CustomerProfile updatedCustomer = customerProfiles.get(0);
+		CustomerProfile updatedCustomer = customerProfiles.getFirst();
 		updatedCustomer.setPurchaseHistory(new ArrayList<>(Arrays.asList("purchase1", "purchase2", "purchase3")));
 
-		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.get(0);
+		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
 		customerProfileDTO.setPurchaseHistory(Arrays.asList("purchase1", "purchase2", "purchase3"));
 
 		Map<String, String> purchase = new HashMap<>();
@@ -355,7 +355,7 @@ class CustomerServiceImplTestCase {
 		try {
 			result = customerServiceImpl.addToPurchaseHistory(1L, json);
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 
 		assertNotNull(result);
@@ -379,11 +379,11 @@ class CustomerServiceImplTestCase {
 	@Test
 	@DisplayName("Test adding multiple purchases to purchase history - Positive case")
 	void testAddMultiplePurchasesToPurchaseHistory_Positive() throws ResourceNotFoundException, JsonProcessingException {
-		CustomerProfile existingCustomer = customerProfiles.get(0);
+		CustomerProfile existingCustomer = customerProfiles.getFirst();
 		List<String> existingPurchases = Arrays.asList("purchase1", "purchase2");
 		existingCustomer.setPurchaseHistory(existingPurchases);
 
-		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.get(0);
+		CustomerProfileDTO customerProfileDTO = customerProfilesDTOs.getFirst();
 		List<String> fullPurchaseList = new ArrayList<>(existingPurchases);
 		fullPurchaseList.addAll(Arrays.asList("newPurchase1", "newPurchase2", "newPurchase3"));
 		CustomerProfile updatedCustomer = existingCustomer;
@@ -426,14 +426,14 @@ class CustomerServiceImplTestCase {
 		try {
 			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
-		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileRepository.findAll()).thenReturn(Collections.singletonList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 
 		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegion(Region.NORTH);
 
-		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+		assertEquals(Collections.singletonList(customerProfilesDTOs.getFirst()), result);
 	}
 
 	@Test
@@ -443,14 +443,14 @@ class CustomerServiceImplTestCase {
 		try {
 			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
-		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileRepository.findAll()).thenReturn(Collections.singletonList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 
 		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnInterest(Interest.SPORTS);
 
-		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+		assertEquals(Collections.singletonList(customerProfilesDTOs.getFirst()), result);
 	}
 
 	@Test
@@ -460,7 +460,7 @@ class CustomerServiceImplTestCase {
 		try {
 			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 		when(customerProfileRepository.findAll()).thenReturn(Collections.singletonList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
@@ -476,14 +476,14 @@ class CustomerServiceImplTestCase {
 		try {
 			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
-		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileRepository.findAll()).thenReturn(Collections.singletonList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 
 		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegionAndInterest(Region.NORTH, Interest.SPORTS);
 
-		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+		assertEquals(Collections.singletonList(customerProfilesDTOs.getFirst()), result);
 	}
 
 	@Test
@@ -493,14 +493,14 @@ class CustomerServiceImplTestCase {
 		try {
 			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
-		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileRepository.findAll()).thenReturn(Collections.singletonList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 
 		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegionAndPurchasingHabit(Region.NORTH, PurchasingHabits.NEW);
 
-		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+		assertEquals(Collections.singletonList(customerProfilesDTOs.getFirst()), result);
 	}
 
 	@Test
@@ -510,14 +510,14 @@ class CustomerServiceImplTestCase {
 		try {
 			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
-		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
+		when(customerProfileRepository.findAll()).thenReturn(Collections.singletonList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 
 		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnInterestAndPurchasingHabit(Interest.SPORTS, PurchasingHabits.NEW);
 
-		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+		assertEquals(Collections.singletonList(customerProfilesDTOs.getFirst()), result);
 	}
 
 	@Test
@@ -527,14 +527,14 @@ class CustomerServiceImplTestCase {
 		try {
 			when(objectMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class)).thenReturn(realMapper.readValue(customerProfiles.getFirst().getSegmentationData(), Map.class));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 		when(customerProfileRepository.findAll()).thenReturn(Arrays.asList(customerProfiles.getFirst()));
 		when(customerProfileMapper.toDTO(customerProfiles.getFirst())).thenReturn(customerProfilesDTOs.getFirst());
 
 		List<CustomerProfileDTO> result = customerServiceImpl.searchCustomerBasedOnRegionAndInterestAndPurchasingHabit(Region.NORTH, Interest.SPORTS, PurchasingHabits.NEW);
 
-		assertEquals(Arrays.asList(customerProfilesDTOs.getFirst()), result);
+		assertEquals(Collections.singletonList(customerProfilesDTOs.getFirst()), result);
 	}
 
 	@Test
@@ -556,7 +556,7 @@ class CustomerServiceImplTestCase {
 		try {
 			assertEquals(customerProfilesDTOs.getFirst(), customerServiceImpl.updatePurchasingHabit(1L));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -648,7 +648,7 @@ class CustomerServiceImplTestCase {
 		try {
 			assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -672,7 +672,7 @@ class CustomerServiceImplTestCase {
 			segmentationData.put("Purchasing Habits", "REGULAR");
 			when(objectMapper.writeValueAsString(segmentationMap)).thenReturn(realMapper.writeValueAsString(segmentationMap));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 		when(customerProfileRepository.findById(1L)).thenReturn(Optional.of(customerProfile));
 		when(customerProfileRepository.save(customerProfile)).thenReturn(customerProfile);
@@ -680,7 +680,7 @@ class CustomerServiceImplTestCase {
 		try {
 			assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -712,7 +712,7 @@ class CustomerServiceImplTestCase {
 		try {
 			assertEquals(customerProfileDTO, customerServiceImpl.updatePurchasingHabit(1L));
 		} catch (JsonProcessingException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
