@@ -53,10 +53,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getRegionFromSegmentation(c) == region)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customers found in the region");
+		}
+		return list;
 	}
 
 	/**
@@ -68,10 +72,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list =  customerProfiles.stream()
 				.filter(c -> getInterestFromSegmentation(c) == interest)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customer Found with this interest");
+		}
+		return list;
 	}
 
 	/**
@@ -83,10 +91,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customer with this Purchasing Habit");
+		}
+		return list;
 	}
 
 	/**
@@ -98,10 +110,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getRegionFromSegmentation(c) == region && getInterestFromSegmentation(c) == interest)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No customers found in this region with this interest");
+		}
+		return list;
 	}
 
 	/**
@@ -132,10 +148,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list =  customerProfiles.stream()
 				.filter(c -> getInterestFromSegmentation(c) == interest && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw  new ResourceNotFoundException("No Customers found with this interest and purchasinghabit");
+		}
+		return list;
 	}
 
 	/**
@@ -241,10 +261,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getInterestFromSegmentation(c) == interest && getRegionFromSegmentation(c) == region && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customers found in this region with specified interest and purchasinghabits");
+		}
+		return list;
 	}
 
 	/**
@@ -373,7 +397,6 @@ public class CustomerServiceImpl implements CustomerService {
 	 * @param enumType        the class of the enum type
 	 * @return the enum value, or null if not found
 	 * @throws EnumValueNotFoundException if the enum value is null
-	 * @throws RuntimeException           if any other exception occurs during processing
 	 */
 	public <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
 		if (customerProfile.getSegmentationData() == null || customerProfile.getSegmentationData().isEmpty()) {

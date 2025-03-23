@@ -4,15 +4,6 @@ package com.crm.enums;
  * Enumeration representing different regions.
  */
 public enum Region {
-	/**
-	 * Northern region.
-	 */
-	NORTH,
-
-	/**
-	 * Southern region.
-	 */
-	SOUTH,
 
 	/**
 	 * North America region.

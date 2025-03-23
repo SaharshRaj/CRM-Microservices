@@ -191,8 +191,8 @@ class CustomerProfileRepositoryTestCase {
 				.purchaseHistory(Arrays.asList("Item1", "Item2"))
 				.segmentationData("{\"segmentationData\": {\"Region\": \"NORTH\", \"Interest\": \"SPORTS\", \"PurchasingHabits\": \"NEW\"}}").build();
 		customerProfileRepository.save(customer3);
-		List<CustomerProfile> CustomerList = customerProfileRepository.findAllByPhoneNumber("7776665552");
-		assertEquals(CustomerList.size(), 1);
+		List<CustomerProfile> customerList = customerProfileRepository.findAllByPhoneNumber("7776665552");
+		assertEquals( 1,customerList.size());
 	}
 
 	@Test
