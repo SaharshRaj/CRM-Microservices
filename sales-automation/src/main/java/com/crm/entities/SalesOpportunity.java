@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
 public class SalesOpportunity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "opportunity_id",nullable = false)
+    @Column(name = "opportunity_id", nullable = false)
     private Long opportunityID;
     //Foreign Key
     @Column(name = "customer_id")
@@ -31,6 +30,6 @@ public class SalesOpportunity {
     @Column(name = "closing_date")
     private LocalDate closingDate;
     @Column(name = "follow_up_reminder")
-    private LocalDateTime followUpReminder;
+    private LocalDate followUpReminder;
 
 }
