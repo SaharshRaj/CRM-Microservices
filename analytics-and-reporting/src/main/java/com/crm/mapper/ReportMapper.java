@@ -1,41 +1,50 @@
 package com.crm.mapper;
 
-import com.crm.dto.CustomerBehaviorReportDTO;
-import com.crm.dto.CustomerSupportReportDTO;
-import com.crm.dto.MarketingCampaignReportDTO;
-import com.crm.dto.SalesPerformanceReportDTO;
-import com.crm.entities.CustomerBehaviorReport;
-import com.crm.entities.CustomerSupportReport;
-import com.crm.entities.MarketingCampaignReport;
-import com.crm.entities.SalesPerformanceReport;
+import com.crm.dto.ReportResponseDTO;
+import com.crm.dto.ScheduleConfigRequestDTO;
+import com.crm.dto.ScheduleConfigResponseDTO;
+import com.crm.entities.Report;
+import com.crm.entities.ScheduleConfig;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.Map;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Mapper
 public interface ReportMapper {
 
-    //ReportMapper using Factory
     ReportMapper MAPPER = Mappers.getMapper(ReportMapper.class);
 
+    @Mapping(target = "dataPoints", expression = "java(convertDataPointsToMap(report.getDataPoints()))")
+    ReportResponseDTO mapToDto(Report report);
 
-    //CustomerBehaviorReport to CustomerBehaviorReportDTO
-    CustomerBehaviorReportDTO mapToCustomerBehaviorReportDTO(CustomerBehaviorReport customerBehaviorReport);
-    //CustomerBehaviorReportDTO to CustomerBehaviorReport
-    CustomerBehaviorReport mapToCustomerBehaviorReport(CustomerBehaviorReportDTO customerBehaviorReportDTO);
+    @Mapping(target = "dataPoints", expression = "java(convertDataPointsToString(reportResponseDTO.getDataPoints()))")
+    Report mapToReport(ReportResponseDTO reportResponseDTO);
 
-    //CustomerSupportReport to CustomerSupportReportDTO
-    CustomerSupportReportDTO mapToCustomerSupportReportDTO(CustomerSupportReport customerSupportReport);
-    //CustomerSupportReportDTO to CustomerSupportReport
-    CustomerSupportReport mapToCustomerSupportReport(CustomerSupportReportDTO customerSupportReportDTO);
+    // Utility method to convert JSON string to Map
+    default Map<String, Object> convertDataPointsToMap(String dataPoints) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(dataPoints, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Error while converting dataPoints to Map: " + e.getMessage(), e);
+        }
+    }
 
-    //MarketingCampaignReport to MarketingCampaignReportDTO
-    MarketingCampaignReportDTO mapToMarketingCampaignReportDTO(MarketingCampaignReport marketingCampaignReport);
-    //MarketingCampaignReportDTO to MarketingCampaignReport
-    MarketingCampaignReport mapToMarketingCampaignReport(MarketingCampaignReportDTO marketingCampaignReportDTO);
+    // Utility method to convert Map to JSON string
+    default String convertDataPointsToString(Map<String, Object> dataPoints) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(dataPoints);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while converting dataPoints to String: " + e.getMessage(), e);
+        }
+    }
 
-    //SalesPerformanceReport to SalesPerformanceReportDTO
-    SalesPerformanceReportDTO mapToSalesPerformanceReportDTO(SalesPerformanceReport salesPerformanceReport);
-    //SalesPerformanceReportDTO to SalesPerformanceReport
-    SalesPerformanceReport mapToSalesPerformanceReport(SalesPerformanceReportDTO salesPerformanceReportDTO);
+    ScheduleConfig mapToScheduleConfig(ScheduleConfigRequestDTO scheduleConfigRequestDTO);
 
+    ScheduleConfigResponseDTO mapToScheduleConfigResponseDTO(ScheduleConfig scheduleConfig);
 }
