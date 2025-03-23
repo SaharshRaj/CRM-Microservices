@@ -1,5 +1,7 @@
 package com.crm.dto;
 import com.crm.enums.Type;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 @AllArgsConstructor
 @Validated
 public class CampaignDTO {
+	@Schema(hidden=true)
     private Long campaignID;
     @NotBlank(message = "Name cannot be blank")
     @Size(min = 5, max = 100, message = "Name must be between 5 and 100 characters")
@@ -29,8 +32,11 @@ public class CampaignDTO {
     private LocalDate endDate;
     @NotNull(message = "Type cannot be null")
     private Type type;
+    @Schema(hidden=true)
     private int customerInteractions;
+    @Schema(hidden=true)
     private String trackingUrl;
+    @Schema(hidden=true)
     public boolean isEndDateAfterStartDate() {
         if (startDate == null || endDate == null) {
             return true; // If one of the dates is null, validation will fail with @NotNull.
