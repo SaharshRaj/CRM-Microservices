@@ -66,7 +66,7 @@ class NotificationServiceTestCase {
                 .body("Test notification Body for Employee")
                 .subject("Test Subject for Employee")
                 .emailFor("employee")
-                .employeeID(101L)
+                .employeeID("sohithkalavakuri71@gmail.com")
                 .build();
 		
 		customerProfiles=Arrays.asList(

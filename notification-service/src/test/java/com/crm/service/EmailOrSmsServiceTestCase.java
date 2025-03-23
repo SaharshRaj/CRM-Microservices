@@ -23,6 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -49,11 +50,11 @@ class EmailOrSmsServiceTestCase {
                 .build();
 
         EmployeeDTO employeeDTO=new EmployeeDTO();
-        employeeDTO.setEmail(employee.getEmail());
-        employeeDTO.setPhoneNumber(employee.getPhoneNumber());
-        employeeDTO.setEmployeeID(employee.getEmployeeID());
+        employeeDTO.setEmployeeEmail("sohithkalavakuri71@gmail.com");
+        employeeDTO.setPhoneNumber("+917330783299");
 
         notification = NotificationDTO.builder()
+        		.employeeID(employeeDTO.getEmployeeEmail())
                 .subject("Test Subject")
                 .body("Test Body")
                 .build();
@@ -97,7 +98,7 @@ class EmailOrSmsServiceTestCase {
 
     @Test
     void testSendEmailToEmployee_Failure() {
-        setUpEmail();
+    	setUpEmail();
         doAnswer(invocation -> {
             throw new MessagingException("Email failed");
         }).when(mailSender).send(mimeMessage);

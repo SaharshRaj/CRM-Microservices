@@ -158,6 +158,7 @@ public class EmailOrSmsServiceImpl implements EmailOrSmsService {
                     new PhoneNumber(twilioPhoneNumber),
                     notificationDTO.getSubject())
                     .create();
+            System.out.println( message.getSid());
             logger.info("SMS sent with SID: {}, recipient: {}", message.getSid(), employeeDTO.getPhoneNumber());
             return true;
         } catch (NotificationNotFoundException e) {
