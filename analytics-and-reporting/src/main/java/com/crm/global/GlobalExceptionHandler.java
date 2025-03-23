@@ -4,6 +4,7 @@ import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ValidationErrorResponseDTO;
 import com.crm.exception.InvalidCronExpressionException;
 import com.crm.exception.InvalidDataRecievedException;
+import com.crm.exception.NoReportsAvailableException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +66,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(IllegalArgumentException.class)
     //* Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
-    public ResponseEntity<ErrorResponseDTO> handleAllException(IllegalArgumentException ex, WebRequest webRequest) {
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest webRequest) {
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
@@ -123,6 +124,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(NoReportsAvailableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNoReportsAvailableException(NoReportsAvailableException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.NOT_FOUND.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponseDTO> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
         List<String> errorMessage = new ArrayList<>();
@@ -138,4 +152,6 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+
 }

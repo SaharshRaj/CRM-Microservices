@@ -3,7 +3,6 @@ package com.crm.controller;
 import com.crm.dto.ReportResponseDTO;
 import com.crm.dto.ScheduleConfigRequestDTO;
 import com.crm.dto.ScheduleConfigResponseDTO;
-import com.crm.entities.Report;
 import com.crm.exception.InvalidDataRecievedException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
@@ -34,7 +33,7 @@ public interface ReportController {
     @GetMapping("type/{type}")
     public ResponseEntity<List<ReportResponseDTO>> getReportByType(@PathVariable String type);
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<ReportResponseDTO>> getAllReports();
 
     @PostMapping(value = "/configureCron")

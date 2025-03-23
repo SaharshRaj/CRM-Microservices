@@ -1,4 +1,5 @@
 package com.crm.service;
+
 import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ReportResponseDTO;
 import com.crm.dto.external.CampaignDTO;
@@ -20,10 +21,8 @@ import com.crm.repository.ReportRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,22 +33,24 @@ import java.util.stream.Collectors;
 @Service
 public class ReportServiceImpl implements ReportService{
 
-    @Autowired
     private SalesMockService salesMockService;
-    @Autowired
     private CustomerMockService customerMockService;
-    @Autowired
     private SupportTicketMockService supportTicketMockService;
-    @Autowired
     private CampaignMockService campaignMockService;
-
-    @Autowired
     private ReportRepository repository;
-    @Autowired
     private ObjectMapper objectMapper;
+    private ReportMapper reportMapper;
 
     @Autowired
-    private ReportMapper reportMapper;
+    public ReportServiceImpl(SalesMockService salesMockService, CustomerMockService customerMockService, SupportTicketMockService supportTicketMockService, CampaignMockService campaignMockService, ReportRepository repository, ObjectMapper objectMapper, ReportMapper reportMapper) {
+        this.salesMockService = salesMockService;
+        this.customerMockService = customerMockService;
+        this.supportTicketMockService = supportTicketMockService;
+        this.campaignMockService = campaignMockService;
+        this.repository = repository;
+        this.objectMapper = objectMapper;
+        this.reportMapper = reportMapper;
+    }
 
     /**
      * @return
@@ -149,7 +150,7 @@ public class ReportServiceImpl implements ReportService{
     @Override
     public ReportResponseDTO generateSupportReport() throws JsonProcessingException, InvalidDataRecievedException {
         ResponseEntity<?> response = supportTicketMockService.getAllSupportTickets();
-        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
+        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() != null){
             ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
             throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
         }
@@ -271,20 +272,6 @@ public class ReportServiceImpl implements ReportService{
         return ReportMapper.MAPPER.mapToDto(optionalReport.get());
     }
 
-
-//    @Override
-//    public List<ReportResponseDTO> getReportByType(ReportType reportType) {
-//        List<Report> reportList = repository.findByReportType(reportType);
-//                if(reportList.isEmpty()){
-//                    throw new NoSuchElementException("Report not found with type: " + reportType);
-//                }
-//        List<ReportResponseDTO> result = new ArrayList<>();
-//        reportList.forEach(report -> {
-//             ReportResponseDTO reportResponseDTO = ReportMapper.MAPPER.mapToDto(report);
-//             result.add(reportResponseDTO);
-//        });
-//        return result;
-//    }
 @Override
 public List<ReportResponseDTO> getReportByType(ReportType reportType) {
     List<Report> reportList = repository.findByReportType(reportType);
@@ -303,7 +290,7 @@ public List<ReportResponseDTO> getReportByType(ReportType reportType) {
         List<Report> reports = repository.findAll();
         return reports.stream()
                 .map(ReportMapper.MAPPER::mapToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }
