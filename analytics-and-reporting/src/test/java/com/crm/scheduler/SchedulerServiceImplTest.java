@@ -1,9 +1,9 @@
 package com.crm.scheduler;
 import com.crm.dto.ReportResponseDTO;
 import com.crm.dto.external.NotificationDTO;
-import com.crm.dummy.DummyClass;
 import com.crm.enums.Type;
 import com.crm.exception.InvalidDataRecievedException;
+import com.crm.feign.Proxy;
 import com.crm.mapper.ReportMapper;
 import com.crm.repository.ReportRepository;
 import com.crm.service.ReportService;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 class SchedulerServiceImplTest {
 
     @Mock
-    private DummyClass dummyClass;
+    private Proxy proxy;
 
     @Mock
     private ReportService reportService;
@@ -61,7 +61,7 @@ class SchedulerServiceImplTest {
         when(reportService.generateCustomerReport()).thenReturn(customerReport);
         when(reportService.generateSupportReport()).thenReturn(supportReport);
         when(reportService.generateMarketingReport()).thenReturn(marketingReport);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(proxy.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<NotificationDTO> notifications = service.sendNotifications();
 
@@ -76,13 +76,13 @@ class SchedulerServiceImplTest {
         when(reportService.generateCustomerReport()).thenReturn(customerReport);
         when(reportService.generateSupportReport()).thenReturn(supportReport);
         when(reportService.generateMarketingReport()).thenReturn(marketingReport);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(proxy.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<NotificationDTO> notifications = service.sendNotifications();
 
         assertEquals(Type.EMAIL, notifications.get(0).getType());
         assertEquals("ANALYTICS REPORT FOR SALES-AUTOMATION", notifications.get(0).getSubject());
-        assertEquals("2388032@cognizant.com", notifications.get(0).getEmployeeID());
+        assertEquals("sailavanya1509@gmail.com", notifications.get(0).getEmployeeID());
         assertTrue(notifications.get(0).getBody().contains("Dear Sales Team,"));
     }
 
@@ -94,13 +94,13 @@ class SchedulerServiceImplTest {
         when(reportService.generateCustomerReport()).thenReturn(customerReport);
         when(reportService.generateSupportReport()).thenReturn(supportReport);
         when(reportService.generateMarketingReport()).thenReturn(marketingReport);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(proxy.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<NotificationDTO> notifications = service.sendNotifications();
 
         assertEquals(Type.EMAIL, notifications.get(1).getType());
         assertEquals("ANALYTICS REPORT FOR CUSTOMER-DATA-MANAGEMENT", notifications.get(1).getSubject());
-        assertEquals("2388032@cognizant.com", notifications.get(1).getEmployeeID());
+        assertEquals("sailavanya1509@gmail.com", notifications.get(1).getEmployeeID());
         assertTrue(notifications.get(1).getBody().contains("Dear Customer Data Management Team,"));
     }
 
@@ -112,13 +112,13 @@ class SchedulerServiceImplTest {
         when(reportService.generateCustomerReport()).thenReturn(customerReport);
         when(reportService.generateSupportReport()).thenReturn(supportReport);
         when(reportService.generateMarketingReport()).thenReturn(marketingReport);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(proxy.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<NotificationDTO> notifications = service.sendNotifications();
 
         assertEquals(Type.EMAIL, notifications.get(2).getType());
         assertEquals("ANALYTICS REPORT FOR CUSTOMER-SUPPORT", notifications.get(2).getSubject());
-        assertEquals("2388032@cognizant.com", notifications.get(2).getEmployeeID());
+        assertEquals("sailavanya1509@gmail.com", notifications.get(2).getEmployeeID());
         assertTrue(notifications.get(2).getBody().contains("Dear Support Team,"));
     }
 
@@ -130,13 +130,13 @@ class SchedulerServiceImplTest {
         when(reportService.generateCustomerReport()).thenReturn(customerReport);
         when(reportService.generateSupportReport()).thenReturn(supportReport);
         when(reportService.generateMarketingReport()).thenReturn(marketingReport);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(proxy.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<NotificationDTO> notifications = service.sendNotifications();
 
         assertEquals(Type.EMAIL, notifications.get(3).getType());
         assertEquals("ANALYTICS REPORT FOR MARKETING-AUTOMATION", notifications.get(3).getSubject());
-        assertEquals("2388032@cognizant.com", notifications.get(3).getEmployeeID());
+        assertEquals("sailavanya1509@gmail.com", notifications.get(3).getEmployeeID());
         assertTrue(notifications.get(3).getBody().contains("Dear Marketing Team,"));
     }
 
@@ -148,10 +148,10 @@ class SchedulerServiceImplTest {
         when(reportService.generateCustomerReport()).thenReturn(customerReport);
         when(reportService.generateSupportReport()).thenReturn(supportReport);
         when(reportService.generateMarketingReport()).thenReturn(marketingReport);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(proxy.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         service.sendNotifications();
 
-        verify(dummyClass, times(4)).sendNotificatonDummy(any(NotificationDTO.class));
+        verify(proxy, times(4)).sendNotificatonDummy(any(NotificationDTO.class));
     }
 }

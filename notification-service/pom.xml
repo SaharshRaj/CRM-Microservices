@@ -33,6 +33,7 @@
 		<!--		MapStruct-->
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<org.projectlombok.version>1.18.30</org.projectlombok.version>
+		<spring-boot-admin.version>3.4.5</spring-boot-admin.version>
 
 		<!--		.-->
 	</properties>
@@ -54,6 +55,7 @@
 			<artifactId>twilio</artifactId>
 			<version>10.0.0-rc.5</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -111,6 +113,10 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>de.codecentric</groupId>
+			<artifactId>spring-boot-admin-starter-client</artifactId>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -118,6 +124,13 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
 				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>de.codecentric</groupId>
+				<artifactId>spring-boot-admin-dependencies</artifactId>
+				<version>${spring-boot-admin.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

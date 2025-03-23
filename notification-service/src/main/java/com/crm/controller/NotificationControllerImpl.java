@@ -2,7 +2,6 @@ package com.crm.controller;
 
 import com.crm.dto.NotificationDTO;
 import com.crm.service.NotificationService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -37,14 +36,14 @@ public class NotificationControllerImpl implements NotificationController {
      */
     
    @Override
-    public ResponseEntity<String> sendNotification(@RequestBody NotificationDTO notificationDTO) {
+    public ResponseEntity<NotificationDTO> sendNotification(@RequestBody NotificationDTO notificationDTO) {
 	   	 if (notificationDTO == null) {
              return ResponseEntity.badRequest().build();
          }
         try {
             NotificationDTO savedNotification = service.sendNotification(notificationDTO);
             logger.info("Notification sent successfully: {}", savedNotification);
-            return ResponseEntity.ok("Notification Sent Successfully");
+            return new ResponseEntity<>(savedNotification, HttpStatus.OK);
         } catch (Exception e) {
         	logger.error("Error occurred", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

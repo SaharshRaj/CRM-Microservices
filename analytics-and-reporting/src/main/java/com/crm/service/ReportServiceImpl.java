@@ -6,20 +6,18 @@ import com.crm.dto.external.CampaignDTO;
 import com.crm.dto.external.CustomerProfileDTO;
 import com.crm.dto.external.SalesOpportunityResponseDTO;
 import com.crm.dto.external.SupportTicketDTO;
-import com.crm.dummy.CampaignMockService;
-import com.crm.dummy.CustomerMockService;
-import com.crm.dummy.SalesMockService;
-import com.crm.dummy.SupportTicketMockService;
 import com.crm.entities.Report;
 import com.crm.enums.ReportType;
 import com.crm.enums.SalesStage;
 import com.crm.enums.Status;
 import com.crm.enums.Type;
 import com.crm.exception.InvalidDataRecievedException;
+import com.crm.feign.Proxy;
 import com.crm.mapper.ReportMapper;
 import com.crm.repository.ReportRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,23 +31,15 @@ import java.util.stream.Collectors;
 @Service
 public class ReportServiceImpl implements ReportService{
 
-    private SalesMockService salesMockService;
-    private CustomerMockService customerMockService;
-    private SupportTicketMockService supportTicketMockService;
-    private CampaignMockService campaignMockService;
-    private ReportRepository repository;
-    private ObjectMapper objectMapper;
-    private ReportMapper reportMapper;
+    private final Proxy proxy;
+    private final ReportRepository repository;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public ReportServiceImpl(SalesMockService salesMockService, CustomerMockService customerMockService, SupportTicketMockService supportTicketMockService, CampaignMockService campaignMockService, ReportRepository repository, ObjectMapper objectMapper, ReportMapper reportMapper) {
-        this.salesMockService = salesMockService;
-        this.customerMockService = customerMockService;
-        this.supportTicketMockService = supportTicketMockService;
-        this.campaignMockService = campaignMockService;
+    public ReportServiceImpl(Proxy proxy, ReportRepository repository, ObjectMapper objectMapper) {
         this.repository = repository;
         this.objectMapper = objectMapper;
-        this.reportMapper = reportMapper;
+        this.proxy = proxy;
     }
 
     /**
@@ -57,7 +47,7 @@ public class ReportServiceImpl implements ReportService{
      */
     @Override
     public ReportResponseDTO generateCustomerReport() throws JsonProcessingException, InvalidDataRecievedException {
-        ResponseEntity<?> response = customerMockService.getAllCustomers();
+        ResponseEntity<?> response = proxy.getAllCustomerProfiles();
         if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
             ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
             throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
@@ -101,7 +91,7 @@ public class ReportServiceImpl implements ReportService{
      */
     @Override
     public ReportResponseDTO generateSalesReport() throws JsonProcessingException, InvalidDataRecievedException {
-        ResponseEntity<?> response = salesMockService.getAllLeads();
+        ResponseEntity<?> response = proxy.retrieveAllSalesOpportunities();
         if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
             ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
             throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
@@ -149,8 +139,8 @@ public class ReportServiceImpl implements ReportService{
      */
     @Override
     public ReportResponseDTO generateSupportReport() throws JsonProcessingException, InvalidDataRecievedException {
-        ResponseEntity<?> response = supportTicketMockService.getAllSupportTickets();
-        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() != null){
+        ResponseEntity<?> response = proxy.retrieveAllSupportTickets();
+        if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
             ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
             throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
         }
@@ -202,7 +192,7 @@ public class ReportServiceImpl implements ReportService{
      */
     @Override
     public ReportResponseDTO generateMarketingReport() throws JsonProcessingException, InvalidDataRecievedException {
-        ResponseEntity<?> response = campaignMockService.getAllCampaigns();
+        ResponseEntity<?> response = proxy.getAllCampaigns();
         if(response.getBody() instanceof ErrorResponseDTO || response.getBody() == null){
             ErrorResponseDTO errorResponseDTO = (ErrorResponseDTO) response.getBody();
             throw new InvalidDataRecievedException(errorResponseDTO.getMessage());
@@ -280,7 +270,7 @@ public List<ReportResponseDTO> getReportByType(ReportType reportType) {
     }
     List<ReportResponseDTO> result = new ArrayList<>();
     reportList.forEach(report -> {
-        ReportResponseDTO reportResponseDTO = reportMapper.mapToDto(report); // Use the injected mapper
+        ReportResponseDTO reportResponseDTO = ReportMapper.MAPPER.mapToDto(report); // Use the injected mapper
         result.add(reportResponseDTO);
     });
     return result;

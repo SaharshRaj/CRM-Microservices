@@ -6,12 +6,12 @@ import com.crm.dto.NotificationDTO;
 import com.crm.enums.Status;
 import com.crm.enums.Type;
 import com.crm.exception.NotificationNotFoundException;
-import com.crm.feign.CustomerDataManagement;
-
+import com.crm.feign.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 /**
@@ -23,17 +23,17 @@ public class NotificationServiceImpl implements NotificationService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);
 	private static final String EMAIL_SEND_ERROR_MESSAGE ="Error While Sending the message: {}";
-	private final CustomerDataManagement customerDataManagement;
+	private final Proxy proxy;
     private final EmailOrSmsService emailOrSmsService;
     private EmployeeDTO employeeDTO=new EmployeeDTO();
     /** 
      * Constructor for NotificationServiceImpl.
      *
-     * @param customerDataManagement Service to fetch customer profiles from an external source.
+     * @param proxy Service to fetch customer profiles from an external source.
      * @param emailOrSmsService      Service to send emails and SMS notifications.
      */
-    public NotificationServiceImpl(CustomerDataManagement customerDataManagement,EmailOrSmsService emailOrSmsService) {
-    	this.customerDataManagement=customerDataManagement;
+    public NotificationServiceImpl(Proxy proxy, EmailOrSmsService emailOrSmsService) {
+    	this.proxy = proxy;
 		this.emailOrSmsService = emailOrSmsService;
     }
     /**
@@ -73,7 +73,7 @@ public class NotificationServiceImpl implements NotificationService {
 	 * @throws NotificationNotFoundException if no customers are found or an invalid type is provided. 
 	 */
 	private void processCustomerNotifications(NotificationDTO notificationDTO) {
-		ResponseEntity<List<CustomerProfileDTO>> response = customerDataManagement.getAllCustomerProfiles();
+		ResponseEntity<List<CustomerProfileDTO>> response = proxy.getAllCustomerProfiles();
 	    List<CustomerProfileDTO> allCustomers = response.getBody();
 
 	    if (allCustomers == null || allCustomers.isEmpty()) {

@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -22,10 +21,6 @@ import org.springframework.validation.annotation.Validated;
 @AllArgsConstructor
 @Validated
 public class NotificationDTO {
-    /**
-     * List of customer IDs to whom the notification should be sent.
-     */
-    private List<Long> customerID;
     /**
      * Employee ID to whom the notification should be sent.
      */

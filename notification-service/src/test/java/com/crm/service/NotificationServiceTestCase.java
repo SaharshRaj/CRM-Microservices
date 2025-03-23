@@ -27,11 +27,11 @@ import com.crm.dto.NotificationDTO;
 import com.crm.enums.Status;
 import com.crm.enums.Type;
 import com.crm.exception.NotificationNotFoundException;
-import com.crm.feign.CustomerDataManagement;
+import com.crm.feign.Proxy;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTestCase {
 	@Mock
-	private CustomerDataManagement customerDataManagement;
+	private Proxy proxy;
 	
 	@Mock
 	private EmailOrSmsService emailOrSmsService;
@@ -79,7 +79,7 @@ class NotificationServiceTestCase {
 
 	@Test
 	void testSendNotification_Success_Email() {
-		 when(customerDataManagement.getAllCustomerProfiles())
+		 when(proxy.getAllCustomerProfiles())
          .thenReturn(ResponseEntity.ok(customerProfiles));
 
 		 doNothing().when(emailOrSmsService).sendEmail(any(CustomerProfileDTO.class), any(NotificationDTO.class));
@@ -95,7 +95,7 @@ class NotificationServiceTestCase {
 	
 	 @Test
 	    void testSendNotification_Success_SMS_MultipleCustomers() {
-	        when(customerDataManagement.getAllCustomerProfiles())
+	        when(proxy.getAllCustomerProfiles())
 	                .thenReturn(ResponseEntity.ok(customerProfiles));
 
 	        when(emailOrSmsService.sendSms(any(CustomerProfileDTO.class), any(NotificationDTO.class)))
@@ -111,7 +111,7 @@ class NotificationServiceTestCase {
 
 	  @Test
 	    void testSendNotification_NoCustomersFound() {
-	        when(customerDataManagement.getAllCustomerProfiles())
+	        when(proxy.getAllCustomerProfiles())
 	                .thenReturn(ResponseEntity.ok(Collections.emptyList()));
 
 	        NotificationNotFoundException exception = assertThrows(NotificationNotFoundException.class, () -> notificationServiceImpl.sendNotification(notificationDTO1));
@@ -133,7 +133,7 @@ class NotificationServiceTestCase {
 	    void testSendNotification_EmailServiceFailure() {
 		  notificationDTO1.setType(Type.EMAIL);
 	        ResponseEntity<List<CustomerProfileDTO>> response = new ResponseEntity<>(customerProfiles, HttpStatus.OK);
-	        when(customerDataManagement.getAllCustomerProfiles()).thenReturn(response);
+	        when(proxy.getAllCustomerProfiles()).thenReturn(response);
 	        doThrow(new RuntimeException("Email sending failed")).when(emailOrSmsService).sendEmail(any(CustomerProfileDTO.class), any(NotificationDTO.class));
 
 	        NotificationDTO result = notificationServiceImpl.sendNotification(notificationDTO1);
@@ -144,7 +144,7 @@ class NotificationServiceTestCase {
 	  
 	 @Test
 	  void testSendNotification_SMS_ServiceFailure() {
-		  when(customerDataManagement.getAllCustomerProfiles())
+		  when(proxy.getAllCustomerProfiles())
 		  		.thenReturn(ResponseEntity.ok(customerProfiles));
 		  
 		  doThrow(new NotificationNotFoundException("SMS service down"))

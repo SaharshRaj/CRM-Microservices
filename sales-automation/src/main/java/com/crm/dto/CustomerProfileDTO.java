@@ -1,4 +1,4 @@
-package com.crm.dto.external;
+package com.crm.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

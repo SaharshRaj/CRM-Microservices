@@ -15,17 +15,17 @@ import java.util.List;
 import java.util.Map;
 @RequestMapping("api/marketing")
 public interface CampaignController {
-	@GetMapping("GetAllCampaigns")
+	@GetMapping
 	public ResponseEntity<List<CampaignDTO>> getAllCampaigns();
-	@PostMapping("campaign")
+	@PostMapping
 	public ResponseEntity<CampaignDTO> createCampaign(@Valid @RequestBody CampaignDTO campaignDTO);
 	@PostMapping("multipleCampaigns")
 	ResponseEntity<List<CampaignDTO>> createCampaigns(@RequestBody List<CampaignDTO> campaignDTOs);
-	@GetMapping("campaign/{campaignId}")
+	@GetMapping("/{campaignId}")
 	public ResponseEntity<CampaignDTO> getCampaignById(@PathVariable("campaignId") Long campaignId);
-	@PutMapping("campaign/{campaignId}")
+	@PutMapping("/{campaignId}")
 	public ResponseEntity<CampaignDTO> updateCampaign(@PathVariable("campaignId") Long campaignId,@Valid @RequestBody CampaignDTO campaignDTO);
-	@DeleteMapping("campaign/{campaignId}")
+	@DeleteMapping("/{campaignId}")
 	public ResponseEntity<CampaignDTO> deleteCampaign(@PathVariable("campaignId") Long campaignId);
 	@GetMapping("/{campaignId}/track")
 	public ResponseEntity<Void> trackCampaignClick(@PathVariable("campaignId") Long campaignId) throws CampaignNotFoundException;

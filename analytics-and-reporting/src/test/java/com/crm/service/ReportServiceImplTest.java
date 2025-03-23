@@ -6,20 +6,16 @@ import com.crm.dto.external.CampaignDTO;
 import com.crm.dto.external.CustomerProfileDTO;
 import com.crm.dto.external.SalesOpportunityResponseDTO;
 import com.crm.dto.external.SupportTicketDTO;
-import com.crm.dummy.CampaignMockService;
-import com.crm.dummy.CustomerMockService;
-import com.crm.dummy.SalesMockService;
-import com.crm.dummy.SupportTicketMockService;
 import com.crm.entities.Report;
 import com.crm.enums.ReportType;
 import com.crm.enums.SalesStage;
 import com.crm.enums.Status;
 import com.crm.enums.Type;
 import com.crm.exception.InvalidDataRecievedException;
+import com.crm.feign.Proxy;
 import com.crm.mapper.ReportMapper;
 import com.crm.repository.ReportRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +30,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -43,13 +39,7 @@ import static org.mockito.Mockito.*;
 class ReportServiceImplTest {
 
     @Mock
-    private SalesMockService salesMockService;
-    @Mock
-    private CustomerMockService customerMockService;
-    @Mock
-    private SupportTicketMockService supportTicketMockService;
-    @Mock
-    private CampaignMockService campaignMockService;
+    private Proxy proxy;
     @Mock
     private ReportRepository repository;
     @Mock
@@ -147,7 +137,7 @@ class ReportServiceImplTest {
     @Test
     void generateCustomerReport_Success() throws Exception {
         ResponseEntity<List<CustomerProfileDTO>> responseEntity = new ResponseEntity<>(customerProfiles, HttpStatus.OK);
-        when(customerMockService.getAllCustomers()).thenReturn(responseEntity);
+        when(proxy.getAllCustomerProfiles()).thenReturn(responseEntity);
 
         Report report = new Report();
         report.setId(1L);
@@ -161,12 +151,12 @@ class ReportServiceImplTest {
 
         assertNotNull(reportResponseDTO);
         assertEquals(ReportType.CUSTOMER, reportResponseDTO.getReportType());
-        verify(customerMockService, times(1)).getAllCustomers();
+        verify(proxy, times(1)).getAllCustomerProfiles();
         verify(repository, times(1)).save(any(Report.class));
     }
 
     @Test
-    void generateCustomerReport_InvalidData() throws Exception {
+    void generateCustomerReport_InvalidData() {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .code("400")
@@ -174,7 +164,7 @@ class ReportServiceImplTest {
                 .path("/customers")
                 .build();
         ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
-        when(customerMockService.getAllCustomers()).thenReturn((ResponseEntity) responseEntity);
+        when(proxy.getAllCustomerProfiles()).thenReturn((ResponseEntity) responseEntity);
 
         assertThrows(InvalidDataRecievedException.class, () -> reportService.generateCustomerReport());
     }
@@ -182,7 +172,7 @@ class ReportServiceImplTest {
     @Test
     void generateSalesReport_Success() throws Exception {
         ResponseEntity<List<SalesOpportunityResponseDTO>> responseEntity = new ResponseEntity<>(salesOpportunities, HttpStatus.OK);
-        when(salesMockService.getAllLeads()).thenReturn(responseEntity);
+        when(proxy.retrieveAllSalesOpportunities()).thenReturn(responseEntity);
 
         Report report = new Report();
         report.setId(2L);
@@ -196,12 +186,12 @@ class ReportServiceImplTest {
 
         assertNotNull(reportResponseDTO);
         assertEquals(ReportType.SALES, reportResponseDTO.getReportType());
-        verify(salesMockService, times(1)).getAllLeads();
+        verify(proxy, times(1)).retrieveAllSalesOpportunities();
         verify(repository, times(1)).save(any(Report.class));
     }
 
     @Test
-    void generateSalesReport_InvalidData() throws Exception {
+    void generateSalesReport_InvalidData() {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .code("400")
@@ -209,7 +199,7 @@ class ReportServiceImplTest {
                 .path("/sales")
                 .build();
         ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
-        when(salesMockService.getAllLeads()).thenReturn((ResponseEntity) responseEntity);
+        when(proxy.retrieveAllSalesOpportunities()).thenReturn((ResponseEntity) responseEntity);
 
         assertThrows(InvalidDataRecievedException.class, () -> reportService.generateSalesReport());
     }
@@ -217,7 +207,7 @@ class ReportServiceImplTest {
     @Test
     void generateSupportReport_Success() throws Exception {
         ResponseEntity<List<SupportTicketDTO>> responseEntity = new ResponseEntity<>(supportTickets, HttpStatus.OK);
-        when(supportTicketMockService.getAllSupportTickets()).thenReturn(responseEntity);
+        when(proxy.retrieveAllSupportTickets()).thenReturn(responseEntity);
 
         Report report = new Report();
         report.setId(3L);
@@ -231,12 +221,12 @@ class ReportServiceImplTest {
 
         assertNotNull(reportResponseDTO);
         assertEquals(ReportType.SUPPORT, reportResponseDTO.getReportType());
-        verify(supportTicketMockService, times(1)).getAllSupportTickets();
+        verify(proxy, times(1)).retrieveAllSupportTickets();
         verify(repository, times(1)).save(any(Report.class));
     }
 
     @Test
-    void generateSupportReport_InvalidData() throws Exception {
+    void generateSupportReport_InvalidData() {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .code("400")
@@ -244,14 +234,14 @@ class ReportServiceImplTest {
                 .path("/support")
                 .build();
         ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
-        when(supportTicketMockService.getAllSupportTickets()).thenReturn((ResponseEntity) responseEntity);
+        when(proxy.retrieveAllSupportTickets()).thenReturn((ResponseEntity) responseEntity);
 
         assertThrows(InvalidDataRecievedException.class, () -> reportService.generateSupportReport());
     }
     @Test
     void generateMarketingReport_Success() throws Exception {
         ResponseEntity<List<CampaignDTO>> responseEntity = new ResponseEntity<>(campaigns, HttpStatus.OK);
-        when(campaignMockService.getAllCampaigns()).thenReturn(responseEntity);
+        when(proxy.getAllCampaigns()).thenReturn(responseEntity);
 
         Report report = new Report();
         report.setId(4L);
@@ -265,11 +255,11 @@ class ReportServiceImplTest {
 
         assertNotNull(reportResponseDTO);
         assertEquals(ReportType.MARKETING, reportResponseDTO.getReportType());
-        verify(campaignMockService, times(1)).getAllCampaigns();
+        verify(proxy, times(1)).getAllCampaigns();
         verify(repository, times(1)).save(any(Report.class));
     }
     @Test
-    void generateMarketingReport_InvalidData() throws Exception {
+    void generateMarketingReport_InvalidData() {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .code("400")
@@ -277,14 +267,14 @@ class ReportServiceImplTest {
                 .path("/campaigns")
                 .build();
         ResponseEntity<ErrorResponseDTO> responseEntity = new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
-        when(campaignMockService.getAllCampaigns()).thenReturn((ResponseEntity) responseEntity);
+        when(proxy.getAllCampaigns()).thenReturn((ResponseEntity) responseEntity);
 
         assertThrows(InvalidDataRecievedException.class, () -> reportService.generateMarketingReport());
     }
     @Test
     void generateCustomerReport_NoCustomers() throws Exception {
         ResponseEntity<List<CustomerProfileDTO>> responseEntity = new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-        when(customerMockService.getAllCustomers()).thenReturn(responseEntity);
+        when(proxy.getAllCustomerProfiles()).thenReturn(responseEntity);
 
         Report report = new Report();
         report.setId(5L);
@@ -298,7 +288,7 @@ class ReportServiceImplTest {
 
         assertNotNull(reportResponseDTO);
         assertEquals(ReportType.CUSTOMER, reportResponseDTO.getReportType());
-        verify(customerMockService, times(1)).getAllCustomers();
+        verify(proxy, times(1)).getAllCustomerProfiles();
         verify(repository, times(1)).save(any(Report.class));
     }
 
@@ -306,7 +296,7 @@ class ReportServiceImplTest {
     @Test
     void generateSalesReport_NoOpportunities() throws Exception {
         ResponseEntity<List<SalesOpportunityResponseDTO>> responseEntity = new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-        when(salesMockService.getAllLeads()).thenReturn(responseEntity);
+        when(proxy.retrieveAllSalesOpportunities()).thenReturn(responseEntity);
 
         Report report = new Report();
         report.setId(6L);
@@ -320,13 +310,13 @@ class ReportServiceImplTest {
 
         assertNotNull(reportResponseDTO);
         assertEquals(ReportType.SALES, reportResponseDTO.getReportType());
-        verify(salesMockService, times(1)).getAllLeads();
+        verify(proxy, times(1)).retrieveAllSalesOpportunities();
         verify(repository, times(1)).save(any(Report.class));
     }
     @Test
     void generateSupportReport_NoTickets() throws Exception {
         ResponseEntity<List<SupportTicketDTO>> responseEntity = new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-        when(supportTicketMockService.getAllSupportTickets()).thenReturn(responseEntity);
+        when(proxy.retrieveAllSupportTickets()).thenReturn(responseEntity);
 
         Report report = new Report();
         report.setId(7L);
@@ -340,7 +330,7 @@ class ReportServiceImplTest {
 
         assertNotNull(reportResponseDTO);
         assertEquals(ReportType.SUPPORT, reportResponseDTO.getReportType());
-        verify(supportTicketMockService, times(1)).getAllSupportTickets();
+        verify(proxy, times(1)).retrieveAllSupportTickets();
         verify(repository, times(1)).save(any(Report.class));
     }
      @Test
@@ -359,13 +349,7 @@ class ReportServiceImplTest {
       when(repository.findById(1L)).thenReturn(Optional.empty());
        assertThrows(NoSuchElementException.class, () -> reportService.getReportById(1L));
    }
-//    @Test
-//    void getReportByType_NotFound() {
-//        when(repository.findByReportType(ReportType.CUSTOMER)).thenReturn(Collections.emptyList());
-//
-//        assertThrows(NoSuchElementException.class, () -> reportService.getReportByType(ReportType.CUSTOMER));
-//        verify(repository, times(1)).findByReportType(ReportType.CUSTOMER);
-//    }
+
 
 
         @Test
@@ -453,8 +437,7 @@ class ReportServiceImplTest {
                 .build();
 
         when(repository.findByReportType(reportType)).thenReturn(Arrays.asList(report1, report2));
-        when(reportMapper.mapToDto(report1)).thenReturn(dto1);
-        when(reportMapper.mapToDto(report2)).thenReturn(dto2);
+
 
         List<ReportResponseDTO> result = reportService.getReportByType(reportType);
 
@@ -465,6 +448,5 @@ class ReportServiceImplTest {
         assertTrue(EqualsBuilder.reflectionEquals(dto2, result.get(1), "generatedDate", "dataPoints"));
 
         verify(repository, times(1)).findByReportType(reportType);
-        verify(reportMapper, times(2)).mapToDto(any(Report.class));
     }
 }

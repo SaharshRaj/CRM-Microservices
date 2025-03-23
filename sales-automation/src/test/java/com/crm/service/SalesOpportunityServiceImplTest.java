@@ -3,13 +3,13 @@ package com.crm.service;
 import com.crm.dto.NotificationDTO;
 import com.crm.dto.SalesOpportunityRequestDTO;
 import com.crm.dto.SalesOpportunityResponseDTO;
-import com.crm.dummy.DummyClass;
 import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidOpportunityIdException;
 import com.crm.exception.InvalidSalesDetailsException;
+import com.crm.feign.Proxy;
 import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
 import jakarta.validation.ConstraintViolationException;
@@ -43,7 +43,7 @@ class SalesOpportunityServiceImplTest {
     private SalesOpportunityMapper mapper;
 
     @Mock
-    private DummyClass dummyClass;
+    private Proxy proxy;
 
 
     @InjectMocks
@@ -232,12 +232,12 @@ class SalesOpportunityServiceImplTest {
                 .build();
 
         when(repository.findById(1L)).thenReturn(Optional.of(salesOpportunity));
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenReturn(notificationDTO);
+        when(proxy.sendNotificaton(any(NotificationDTO.class))).thenReturn(notificationDTO);
         when(repository.save(any(SalesOpportunity.class))).thenReturn(salesOpportunity);
         assertEquals(salesOpportunityResponseDTO, service.updateSalesStage(1L , SalesStage.CLOSED_WON));
         verify(repository, times(1)).findById(1L);
         verify(repository, times(1)).save(any(SalesOpportunity.class));
-        verify(dummyClass, times(1)).sendNotificatonDummy(any(NotificationDTO.class));
+        verify(proxy, times(1)).sendNotificaton(any(NotificationDTO.class));
     }
 
     @Test

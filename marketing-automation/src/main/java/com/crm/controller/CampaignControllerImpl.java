@@ -44,7 +44,7 @@ public class CampaignControllerImpl implements CampaignController {
      * @return ResponseEntity containing a list of CampaignDTOs.
      */
     @Override
-    @GetMapping("GetAllCampaigns")
+    @GetMapping
     @Operation(summary = "Get all campaigns", description = "Retrieves a list of all marketing campaigns.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CampaignDTO.class))),
@@ -62,7 +62,7 @@ public class CampaignControllerImpl implements CampaignController {
      * @return ResponseEntity containing the created CampaignDTO.
      */
     @Override
-    @PostMapping("campaign")
+    @PostMapping
     @Operation(summary = "Create a new campaign", description = "Creates a new marketing campaign.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Campaign created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CampaignDTO.class))),
@@ -80,7 +80,7 @@ public class CampaignControllerImpl implements CampaignController {
      * @return ResponseEntity containing the CampaignDTO.
      */
     @Override
-    @GetMapping("campaign/{campaignId}")
+    @GetMapping("/{campaignId}")
     @Operation(summary = "Get campaign by ID", description = "Retrieves a marketing campaign by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Campaign found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CampaignDTO.class))),
@@ -99,7 +99,7 @@ public class CampaignControllerImpl implements CampaignController {
      * @return ResponseEntity containing the updated CampaignDTO.
      */
     @Override
-    @PutMapping("campaign/{campaignId}")
+    @PutMapping("/{campaignId}")
     @Operation(summary = "Update campaign by ID", description = "Updates an existing marketing campaign by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Campaign updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CampaignDTO.class))),
@@ -118,7 +118,7 @@ public class CampaignControllerImpl implements CampaignController {
      * @return ResponseEntity indicating the deletion status.
      */
     @Override
-    @DeleteMapping("campaign/{campaignId}")
+    @DeleteMapping("/{campaignId}")
     @Operation(summary = "Delete campaign by ID", description = "Deletes a marketing campaign by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Campaign deleted"),

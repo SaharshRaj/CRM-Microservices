@@ -1,9 +1,9 @@
 package com.crm.service;
 
+import com.crm.dto.CustomerProfileDTO;
 import com.crm.dto.NotificationDTO;
 import com.crm.dto.SalesOpportunityRequestDTO;
 import com.crm.dto.SalesOpportunityResponseDTO;
-import com.crm.dummy.DummyClass;
 import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
@@ -11,34 +11,33 @@ import com.crm.exception.CustomerNotFoundException;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidOpportunityIdException;
 import com.crm.exception.InvalidSalesDetailsException;
+import com.crm.feign.Proxy;
 import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
-@Slf4j //TODO:Remove this annotation
 public class SalesOpportunityServiceImpl implements SalesOpportunityService {
 
     private final SalesOpportunityRepository repository;
-    private final DummyClass dummyClass;
+    private final Proxy proxy;
     private String errorMsg = "No leads found with given Opportunity ID";
 
     @Autowired
-    public SalesOpportunityServiceImpl(SalesOpportunityRepository repository, DummyClass dummyClass) {
+    public SalesOpportunityServiceImpl(SalesOpportunityRepository repository, Proxy proxy) {
         this.repository = repository;
-        this.dummyClass = dummyClass;
+        this.proxy = proxy;
     }
 
 
@@ -75,8 +74,8 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      */
     @Override
     public SalesOpportunityResponseDTO createSalesOpportunity(SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException {
-        //TODO:Make Call Using Feign to check if Customer exists or not
-        if(false){
+        ResponseEntity<?> customer = proxy.getCustomerById(salesOpportunityRequestDto.getCustomerID());
+        if(!(customer.getBody() instanceof CustomerProfileDTO)){
             throw new CustomerNotFoundException("Customer with id: " + salesOpportunityRequestDto.getCustomerID() + " does not exists.");
         }
         SalesOpportunity salesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityRequestDto);
@@ -138,15 +137,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
                 .subject("Sales Status Changed for Lead with ID " + opportunityID)
                 .body(email.toString())
                 .build();
-        //TODO:Send Email Regarding SalesStage
-        NotificationDTO resultDTO = dummyClass.sendNotificatonDummy(notificationDTO);
-        if (resultDTO.getStatus().equals("SENT")) {
-            log.info("NOTIFICATION SENT FOR LEAD WITH ID #{}", opportunityID);
-        } else {
-            log.error("FAILED TO SEND NOTIFICATION FOR LEAD WITH ID #{}", opportunityID);
-        }
-
-        log.info("EMAIL -> \n{}",email.toString());
+        proxy.sendNotificaton(notificationDTO);
         return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(salesOpportunity));
         }
         catch (NoSuchElementException e) {

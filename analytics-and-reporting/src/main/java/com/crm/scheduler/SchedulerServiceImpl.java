@@ -2,12 +2,10 @@ package com.crm.scheduler;
 
 import com.crm.dto.ReportResponseDTO;
 import com.crm.dto.external.NotificationDTO;
-import com.crm.dummy.DummyClass;
 import com.crm.entities.EmailFormat;
 import com.crm.enums.Type;
 import com.crm.exception.InvalidDataRecievedException;
-import com.crm.mapper.ReportMapper;
-import com.crm.repository.ReportRepository;
+import com.crm.feign.Proxy;
 import com.crm.service.ReportService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +22,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SchedulerServiceImpl implements SchedulerService {
 
-    private final DummyClass dummyClass;
     private final ReportService service;
+    private final Proxy proxy;
 
     @Autowired
-    public SchedulerServiceImpl(DummyClass dummyClass, ReportService service) {
-        this.dummyClass = dummyClass;
+    public SchedulerServiceImpl(ReportService service, Proxy proxy) {
         this.service = service;
+        this.proxy = proxy;
     }
 
     @Override
@@ -48,25 +46,25 @@ public class SchedulerServiceImpl implements SchedulerService {
             // Generate notifications
             notificationDTOS.add(createAndSendNotification(
                     "ANALYTICS REPORT FOR SALES-AUTOMATION",
-                    "2388032@cognizant.com",
+                    "sailavanya1509@gmail.com",
                     generateEmailForSales(reportResponseDTOForSalesAutomation)
             ));
 
             notificationDTOS.add(createAndSendNotification(
                     "ANALYTICS REPORT FOR CUSTOMER-DATA-MANAGEMENT",
-                    "2388032@cognizant.com",
+                    "sailavanya1509@gmail.com",
                     generateEmailForCustomers(reportResponseDTOForCustomerDataManagement)
             ));
 
             notificationDTOS.add(createAndSendNotification(
                     "ANALYTICS REPORT FOR CUSTOMER-SUPPORT",
-                    "2388032@cognizant.com",
+                    "sailavanya1509@gmail.com",
                     generateEmailForSupport(reportResponseDTOForCustomerSupport)
             ));
 
             notificationDTOS.add(createAndSendNotification(
                     "ANALYTICS REPORT FOR MARKETING-AUTOMATION",
-                    "2388032@cognizant.com",
+                    "sailavanya1509@gmail.com",
                     generateEmailForMarketing(reportResponseDTOForMarketingAutomation)
             ));
 
@@ -172,6 +170,6 @@ public class SchedulerServiceImpl implements SchedulerService {
                 .build();
 
         log.info("Sending Notification -> {}", subject);
-        return dummyClass.sendNotificatonDummy(notificationDTO);
+        return proxy.sendNotificatonDummy(notificationDTO);
     }
 }

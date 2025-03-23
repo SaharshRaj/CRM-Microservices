@@ -1,10 +1,10 @@
 package com.crm.scheduler;
 
 import com.crm.dto.NotificationDTO;
-import com.crm.dummy.DummyClass;
 import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
+import com.crm.feign.Proxy;
 import com.crm.repository.SalesOpportunityRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +21,12 @@ import java.util.List;
 public class SchedulerServiceImpl implements SchedulerService {
 
     private final SalesOpportunityRepository repository;
-    private final DummyClass dummyClass;
+    private final Proxy proxy;
 
     @Autowired
-    public SchedulerServiceImpl(SalesOpportunityRepository repository, DummyClass dummyClass) {
+    public SchedulerServiceImpl(SalesOpportunityRepository repository, Proxy proxy) {
         this.repository = repository;
-        this.dummyClass = dummyClass;
+        this.proxy = proxy;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class SchedulerServiceImpl implements SchedulerService {
                             .subject("Follow-up Reminder for Sales Lead with ID " + o.getOpportunityID())
                             .body(email.toString())
                             .build();
-                    NotificationDTO resultDTO = dummyClass.sendNotificatonDummy(notificationDTO);
+                    NotificationDTO resultDTO = proxy.sendNotificaton(notificationDTO);
                     result.add(resultDTO);
                     if (resultDTO.getStatus().equals("SENT")) {
                         log.info("NOTIFICATION SENT FOR LEAD WITH ID #{}", o.getOpportunityID());
@@ -83,7 +83,7 @@ public class SchedulerServiceImpl implements SchedulerService {
                             .subject("Status updated for Sales Lead with ID " + o.getOpportunityID())
                             .body(email.toString())
                             .build();
-                    NotificationDTO resultDTO = dummyClass.sendNotificatonDummy(notificationDTO);
+                    NotificationDTO resultDTO = proxy.sendNotificaton(notificationDTO);
                     result.add(resultDTO);
                     if (resultDTO.getStatus().equals("SENT")) {
                         log.info("NOTIFICATION SENT FOR LEAD WITH ID #{}", o.getOpportunityID());

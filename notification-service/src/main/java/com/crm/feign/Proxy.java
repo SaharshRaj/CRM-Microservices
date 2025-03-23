@@ -12,7 +12,7 @@ import java.util.List;
  * through the API gateway.
  */
 @FeignClient("api-gateway")
-public interface CustomerDataManagement {
+public interface Proxy {
     /**
      * Retrieves a list of all customer profiles.
      *
@@ -23,5 +23,5 @@ public interface CustomerDataManagement {
      * The response may be empty if no customers are found.
      */
     @GetMapping("api/customers")
-    public ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
+    ResponseEntity<List<CustomerProfileDTO>> getAllCustomerProfiles();
 }

@@ -7,6 +7,7 @@ import com.crm.entities.Campaign;
 import com.crm.enums.Type;
 import com.crm.exception.CampaignNotFoundException;
 import com.crm.exception.CampaignNotificationFailedException;
+import com.crm.feign.Proxy;
 import com.crm.mapper.CampaignMapper;
 import com.crm.repository.CampaignRepository;
 import org.springframework.stereotype.Service;
@@ -25,11 +26,11 @@ import java.util.stream.Collectors;
 public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepository repository;
     private final CampaignMapper mapper;
-    //private final NotificationClient notificationClient;
-    public CampaignServiceImpl(CampaignRepository repository, CampaignMapper mapper) {
+    private final Proxy proxy;
+    public CampaignServiceImpl(CampaignRepository repository, CampaignMapper mapper, Proxy proxy) {
         this.repository = repository;
         this.mapper = mapper;
-        //this.notificationClient=notificationClient;
+        this.proxy = proxy;
     }
     /**
      * Creates a new campaign.
@@ -61,8 +62,8 @@ public class CampaignServiceImpl implements CampaignService {
             notificationDTO.setTrackingUrl(trackingUrl);
             notificationDTO.setBody(emailFormat.toString());
             try {
-            	//notificationClient.sendNotification(notificationDTO);
-            	//return mapper.mapToDTO(savedCampaign);
+            	proxy.sendNotification(notificationDTO);
+            	return mapper.mapToDTO(savedCampaign);
             }catch(CampaignNotificationFailedException e) {
             	throw new CampaignNotificationFailedException("Campaign Notification Failed Exception"+campaign.getType());
             }
@@ -76,8 +77,8 @@ public class CampaignServiceImpl implements CampaignService {
             notificationDTO.setType(savedCampaign.getType());
             notificationDTO.setTrackingUrl(trackingUrl);
             try {
-            	//notificationClient.sendNotification(notificationDTO);
-            	//return mapper.mapToDTO(savedCampaign)
+            	proxy.sendNotification(notificationDTO);
+            	return mapper.mapToDTO(savedCampaign);
             }catch(CampaignNotificationFailedException e) {
             	throw new CampaignNotificationFailedException("Campaign Notification Failed Exception"+campaign.getType());
             }

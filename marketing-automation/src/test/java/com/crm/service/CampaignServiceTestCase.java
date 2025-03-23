@@ -10,6 +10,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.crm.dto.EmailFormat;
+import com.crm.dto.NotificationDTO;
+import com.crm.feign.Proxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +35,8 @@ class CampaignServiceTestCase {
 	private CampaignRepository campaignRepository;
 	@Mock
 	private CampaignMapperImpl mapper;
+	@Mock
+	private Proxy proxy;
 	@InjectMocks
 	private CampaignServiceImpl campaignServiceImpl;
 	private List<Campaign> campaigns;
@@ -290,17 +296,22 @@ class CampaignServiceTestCase {
         inputDTO.setName("Test Campaign");
         inputDTO.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
         campaign = new Campaign();
+		NotificationDTO notificationDTO = new NotificationDTO();
+		notificationDTO.setEmailFor("Customer");
+		notificationDTO.setStatus("pending");
+		notificationDTO.setBody("");
+		notificationDTO.setType(Type.EMAIL);
+		notificationDTO.setTrackingUrl("");
         campaign.setCampaignID(1L);
         campaign.setStartDate(inputDTO.getStartDate());
         campaign.setEndDate(inputDTO.getEndDate());
         campaign.setType(inputDTO.getType());
         campaign.setName(inputDTO.getName());
         campaign.setTrackingUrl("http://localhost:3004/api/marketing/7/track");
-
+		when(proxy.sendNotification(any(NotificationDTO.class))).thenReturn(notificationDTO);
         when(mapper.mapToCampaign(inputDTO)).thenReturn(campaign);
         when(campaignRepository.save(campaign)).thenReturn(campaign);
         when(mapper.mapToDTO(campaign)).thenReturn(inputDTO);
-
         CampaignDTO resultDTO = campaignServiceImpl.createCampaign(inputDTO);
 
         assertNotNull(resultDTO.getTrackingUrl());
@@ -318,6 +329,20 @@ class CampaignServiceTestCase {
     @Test
     void test_createCampaigns_multipleCampaigns() throws CampaignNotFoundException {
         List<CampaignDTO> inputDTOs = new ArrayList<>();
+		NotificationDTO notificationDTO = new NotificationDTO();
+		EmailFormat emailFormat=new EmailFormat();
+		emailFormat.setSalutation("Dear Customer,");
+		emailFormat.setOpeningLine("Welcome to theCampaign 1I I hope this message finds you well.");
+		emailFormat.setBody("Don't miss out on our exclusive Campaign 1 offers !");
+		emailFormat.setConclusion("Thanks for being with us,THIS IS AUTO GENERATED MAIL PLEASE DO NOT REPLY THIS MAIL");
+		emailFormat.setClosing("Click below link to know more");
+		notificationDTO.setType(Type.EMAIL);
+		notificationDTO.setStatus("pending");
+		notificationDTO.setSubject("This is an Campaign Infomartion with Campaign name"+campaign.getName());
+		notificationDTO.setEmailFor("Customer");
+		notificationDTO.setTrackingUrl("http://localhost:3004/api/marketing/1/track");
+		notificationDTO.setBody(emailFormat.toString());
+
         CampaignDTO dto1 = new CampaignDTO();
         dto1.setName("Campaign 1");
         dto1.setStartDate(LocalDate.now());
@@ -352,6 +377,7 @@ class CampaignServiceTestCase {
         campaign2.setCustomerInteractions(dto2.getCustomerInteractions());
         when(mapper.mapToCampaign(dto1)).thenReturn(campaign1);
         when(campaignRepository.save(campaign1)).thenReturn(campaign1);
+		when(proxy.sendNotification(any(NotificationDTO.class))).thenReturn(notificationDTO);
         when(mapper.mapToDTO(campaign1)).thenReturn(dto1);
         when(mapper.mapToCampaign(dto2)).thenReturn(campaign2);
         when(campaignRepository.save(campaign2)).thenReturn(campaign2);

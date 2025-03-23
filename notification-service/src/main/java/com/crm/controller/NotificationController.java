@@ -13,5 +13,5 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface NotificationController {
   
     @PostMapping("send")
-    public ResponseEntity<String> sendNotification(@Valid NotificationDTO notificationDTO);
+    public ResponseEntity<NotificationDTO> sendNotification(@Valid NotificationDTO notificationDTO);
 }

@@ -1,10 +1,10 @@
 package com.crm.scheduler;
 
 import com.crm.dto.NotificationDTO;
-import com.crm.dummy.DummyClass;
 import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
+import com.crm.feign.Proxy;
 import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ class SchedulerServiceImplTest {
     private SalesOpportunityMapper mapper;
 
     @Mock
-    DummyClass dummyClass;
+    private Proxy proxy;
 
 
     @InjectMocks
@@ -125,7 +125,7 @@ class SchedulerServiceImplTest {
 
         // Stubbing the repository and dummyClass methods
         when(repository.findByFollowUpReminder(LocalDate.now())).thenReturn(list);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> {
+        when(proxy.sendNotificaton(any(NotificationDTO.class))).thenAnswer(invocation -> {
             NotificationDTO arg = invocation.getArgument(0);
             arg.setStatus("SENT");
             return arg;
@@ -136,9 +136,9 @@ class SchedulerServiceImplTest {
 
         // Verify the results
         assertEquals(expected, actual);
-        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj1.getSubject())));
-        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj2.getSubject())));
-        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj3.getSubject())));
+        verify(proxy).sendNotificaton(argThat(dto -> dto.getSubject().equals(obj1.getSubject())));
+        verify(proxy).sendNotificaton(argThat(dto -> dto.getSubject().equals(obj2.getSubject())));
+        verify(proxy).sendNotificaton(argThat(dto -> dto.getSubject().equals(obj3.getSubject())));
     }
 
 
@@ -188,7 +188,7 @@ class SchedulerServiceImplTest {
 
         // Stubbing the repository and dummyClass methods
         when(repository.findByClosingDate(LocalDate.now())).thenReturn(list);
-        when(dummyClass.sendNotificatonDummy(any(NotificationDTO.class))).thenAnswer(invocation -> {
+        when(proxy.sendNotificaton(any(NotificationDTO.class))).thenAnswer(invocation -> {
             NotificationDTO arg = invocation.getArgument(0);
             arg.setStatus("SENT");
             return arg;
@@ -199,8 +199,8 @@ class SchedulerServiceImplTest {
 
         // Verify the results
         assertEquals(expected, actual);
-        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj1.getSubject())));
-        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj2.getSubject())));
-        verify(dummyClass).sendNotificatonDummy(argThat(dto -> dto.getSubject().equals(obj3.getSubject())));
+        verify(proxy).sendNotificaton(argThat(dto -> dto.getSubject().equals(obj1.getSubject())));
+        verify(proxy).sendNotificaton(argThat(dto -> dto.getSubject().equals(obj2.getSubject())));
+        verify(proxy).sendNotificaton(argThat(dto -> dto.getSubject().equals(obj3.getSubject())));
     }
 }

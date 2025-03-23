@@ -40,11 +40,11 @@ class NotificationControllerTestCase {
 
     @Test
     void sendNotification_success() {
-    	
-        ResponseEntity<String> response = controller.sendNotification(notificationDTO);
+    	when(service.sendNotification(notificationDTO)).thenReturn(notificationDTO);
+        ResponseEntity<NotificationDTO> response = controller.sendNotification(notificationDTO);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Notification Sent Successfully", response.getBody());
+        assertEquals(notificationDTO, response.getBody());
         verify(service, times(1)).sendNotification(notificationDTO);
     }
 
@@ -53,14 +53,14 @@ class NotificationControllerTestCase {
 
     	when(service.sendNotification(notificationDTO)).thenThrow(new RuntimeException("Service error"));
 
-        ResponseEntity<String> response = controller.sendNotification(notificationDTO);
+        ResponseEntity<NotificationDTO> response = controller.sendNotification(notificationDTO);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         verify(service, times(1)).sendNotification(notificationDTO);
     } 
     @Test
     void sendNotification_nullNotificationDto_badRequest() {
-    	ResponseEntity<String> response = controller.sendNotification(null); 
+    	ResponseEntity<NotificationDTO> response = controller.sendNotification(null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         verify(service, never()).sendNotification(any());
