@@ -118,6 +118,16 @@ public class GlobalExceptionHandler {
             .build();
         return ResponseEntity.badRequest().body(errorResponse);
     }
+    /**
+     * Handles the CampaignNotificationFailedException.
+     *
+     * If a CampaignNotificationFailedException occurs, this method creates an error response
+     * and sends it back with a "Not Acceptable" status.
+     *
+     * @param e       The exception that occurred.
+     * @param request Information about the web request.
+     * @return  The error response with the "Not Acceptable" status.
+     */  
     @ExceptionHandler(CampaignNotificationFailedException.class)
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public ResponseEntity<ErrorResponseDTO> handleCampaignNotCreated(CampaignNotificationFailedException e,WebRequest request){
