@@ -5,13 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AgentsDTO {
-    private Long agentID;
-    private String firstName;
-    private String lastName;
+
+public class NotificationDTO {
+    private String employeeID;
+    private String status;
+    private String subject;
+    private String body;
+    private String emailFor;
 }
