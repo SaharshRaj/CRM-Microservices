@@ -173,18 +173,18 @@ public interface CustomerController {
 
 
     /**
-     * POST /api/customers/purchasingHabit/{customerId} : Update the purchasing habit of the "customerId" customer profile.
+     * PUT /api/customers/purchasingHabit/{customerId} : Update the purchasing habit of the "customerId" customer profile.
      *
      * @param customerId the id of the customer profile to update
      * @return the ResponseEntity with status 200 (OK) and with body the updated customer profile, or with status 404 (Not Found)
      * @throws ResourceNotFoundException if the customer profile is not found
      */
 
-    @PostMapping("/purchasingHabit/{customerId}")
+    @PutMapping("/purchasingHabit/{customerId}")
     public ResponseEntity<CustomerProfileDTO> updatePurchasingHabit(@PathVariable long customerId) throws ResourceNotFoundException, JsonProcessingException;
 
     /**
-     * POST /api/customers/{customerId} : Update the "customerId" customer profile.
+     * PUT /api/customers/{customerId} : Update the "customerId" customer profile.
      *
      * @param customerId the id of the customer profile to update
      * @param customerProfileDTO the customer profile to update
@@ -192,7 +192,7 @@ public interface CustomerController {
      * @throws ResourceNotFoundException if the customer profile is not found
      */
 
-    @PostMapping("/{customerId}")
+    @PutMapping("/{customerId}")
     public ResponseEntity<?> updateCustomer(@PathVariable long customerId, @RequestBody @Valid CustomerProfileDTO customerProfileDTO) throws ResourceNotFoundException;
 
     /**

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Service implementation for managing customer profiles.
  */
@@ -53,10 +54,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getRegionFromSegmentation(c) == region)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customers found in the region");
+		}
+		return list;
 	}
 
 	/**
@@ -68,10 +73,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list =  customerProfiles.stream()
 				.filter(c -> getInterestFromSegmentation(c) == interest)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customer Found with this interest");
+		}
+		return list;
 	}
 
 	/**
@@ -83,10 +92,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customer with this Purchasing Habit");
+		}
+		return list;
 	}
 
 	/**
@@ -98,10 +111,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getRegionFromSegmentation(c) == region && getInterestFromSegmentation(c) == interest)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No customers found in this region with this interest");
+		}
+		return list;
 	}
 
 	/**
@@ -132,10 +149,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list =  customerProfiles.stream()
 				.filter(c -> getInterestFromSegmentation(c) == interest && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw  new ResourceNotFoundException("No Customers found with this interest and purchasinghabit");
+		}
+		return list;
 	}
 
 	/**
@@ -241,10 +262,14 @@ public class CustomerServiceImpl implements CustomerService {
 		if (customerProfiles.isEmpty()) {
 			throw new ResourceNotFoundException(ERROR_MSG);
 		}
-		return customerProfiles.stream()
+		List<CustomerProfileDTO> list = customerProfiles.stream()
 				.filter(c -> getInterestFromSegmentation(c) == interest && getRegionFromSegmentation(c) == region && getPurchasingHabitsFromSegmentation(c) == purchasingHabits)
 				.map(customerProfileMapper::toDTO)
 				.toList();
+		if(list.isEmpty()){
+			throw new ResourceNotFoundException("No Customers found in this region with specified interest and purchasinghabits");
+		}
+		return list;
 	}
 
 	/**
@@ -256,8 +281,6 @@ public class CustomerServiceImpl implements CustomerService {
 		String purchaseHistory = jsonObject.get("purchaseHistory");
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException(ERROR_MSG_ID + customerId));
-		// Perform any necessary validation on the purchase string and purchasingHabits here.
-
 		existingCustomer.getPurchaseHistory().add(purchaseHistory); // or purchase, if that is the intended behavior
 		CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
 
@@ -308,7 +331,6 @@ public class CustomerServiceImpl implements CustomerService {
 		String segmentationDataString = existingCustomer.getSegmentationData();
 
 		if (segmentationDataString == null || segmentationDataString.isEmpty()) {
-			// Handle the case where segmentationData is null or empty.
 			Map<String, Map<String, String>> newSegmentationMap = new HashMap<>();
 			Map<String, String> segmentationData = new HashMap<>();
 			segmentationData.put("Interest", null);
@@ -373,7 +395,6 @@ public class CustomerServiceImpl implements CustomerService {
 	 * @param enumType        the class of the enum type
 	 * @return the enum value, or null if not found
 	 * @throws EnumValueNotFoundException if the enum value is null
-	 * @throws RuntimeException           if any other exception occurs during processing
 	 */
 	public <T extends Enum<T>> T getEnumFromSegmentation(CustomerProfile customerProfile, String fieldName, Class<T> enumType) {
 		if (customerProfile.getSegmentationData() == null || customerProfile.getSegmentationData().isEmpty()) {
