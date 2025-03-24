@@ -1,16 +1,17 @@
 package com.crm.controller;
 
 import com.crm.dto.NotificationDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
 
 @RequestMapping("api/notifications")
+@Validated
 public interface NotificationController {
-
-    @GetMapping("")
-    public ResponseEntity<List<NotificationDTO>> getAllNotifications();
-
+  
+    @PostMapping("send")
+    public ResponseEntity<NotificationDTO> sendNotification(@Valid NotificationDTO notificationDTO);
 }
