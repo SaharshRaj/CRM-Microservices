@@ -331,7 +331,6 @@ public class CustomerServiceImpl implements CustomerService {
 		String segmentationDataString = existingCustomer.getSegmentationData();
 
 		if (segmentationDataString == null || segmentationDataString.isEmpty()) {
-			// Handle the case where segmentationData is null or empty.
 			Map<String, Map<String, String>> newSegmentationMap = new HashMap<>();
 			Map<String, String> segmentationData = new HashMap<>();
 			segmentationData.put("Interest", null);

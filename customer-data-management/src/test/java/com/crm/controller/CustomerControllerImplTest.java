@@ -8,7 +8,6 @@ import com.crm.exception.ResourceNotFoundException;
 
 import com.crm.service.CustomerServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,10 +55,6 @@ class CustomerControllerImplTest {
 
     }
 
-    @AfterEach
-    void tearDown() {
-
-    }
     @Test
     @DisplayName("Test retrieving all customer profiles - Positive case")
 
