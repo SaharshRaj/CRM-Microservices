@@ -36,6 +36,12 @@ public enum Region {
 	EUROPE,
 
 	/**
+	 * North region.
+	 */
+
+	NORTH,
+
+	/**
 	 * Eastern Europe region.
 	 */
 	EASTERN_EUROPE,
@@ -74,6 +80,8 @@ public enum Region {
 	 * Oceania region.
 	 */
 	OCEANIA,
+
+
 
 	/**
 	 * Sub-Saharan Africa region.

@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * Repository interface for {@link CustomerProfile} entity.
  */
-@Repository
+
 public interface CustomerProfileRepository extends JpaRepository<CustomerProfile, Long> {
 
     /**

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Service implementation for managing customer profiles.
  */
@@ -280,8 +281,6 @@ public class CustomerServiceImpl implements CustomerService {
 		String purchaseHistory = jsonObject.get("purchaseHistory");
 		CustomerProfile existingCustomer = customerProfileRepository.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException(ERROR_MSG_ID + customerId));
-		// Perform any necessary validation on the purchase string and purchasingHabits here.
-
 		existingCustomer.getPurchaseHistory().add(purchaseHistory); // or purchase, if that is the intended behavior
 		CustomerProfile updatedCustomer = customerProfileRepository.save(existingCustomer);
 

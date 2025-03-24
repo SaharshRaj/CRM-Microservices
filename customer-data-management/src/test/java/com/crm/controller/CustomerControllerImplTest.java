@@ -59,7 +59,6 @@ class CustomerControllerImplTest {
     @AfterEach
     void tearDown() {
 
-       // MockitoAnnotations.openMocks(this);
     }
     @Test
     @DisplayName("Test retrieving all customer profiles - Positive case")
@@ -185,7 +184,7 @@ class CustomerControllerImplTest {
     void testSearchCustomerBasedOnRegion_Negative_wrongInput() throws Exception {
         mockMvc.perform(get("/api/customers/region/{region}", "NORH"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Expected : [NORTH, SOUTH, NORTH_AMERICA, LATIN_AMERICA, ASIAN_PACIFIC, MIDDLE_EAST_AND_AFRICA, CENTRAL_AMERICA, EUROPE, EASTERN_EUROPE, WESTERN_EUROPE, NORTHERN_EUROPE, SOUTHERN_EUROPE, SOUTHEAST_ASIA, SOUTH_ASIA, EAST_ASIA, OCEANIA, SUB_SAHARAN_AFRICA] , but Received : NORH"));
+                .andExpect(jsonPath("$.message").value("Expected : [NORTH_AMERICA, LATIN_AMERICA, ASIAN_PACIFIC, MIDDLE_EAST_AND_AFRICA, CENTRAL_AMERICA, EUROPE, NORTH, EASTERN_EUROPE, WESTERN_EUROPE, NORTHERN_EUROPE, SOUTHERN_EUROPE, SOUTHEAST_ASIA, SOUTH_ASIA, EAST_ASIA, OCEANIA, SUB_SAHARAN_AFRICA] , but Received : NORH"));
     }
 
     @Test
@@ -339,7 +338,7 @@ class CustomerControllerImplTest {
     void testUpdateCustomer_Positive() throws Exception {
 
         when(service.updateCustomer(2L, customerProfileDTO)).thenReturn(customerProfileDTO);
-        MvcResult result = mockMvc.perform(post("/api/customers/{customerId}", "2")
+        MvcResult result = mockMvc.perform(put("/api/customers/{customerId}", "2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(customerProfileDTO)))
                 .andExpect(status().isOk())
@@ -354,7 +353,7 @@ class CustomerControllerImplTest {
     @DisplayName("Test updating customer profile - Negative case")
     void testUpdateCustomer_Negative() throws Exception {
         when(service.updateCustomer(2L, customerProfileDTO)).thenThrow(new ResourceNotFoundException("Customer not found with id: 2"));
-        mockMvc.perform(post("/api/customers/{customerId}", 2)
+        mockMvc.perform(put("/api/customers/{customerId}", 2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(customerProfileDTO)))
                 .andExpect(status().isNotFound())
@@ -368,7 +367,7 @@ class CustomerControllerImplTest {
         customerProfileDTO.setSegmentationData(Map.of("Region", "NORTH", "Interest","MUSIC","Purchase Habits","FREQUENT"));
         when(service.updatePurchasingHabit(1L)).thenReturn(customerProfileDTO);
 
-        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}",1))
+        mockMvc.perform(put("/api/customers/purchasingHabit/{customerId}",1))
                 .andExpect(status().isOk());
 
     }
@@ -378,7 +377,7 @@ class CustomerControllerImplTest {
     void testUpdatePurchasingHabit_Negative() throws Exception {
         when(service.updatePurchasingHabit(1L)).thenThrow(new ResourceNotFoundException("Customer not found with id: 1"));
 
-        mockMvc.perform(post("/api/customers/purchasingHabit/{customerId}", 1))
+        mockMvc.perform(put("/api/customers/purchasingHabit/{customerId}", 1))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Customer not found with id: 1"));
     }

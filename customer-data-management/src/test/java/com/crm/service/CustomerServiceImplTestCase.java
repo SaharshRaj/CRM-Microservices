@@ -10,7 +10,6 @@ import com.crm.mapper.CustomerProfileMapper;
 import com.crm.repository.CustomerProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-@Slf4j
+
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceImplTestCase {
 
