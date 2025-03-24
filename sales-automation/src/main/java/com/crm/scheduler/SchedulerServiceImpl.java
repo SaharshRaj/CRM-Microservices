@@ -47,6 +47,8 @@ public class SchedulerServiceImpl implements SchedulerService {
 
                     NotificationDTO notificationDTO = NotificationDTO.builder()
                             .subject("Follow-up Reminder for Sales Lead with ID " + o.getOpportunityID())
+                            .emailFor("employee")
+                            .employeeID("saharshraj10@gmail.com")
                             .body(email.toString())
                             .build();
                     NotificationDTO resultDTO = proxy.sendNotificaton(notificationDTO);
@@ -82,6 +84,8 @@ public class SchedulerServiceImpl implements SchedulerService {
                     NotificationDTO notificationDTO = NotificationDTO.builder()
                             .subject("Status updated for Sales Lead with ID " + o.getOpportunityID())
                             .body(email.toString())
+                            .emailFor("employee")
+                            .employeeID("saharshraj10@gmail.com")
                             .build();
                     NotificationDTO resultDTO = proxy.sendNotificaton(notificationDTO);
                     result.add(resultDTO);

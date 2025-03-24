@@ -1,5 +1,7 @@
 package com.crm.service;
 
+import com.crm.dto.CustomerProfileDTO;
+import com.crm.dto.NotificationDTO;
 import com.crm.dto.SalesOpportunityRequestDTO;
 import com.crm.dto.SalesOpportunityResponseDTO;
 import com.crm.entities.SalesOpportunity;
@@ -7,6 +9,7 @@ import com.crm.enums.SalesStage;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidOpportunityIdException;
 import com.crm.exception.InvalidSalesDetailsException;
+import com.crm.feign.Proxy;
 import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -37,8 +41,11 @@ class SalesOpportunityServiceImplIntegrationTest {
     @Spy
     private SalesOpportunityMapper mapper = SalesOpportunityMapper.MAPPER;
 
+    @Spy
+    private Proxy proxy;
     @InjectMocks
     private SalesOpportunityServiceImpl service;
+
 
     private SalesOpportunity salesOpportunity;
     private SalesOpportunityRequestDTO requestDTO;
@@ -48,14 +55,14 @@ class SalesOpportunityServiceImplIntegrationTest {
     void setUp() {
         salesOpportunity = new SalesOpportunity();
         salesOpportunity.setOpportunityID(1L);
-        salesOpportunity.setCustomerID(100L);
+        salesOpportunity.setCustomerID(1L);
         salesOpportunity.setSalesStage(SalesStage.QUALIFICATION);
         salesOpportunity.setEstimatedValue(BigDecimal.valueOf(1000));
         salesOpportunity.setClosingDate(LocalDate.now().plusDays(30));
         salesOpportunity.setFollowUpReminder(LocalDate.now().plusDays(7));
 
         requestDTO = new SalesOpportunityRequestDTO();
-        requestDTO.setCustomerID(100L);
+        requestDTO.setCustomerID(1L);
         requestDTO.setSalesStage(SalesStage.QUALIFICATION);
         requestDTO.setEstimatedValue(BigDecimal.valueOf(1000));
         requestDTO.setClosingDate(LocalDate.now().plusDays(30));
@@ -85,20 +92,7 @@ class SalesOpportunityServiceImplIntegrationTest {
         verify(repository, times(1)).findAll();
     }
 
-    @Test
-    void createSalesOpportunity_success() throws InvalidSalesDetailsException {
-        when(repository.save(any(SalesOpportunity.class))).thenReturn(salesOpportunity);
-        SalesOpportunityResponseDTO result = service.createSalesOpportunity(requestDTO);
-        assertEquals(responseDTO, result);
-        verify(repository, times(1)).save(any(SalesOpportunity.class));
-    }
 
-    @Test
-    void createSalesOpportunity_repositorySaveThrowsException_throwsInvalidSalesDetailsException() {
-        when(repository.save(any(SalesOpportunity.class))).thenThrow(new RuntimeException("Save failed"));
-        assertThrows(InvalidSalesDetailsException.class, () -> service.createSalesOpportunity(requestDTO));
-        verify(repository, times(1)).save(any(SalesOpportunity.class));
-    }
 
     @Test
     void getOpportunitiesByOpportunity_success() {

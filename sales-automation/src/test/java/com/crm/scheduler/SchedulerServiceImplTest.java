@@ -92,6 +92,8 @@ class SchedulerServiceImplTest {
         NotificationDTO obj1 = NotificationDTO.builder()
                 .subject("Follow-up Reminder for Sales Lead with ID " + 1L)
                 .body(email1.toString())
+                .emailFor("employee")
+                .employeeID("saharshraj10@gmail.com")
                 .build();
         obj1.setStatus("SENT");
 
@@ -105,6 +107,8 @@ class SchedulerServiceImplTest {
         NotificationDTO obj2 = NotificationDTO.builder()
                 .subject("Follow-up Reminder for Sales Lead with ID " + 2L)
                 .body(email2.toString())
+                .emailFor("employee")
+                .employeeID("saharshraj10@gmail.com")
                 .build();
         obj2.setStatus("SENT");
 
@@ -118,6 +122,8 @@ class SchedulerServiceImplTest {
         NotificationDTO obj3 = NotificationDTO.builder()
                 .subject("Follow-up Reminder for Sales Lead with ID " + 3L)
                 .body(email3.toString())
+                .emailFor("employee")
+                .employeeID("saharshraj10@gmail.com")
                 .build();
         obj3.setStatus("SENT");
 
@@ -155,6 +161,8 @@ class SchedulerServiceImplTest {
         NotificationDTO obj1 = NotificationDTO.builder()
                 .subject("Status updated for Sales Lead with ID " + 1L)
                 .body(email1.toString())
+                .emailFor("employee")
+                .employeeID("saharshraj10@gmail.com")
                 .build();
         obj1.setStatus("SENT");
 
@@ -168,6 +176,8 @@ class SchedulerServiceImplTest {
         NotificationDTO obj2 = NotificationDTO.builder()
                 .subject("Status updated for Sales Lead with ID " + 2L)
                 .body(email2.toString())
+                .emailFor("employee")
+                .employeeID("saharshraj10@gmail.com")
                 .build();
         obj2.setStatus("SENT");
 
@@ -181,6 +191,8 @@ class SchedulerServiceImplTest {
         NotificationDTO obj3 = NotificationDTO.builder()
                 .subject("Status updated for Sales Lead with ID " + 3L)
                 .body(email3.toString())
+                .emailFor("employee")
+                .employeeID("saharshraj10@gmail.com")
                 .build();
         obj3.setStatus("SENT");
 

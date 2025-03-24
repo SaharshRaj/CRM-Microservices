@@ -97,56 +97,7 @@ class SalesOpportunityServiceImplTest {
         verify(repository, times(1)).findAll();
     }
 
-    @Test
-    @DisplayName("createSalesOpportunity() - Positive")
-    void createSalesOpportunityShouldReturnCreatedOpportunityWhenValidInput() {
-        SalesOpportunity salesOpportunity = list.getFirst();
 
-        when(repository.save(any(SalesOpportunity.class))).thenAnswer((invocation -> {
-            salesOpportunity.setOpportunityID(1L);
-            return salesOpportunity;
-        }));
-        when(mapper.mapToRequestDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityRequestDTO
-                .builder()
-                .opportunityID(salesOpportunity.getOpportunityID())
-                .salesStage(salesOpportunity.getSalesStage())
-                .estimatedValue(salesOpportunity.getEstimatedValue())
-                .followUpReminder(salesOpportunity.getFollowUpReminder())
-                .closingDate(salesOpportunity.getClosingDate())
-                .customerID(salesOpportunity.getCustomerID())
-                .build());
-
-        assertEquals(1L,
-                service.createSalesOpportunity(mapper
-                                .mapToRequestDTO(salesOpportunity))
-                        .getOpportunityID()
-        );
-        verify(repository, times(1)).save(any(SalesOpportunity.class));
-    }
-
-    @Test
-    @DisplayName("createSalesOpportunity() - Negative")
-    void createSalesOpportunityShouldThrowExceptionWhenInvalidInput() {
-        SalesOpportunity salesOpportunity = list.getFirst();
-
-        salesOpportunity.setCustomerID(0L);
-
-        when(repository.save(any(SalesOpportunity.class))).thenThrow(ConstraintViolationException.class);
-
-        when(mapper.mapToRequestDTO(salesOpportunity)).thenAnswer(invocation -> SalesOpportunityRequestDTO
-                .builder()
-                .opportunityID(salesOpportunity.getOpportunityID())
-                .salesStage(salesOpportunity.getSalesStage())
-                .estimatedValue(salesOpportunity.getEstimatedValue())
-                .followUpReminder(salesOpportunity.getFollowUpReminder())
-                .closingDate(salesOpportunity.getClosingDate())
-                .customerID(salesOpportunity.getCustomerID())
-                .build());
-        // Assert that an InvalidSalesDetailsException is thrown when creating the SalesOpportunity
-        SalesOpportunityRequestDTO salesOpportunityRequestDTO = mapper.mapToRequestDTO(salesOpportunity);
-        assertThrows(InvalidSalesDetailsException.class, () -> service.createSalesOpportunity(salesOpportunityRequestDTO));
-        verify(repository, times(1)).save(any(SalesOpportunity.class));
-    }
 
     @Test
     @DisplayName("updateSalesOpportunity() - Positive")

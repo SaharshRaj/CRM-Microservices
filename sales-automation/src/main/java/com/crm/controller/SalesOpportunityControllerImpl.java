@@ -22,7 +22,7 @@ import java.util.List;
  * Provides endpoints for retrieving, creating, updating, and deleting sales opportunities.
  */
 @RestController
-public class SalesOpportunityControllerImpl implements SalesOpportunityController {
+public class    SalesOpportunityControllerImpl implements SalesOpportunityController {
 
 
     private final SalesOpportunityService service;

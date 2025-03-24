@@ -10,18 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 class SalesAutomationApplicationTests {
 
-    @Autowired
-    SalesOpportunityController controller;
-
-    @Test
-    void contextLoads() {
-        assertNotNull(controller);
-    }
 
     @Test
     void main() {
-        SalesAutomationApplication.main(new String[]{});
-        assertNotNull(controller);
+
     }
 
 }

@@ -75,7 +75,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     @Override
     public SalesOpportunityResponseDTO createSalesOpportunity(SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException {
         ResponseEntity<?> customer = proxy.getCustomerById(salesOpportunityRequestDto.getCustomerID());
-        if(!(customer.getBody() instanceof CustomerProfileDTO)){
+        if(customer == null || !(customer.getBody() instanceof CustomerProfileDTO)){
             throw new CustomerNotFoundException("Customer with id: " + salesOpportunityRequestDto.getCustomerID() + " does not exists.");
         }
         SalesOpportunity salesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityRequestDto);
@@ -136,6 +136,8 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .subject("Sales Status Changed for Lead with ID " + opportunityID)
                 .body(email.toString())
+                .emailFor("employee")
+                .employeeID("saharshraj10@gmail.com")
                 .build();
         proxy.sendNotificaton(notificationDTO);
         return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(salesOpportunity));
