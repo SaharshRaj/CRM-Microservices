@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Global exception handler for the Sales Automation Module.
+ * Global exception handler for the Report Automation Module.
  * Handles various exceptions and returns appropriate error responses.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     /**
      *
-     * @param ex         The InvalidSalesDetailsException.
+     * @param ex         The InvalidDetailsException.
      * @param webRequest The WebRequest.
      * @return ResponseEntity containing ErrorResponseDTO with 400 status.
      */
@@ -51,19 +51,6 @@ public class GlobalExceptionHandler {
      * @return ResponseEntity containing ErrorResponseDTO with 404 status.
      */
 
-    @ExceptionHandler(Exception.class)
-    //* Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
-    public ResponseEntity<ErrorResponseDTO> handleAllException(Exception ex, WebRequest webRequest) {
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
-                .timestamp(LocalDateTime.now())
-                .path(webRequest.getDescription(false))
-                .message(ex.getMessage())
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
     @ExceptionHandler(IllegalArgumentException.class)
     //* Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
     public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest webRequest) {
@@ -112,7 +99,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ErrorResponseDTO> handleInvalidCronExpression(NoSuchElementException ex, WebRequest webRequest) {
+    public ResponseEntity<ErrorResponseDTO> NoSuchElementException(NoSuchElementException ex, WebRequest webRequest) {
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .code(String.valueOf(HttpStatus.NOT_FOUND.value()))

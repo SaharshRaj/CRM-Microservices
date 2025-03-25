@@ -165,7 +165,7 @@ public class SchedulerServiceImpl implements SchedulerService {
                 .type(Type.EMAIL)
                 .subject(subject)
                 .employeeID(employeeID)
-                .emailFor("EMPLOYEE")
+                .emailFor("employee")
                 .body(emailFormat.toString())
                 .build();
 
