@@ -7,6 +7,7 @@ import com.crm.dto.SalesOpportunityResponseDTO;
 import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
+import com.crm.enums.Type;
 import com.crm.exception.CustomerNotFoundException;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidOpportunityIdException;
@@ -22,7 +23,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,7 +32,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
 
     private final SalesOpportunityRepository repository;
     private final Proxy proxy;
-    private String errorMsg = "No leads found with given Opportunity ID";
+    private static final String ERROR_MSG = "No leads found with given Opportunity ID";
 
     @Autowired
     public SalesOpportunityServiceImpl(SalesOpportunityRepository repository, Proxy proxy) {
@@ -52,17 +52,14 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
 
         List<SalesOpportunity> opportunityList = repository.findAll();
 
-        List<SalesOpportunityResponseDTO> salesOpportunityResponseDTOList = new ArrayList<>();
-
-        opportunityList.forEach(
-                e -> salesOpportunityResponseDTOList.add(SalesOpportunityMapper.MAPPER.mapToResponseDTO(e))
-        );
-
-        if (salesOpportunityResponseDTOList.isEmpty()) {
+        if(opportunityList.isEmpty()){
             throw new NoSuchElementException("No Sales Opportunity Available");
         }
 
-        return salesOpportunityResponseDTOList;
+
+        return opportunityList.stream()
+                .map(SalesOpportunityMapper.MAPPER::mapToResponseDTO)
+                .toList();
     }
 
     /**
@@ -74,14 +71,13 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      */
     @Override
     public SalesOpportunityResponseDTO createSalesOpportunity(SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException {
-        ResponseEntity<?> customer = proxy.getCustomerById(salesOpportunityRequestDto.getCustomerID());
+        ResponseEntity<CustomerProfileDTO> customer = proxy.getCustomerById(salesOpportunityRequestDto.getCustomerID());
         if(customer == null || !(customer.getBody() instanceof CustomerProfileDTO)){
             throw new CustomerNotFoundException("Customer with id: " + salesOpportunityRequestDto.getCustomerID() + " does not exists.");
         }
         SalesOpportunity salesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityRequestDto);
         try {
-            SalesOpportunity savedOpportunity = repository.save(salesOpportunity);
-            return SalesOpportunityMapper.MAPPER.mapToResponseDTO(savedOpportunity);
+            return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(salesOpportunity));
         } catch (Exception e) {
             throw new InvalidSalesDetailsException(e.getMessage());
         }
@@ -102,7 +98,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         try{
         repository.findById(opportunityID).orElseThrow();
         } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(errorMsg);
+            throw new NoSuchElementException(ERROR_MSG);
         }
         SalesOpportunity newSalesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityRequestDto);
         return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(newSalesOpportunity));
@@ -130,12 +126,13 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
                 .openingLine("I hope this message finds you well.")
                 .body("This is to inform you that Sales Stage for Lead #" + opportunityID + " is changed to " + salesStage.name() + " at " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + ".")
                 .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
-                .closing("SALES-AUTOMATION SERVICE \n CRM")
+                .closing("SALES-AUTOMATION SERVICE \nCRM")
                 .build();
 
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .subject("Sales Status Changed for Lead with ID " + opportunityID)
                 .body(email.toString())
+                .type(Type.EMAIL)
                 .emailFor("employee")
                 .employeeID("saharshraj10@gmail.com")
                 .build();
@@ -143,7 +140,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(salesOpportunity));
         }
         catch (NoSuchElementException e) {
-            throw new NoSuchElementException(errorMsg);
+            throw new NoSuchElementException(ERROR_MSG);
         }
     }
 
@@ -160,7 +157,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         if (salesOpportunity.isPresent()) {
             return SalesOpportunityMapper.MAPPER.mapToResponseDTO(salesOpportunity.get());
         } else {
-            throw new NoSuchElementException(errorMsg);
+            throw new NoSuchElementException(ERROR_MSG);
         }
     }
 
@@ -177,10 +174,9 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         if (salesOpportunityList.isEmpty()) {
             throw new NoSuchElementException("No leads found with given Customer ID");
         } else {
-            List<SalesOpportunityResponseDTO> salesOpportunityRequestDTOList = new ArrayList<>();
-            salesOpportunityList.forEach(
-                    e -> salesOpportunityRequestDTOList.add(SalesOpportunityMapper.MAPPER.mapToResponseDTO(e)));
-            return salesOpportunityRequestDTOList;
+            return salesOpportunityList.stream()
+                    .map(SalesOpportunityMapper.MAPPER::mapToResponseDTO)
+                    .toList();
         }
     }
 
@@ -197,10 +193,9 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         if (salesOpportunityList.isEmpty()) {
             throw new NoSuchElementException("No leads found with requested Sales Stage");
         } else {
-            List<SalesOpportunityResponseDTO> salesOpportunityRequestDTOList = new ArrayList<>();
-            salesOpportunityList.forEach(
-                    e -> salesOpportunityRequestDTOList.add(SalesOpportunityMapper.MAPPER.mapToResponseDTO(e)));
-            return salesOpportunityRequestDTOList;
+            return salesOpportunityList.stream()
+                    .map(SalesOpportunityMapper.MAPPER::mapToResponseDTO)
+                    .toList();
         }
     }
 
@@ -217,10 +212,9 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         if (salesOpportunityList.isEmpty()) {
             throw new NoSuchElementException("No leads found with given Estimated Value");
         } else {
-            List<SalesOpportunityResponseDTO> salesOpportunityDTOList = new ArrayList<>();
-            salesOpportunityList.forEach(
-                    e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToResponseDTO(e)));
-            return salesOpportunityDTOList;
+            return salesOpportunityList.stream()
+                    .map(SalesOpportunityMapper.MAPPER::mapToResponseDTO)
+                    .toList();
         }
     }
 
@@ -238,10 +232,9 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         if (salesOpportunityList.isEmpty()) {
             throw new NoSuchElementException("No leads found with given Closing Date");
         } else {
-            List<SalesOpportunityResponseDTO> salesOpportunityDTOList = new ArrayList<>();
-            salesOpportunityList.forEach(
-                    e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToResponseDTO(e)));
-            return salesOpportunityDTOList;
+            return salesOpportunityList.stream()
+                    .map(SalesOpportunityMapper.MAPPER::mapToResponseDTO)
+                    .toList();
         }
     }
 
@@ -258,10 +251,9 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
         if (salesOpportunityList.isEmpty()) {
             throw new NoSuchElementException("No leads found with given Follow-up Reminder");
         } else {
-            List<SalesOpportunityResponseDTO> salesOpportunityDTOList = new ArrayList<>();
-            salesOpportunityList.forEach(
-                    e -> salesOpportunityDTOList.add(SalesOpportunityMapper.MAPPER.mapToResponseDTO(e)));
-            return salesOpportunityDTOList;
+            return salesOpportunityList.stream()
+                    .map(SalesOpportunityMapper.MAPPER::mapToResponseDTO)
+                    .toList();
         }
     }
 

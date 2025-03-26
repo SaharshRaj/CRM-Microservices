@@ -66,6 +66,7 @@ public class SchedulerServiceImpl implements SchedulerService {
 
     @Override
     public List<NotificationDTO> sendClosingNotification() {
+        log.info("STARTING CRON JOB -> CLOSE LEADS");
         List<SalesOpportunity> salesOpportunityList = repository.findByClosingDate(LocalDate.now());
         List<NotificationDTO> result = new ArrayList<>();
         salesOpportunityList.forEach(

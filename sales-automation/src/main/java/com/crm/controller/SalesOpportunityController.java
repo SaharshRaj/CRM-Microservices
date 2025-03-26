@@ -51,7 +51,7 @@ public interface SalesOpportunityController {
     })
     ResponseEntity<SalesOpportunityResponseDTO> updateSalesOpportunity(@PathVariable Long opportunityId,@Valid @RequestBody SalesOpportunityRequestDTO salesOpportunityRequestDto);
 
-    @PutMapping(value = "/{opportunityId}/{salesStage}",consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{opportunityId}/{salesStage}",consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update sales-stage of existing Lead in the database", description = "Updates sales-stage of an existing sales opportunity (lead) and stores it in the database.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated sales opportunity", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SalesOpportunityResponseDTO.class))),

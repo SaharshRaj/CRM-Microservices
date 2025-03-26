@@ -1,18 +1,18 @@
 package com.crm.service;
 
+import com.crm.dto.CustomerProfileDTO;
 import com.crm.dto.NotificationDTO;
 import com.crm.dto.SalesOpportunityRequestDTO;
 import com.crm.dto.SalesOpportunityResponseDTO;
 import com.crm.entities.EmailFormat;
 import com.crm.entities.SalesOpportunity;
 import com.crm.enums.SalesStage;
+import com.crm.exception.CustomerNotFoundException;
 import com.crm.exception.InvalidDateTimeException;
 import com.crm.exception.InvalidOpportunityIdException;
-import com.crm.exception.InvalidSalesDetailsException;
 import com.crm.feign.Proxy;
 import com.crm.mapper.SalesOpportunityMapper;
 import com.crm.repository.SalesOpportunityRepository;
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -95,6 +97,69 @@ class SalesOpportunityServiceImplTest {
         when(repository.findAll()).thenReturn(new ArrayList<>());
         assertThrows(NoSuchElementException.class, () -> service.retrieveAllSalesOpportunities());
         verify(repository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("createSalesOpportunity() - Positive")
+    void createSalesOpportunitieyShouldReturnSalesOpportunityResponseDTO(){
+        when(proxy.getCustomerById(1L)).thenReturn(new ResponseEntity<>(new CustomerProfileDTO(), HttpStatus.OK));
+        SalesOpportunity salesOpportunity = SalesOpportunity.builder()
+                .customerID(1L)
+                .estimatedValue(BigDecimal.valueOf(10000.0))
+                .salesStage(SalesStage.PROSPECTING)
+                .closingDate(LocalDate.of(2025, Month.MAY, 18))
+                .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
+                .build();
+        when(repository.save(any(SalesOpportunity.class))).thenReturn(list.getFirst());
+        SalesOpportunityRequestDTO salesOpportunityRequestDTO = SalesOpportunityRequestDTO
+                .builder()
+                .salesStage(SalesStage.PROSPECTING)
+                .estimatedValue(BigDecimal.valueOf(10000.0))
+                .closingDate(LocalDate.of(2025, Month.MAY, 18))
+                .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
+                .customerID(salesOpportunity.getCustomerID())
+                .build();
+        SalesOpportunityResponseDTO salesOpportunityResponseDTO = SalesOpportunityResponseDTO
+                .builder()
+                .opportunityID(1L)
+                .salesStage(SalesStage.PROSPECTING)
+                .estimatedValue(BigDecimal.valueOf(10000.0))
+                .closingDate(LocalDate.of(2025, Month.MAY, 18))
+                .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
+                .customerID(salesOpportunity.getCustomerID())
+                .build();
+        assertEquals(salesOpportunityResponseDTO, service.createSalesOpportunity(salesOpportunityRequestDTO));
+    }
+
+    @Test
+    @DisplayName("createSalesOpportunity() - Negative")
+    void createSalesOpportunitieyShouldThrowExceptionWhenProxyReturnsNUll(){
+        when(proxy.getCustomerById(1L)).thenReturn(null);
+        SalesOpportunityRequestDTO salesOpportunityRequestDTO = SalesOpportunityRequestDTO
+                .builder()
+                .salesStage(SalesStage.PROSPECTING)
+                .estimatedValue(BigDecimal.valueOf(10000.0))
+                .closingDate(LocalDate.of(2025, Month.MAY, 18))
+                .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
+                .customerID(1L)
+                .build();
+        assertThrows(CustomerNotFoundException.class, () -> service.createSalesOpportunity(salesOpportunityRequestDTO));
+    }
+
+
+    @Test
+    @DisplayName("createSalesOpportunity() - Negative")
+    void createSalesOpportunitieyShouldThrowExceptionWhenProxyReturnErrorResponseDTO(){
+        when(proxy.getCustomerById(1L)).thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
+        SalesOpportunityRequestDTO salesOpportunityRequestDTO = SalesOpportunityRequestDTO
+                .builder()
+                .salesStage(SalesStage.PROSPECTING)
+                .estimatedValue(BigDecimal.valueOf(10000.0))
+                .closingDate(LocalDate.of(2025, Month.MAY, 18))
+                .followUpReminder(LocalDate.of(2025, Month.APRIL, 18))
+                .customerID(1L)
+                .build();
+        assertThrows(CustomerNotFoundException.class, () -> service.createSalesOpportunity(salesOpportunityRequestDTO));
     }
 
 
