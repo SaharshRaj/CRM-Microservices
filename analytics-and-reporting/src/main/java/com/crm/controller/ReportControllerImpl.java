@@ -107,7 +107,4 @@ public class ReportControllerImpl implements ReportController{
         }
         return ResponseEntity.ok(reportResponseDTOs);
     }
-
-
-
 }
