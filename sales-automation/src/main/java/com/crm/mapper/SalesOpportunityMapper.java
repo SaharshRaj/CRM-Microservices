@@ -15,7 +15,6 @@ public interface SalesOpportunityMapper {
     //SalesOpportunityMapper using Factory
     SalesOpportunityMapper MAPPER = Mappers.getMapper(SalesOpportunityMapper.class);
 
-
     //SalesOpportunity to SalesOpportunityRequestDTO
     SalesOpportunityRequestDTO mapToRequestDTO(SalesOpportunity salesOpportunity);
 
