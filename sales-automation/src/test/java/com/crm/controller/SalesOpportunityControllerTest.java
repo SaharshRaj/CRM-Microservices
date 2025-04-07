@@ -294,16 +294,16 @@ class SalesOpportunityControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/sales-opportunity/{opportunityID}/{salesStage} ==> 200")
+    @DisplayName("PATCH /api/sales-opportunity/{opportunityID}/{salesStage} ==> 200")
     void updateSalesSalesStageShouldReturn200AndUpdatedSalesOpportunity() throws Exception {
-        // api: POST /api/sales-opportunity/{opportunityID}/{salesStage} ==> 200 : SalesOpportunityDTO
+        // api: PATCH /api/sales-opportunity/{opportunityID}/{salesStage} ==> 200 : SalesOpportunityDTO
         SalesOpportunityResponseDTO expected = salesOpportunityDTOList.getFirst();
         expected.setSalesStage(SalesStage.CLOSED_WON);
         expected.setClosingDate(LocalDate.now());
 
         when(service.updateSalesStage(1L,SalesStage.CLOSED_WON)).thenReturn(expected);
 
-        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1/CLOSED_WON"))
+        MvcResult mvcResult = mockMvc.perform(patch("/api/sales-opportunity/1/CLOSED_WON"))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
@@ -313,9 +313,9 @@ class SalesOpportunityControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/sales-opportunity/{opportunityID}/{salesStage} ==> 404")
+    @DisplayName("PATCH /api/sales-opportunity/{opportunityID}/{salesStage} ==> 404")
     void updateSalesStageShouldReturn404AndErrorResponseDTO() throws Exception {
-        // api: POST /api/sales-opportunity/{opportunityID}/{salesStage} ==> 404 : ErrorResponseDTO
+        // api: PATCH /api/sales-opportunity/{opportunityID}/{salesStage} ==> 404 : ErrorResponseDTO
         when(service.updateSalesStage(1L, SalesStage.CLOSED_WON)).thenThrow(new NoSuchElementException("Opportunity with given Id not found"));
 
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
@@ -325,7 +325,7 @@ class SalesOpportunityControllerTest {
                 .message("Opportunity with given Id not found")
                 .build();
 
-        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1/CLOSED_WON"))
+        MvcResult mvcResult = mockMvc.perform(patch("/api/sales-opportunity/1/CLOSED_WON"))
                 .andDo(print()).andExpect(status().isNotFound()).andReturn();
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
@@ -337,9 +337,9 @@ class SalesOpportunityControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/sales-opportunity/{opportunityID}/{salesStage} ==> 400")
+    @DisplayName("PATCH /api/sales-opportunity/{opportunityID}/{salesStage} ==> 400")
     void updateSalesStageShouldReturn400AndErrorResponseDTO() throws Exception {
-        // api: POST /api/sales-opportunity/{opportunityID}/{salesStage} ==> 400 : ErrorResponseDTO
+        // api: PATCH /api/sales-opportunity/{opportunityID}/{salesStage} ==> 400 : ErrorResponseDTO
         when(service.updateSalesStage(1L, SalesStage.CLOSED_WON)).thenThrow(new IllegalArgumentException());
 
         ErrorResponseDTO expected = ErrorResponseDTO.builder()
@@ -349,7 +349,7 @@ class SalesOpportunityControllerTest {
                 .message("Bad Value for Sales Stage, EXPECTING: [PROSPECTING, QUALIFICATION, CLOSED_WON, CLOSED_LOST], BUT RECEIVED: CLOSE_WON")
                 .build();
 
-        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1/CLOSE_WON"))
+        MvcResult mvcResult = mockMvc.perform(patch("/api/sales-opportunity/1/CLOSE_WON"))
                 .andDo(print()).andExpect(status().isBadRequest()).andReturn();
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();

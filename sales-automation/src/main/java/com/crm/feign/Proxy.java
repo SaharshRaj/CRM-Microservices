@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 public interface Proxy {
     //All the methods you want to use
     @GetMapping("/api/customers/{customerId}")
-    ResponseEntity<?> getCustomerById(@PathVariable long customerId);
+    ResponseEntity<CustomerProfileDTO> getCustomerById(@PathVariable long customerId);
 
 
     @PostMapping("api/notifications/send")

@@ -4,6 +4,7 @@ import com.crm.dto.ErrorResponseDTO;
 import com.crm.dto.ValidationErrorResponseDTO;
 import com.crm.enums.SalesStage;
 import com.crm.exception.*;
+import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -38,6 +39,19 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .path(webRequest.getDescription(false))
                 .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponseDTO> handleFeignException(FeignException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(ex.status()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message(extractMessage(ex.getMessage()))
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
@@ -204,6 +218,18 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    private static String extractMessage(String response) {
+        String regex = "\"message\":\"(.*?)\"";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+        java.util.regex.Matcher matcher = pattern.matcher(response);
+
+        if (matcher.find()) {
+            // Return the first captured group, which contains the message
+            return matcher.group(1);
+        }
+        return "Message not found";
     }
 
 }

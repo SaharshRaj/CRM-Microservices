@@ -46,7 +46,7 @@ public class DynamicSchedulerServiceImpl implements DynamicSchedulerService {
 
             if ("Send Reminder".equals(taskName)) {
                 restartReminderTask(newCron);
-            } else if ("Send Closing".equals(taskName)) {
+            } else if ("Close Leads".equals(taskName)) {
                 restartClosingTask(newCron);
             }
 
