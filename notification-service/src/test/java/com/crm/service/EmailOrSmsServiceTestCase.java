@@ -45,7 +45,7 @@ class EmailOrSmsServiceTestCase {
     @BeforeEach
     void setUpGeneral() {
         customer = CustomerProfileDTO.builder()
-                .email("test@example.com")
+                .emailId("test@example.com")
                 .phoneNumber("+917330783299")
                 .build();
 
@@ -135,7 +135,7 @@ class EmailOrSmsServiceTestCase {
     @Test
     void testSendSms_Failure_NullPhoneNumber() {
         CustomerProfileDTO customerWithNullPhone = CustomerProfileDTO.builder()
-                .email("test@example.com")
+                .emailId("test@example.com")
                 .phoneNumber(null)
                 .build();
 

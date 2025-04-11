@@ -19,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/support")
 @Tag(name = "Customer Support Module APIs", description = "APIs for managing customer support tickets, tracking issues, and providing resolutions.")
+@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.DELETE, RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH}, allowCredentials = "true")
 public interface SupportTicketController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)

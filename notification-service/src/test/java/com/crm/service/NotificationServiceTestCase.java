@@ -70,8 +70,8 @@ class NotificationServiceTestCase {
                 .build();
 		
 		customerProfiles=Arrays.asList(
-				CustomerProfileDTO.builder().customerID(1L).email("sohithkalavakuri70@gmail.com").phoneNumber("+917330783299").build(),
-				CustomerProfileDTO.builder().customerID(2L).email("baluchitturi70@gmail.com").phoneNumber("+917330783299").build());
+				CustomerProfileDTO.builder().customerID(1L).emailId("sohithkalavakuri70@gmail.com").phoneNumber("+917330783299").build(),
+				CustomerProfileDTO.builder().customerID(2L).emailId("baluchitturi70@gmail.com").phoneNumber("+917330783299").build());
 		
 	} 
 

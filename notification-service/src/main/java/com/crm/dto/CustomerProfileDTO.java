@@ -29,5 +29,5 @@ public class CustomerProfileDTO {
     /**
      * The email address of the customer.
      */
-    private String email;
+    private String emailId;
 }

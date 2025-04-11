@@ -25,6 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("api/marketing")
 @Tag(name = "Campaign Management", description = "Operations related to marketing campaigns")
+@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.DELETE, RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH}, allowCredentials = "true")
 public class CampaignControllerImpl implements CampaignController {
 
     private final CampaignService service;
