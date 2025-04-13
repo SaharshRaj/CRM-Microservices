@@ -21,7 +21,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sales-opportunity")
-@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.DELETE, RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH}, allowCredentials = "true")
 @Tag(name = "Sales-Automation APIs", description = "Sales-Automation APIs helps to automate the sales process. Employees from sales/marketing teams can create new leads linked to customers. This module manages the lifecycle of leads (Sales Opportunities) and uses a scheduler to trigger notifications or reminders based on pre-set follow-up reminders.")
 public interface SalesOpportunityController {
 
@@ -42,7 +41,7 @@ public interface SalesOpportunityController {
     })
     ResponseEntity<SalesOpportunityResponseDTO> createSalesOpportunity(@Valid @RequestBody SalesOpportunityRequestDTO salesOpportunityRequestDto);
 
-    @PostMapping(value = "/{opportunityId}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{opportunityId}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update existing Lead in the database", description = "Updates an existing sales opportunity (lead) and stores it in the database.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated sales opportunity", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SalesOpportunityResponseDTO.class))),

@@ -23,7 +23,6 @@ import java.util.List;
  */
 
 @RequestMapping("api/customers")
-@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.DELETE, RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH}, allowCredentials = "true")
 public interface CustomerController {
     /**
      * GET /api/customers : Get all customer profiles.

@@ -40,6 +40,19 @@ spring:
           uri: lb://analytics-and-reporting
           predicates:
             - Path=/api/analytics/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
 
 eureka:
   client:
@@ -49,5 +62,3 @@ server:
   port: 8765
 
 secret: wxiTxVJTE263r0L7zFuBcrJInd6fEqeOKDJcFKdzHO4=
-
-

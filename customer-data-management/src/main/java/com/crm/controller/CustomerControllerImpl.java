@@ -26,7 +26,6 @@ import java.util.List;
  */
 @RestController
 @Validated
-@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.DELETE, RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH}, allowCredentials = "true")
 public class CustomerControllerImpl implements CustomerController{
 
 

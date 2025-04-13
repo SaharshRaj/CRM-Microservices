@@ -7,6 +7,7 @@ import com.crm.exception.*;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -91,12 +92,24 @@ public class GlobalExceptionHandler {
                 .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
                 .timestamp(LocalDateTime.now())
                 .path(webRequest.getDescription(false))
-                .message("Bad Value for Sales Stage, EXPECTING: "+ Arrays.toString(SalesStage.values()) +", BUT RECEIVED: "+ Arrays.stream(webRequest.getDescription(false).split("/")).toList().getLast())
+                .message(ex.getMessage())
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, WebRequest webRequest) {
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .timestamp(LocalDateTime.now())
+                .path(webRequest.getDescription(false))
+                .message("Bad Value for Sales Stage, EXPECTING: "+ Arrays.toString(SalesStage.values()) +", BUT RECEIVED: "+ Arrays.stream(webRequest.getDescription(false).split("/")).toList().getLast())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
     /**
      * Handles InvalidSalesDetailsException and returns a 400 Bad Request error response.
      *

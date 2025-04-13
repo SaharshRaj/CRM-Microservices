@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,6 +34,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
     private final SalesOpportunityRepository repository;
     private final Proxy proxy;
     private static final String ERROR_MSG = "No leads found with given Opportunity ID";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE; // Or your desired format
 
     @Autowired
     public SalesOpportunityServiceImpl(SalesOpportunityRepository repository, Proxy proxy) {
@@ -94,14 +96,59 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
      * @throws NoSuchElementException if no sales opportunity is found with the given ID.
      */
     @Override
-    public SalesOpportunityResponseDTO updateSalesOpportunity(Long opportunityID ,SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException, NoSuchElementException{
-        try{
-        repository.findById(opportunityID).orElseThrow();
+    public SalesOpportunityResponseDTO updateSalesOpportunity(Long opportunityID, SalesOpportunityRequestDTO salesOpportunityRequestDto) throws InvalidSalesDetailsException, NoSuchElementException {
+        try {
+            SalesOpportunity salesOpportunity = repository.findById(opportunityID).orElseThrow();
+            boolean isUpdated = false;
+            LocalDate previousFollowUpReminder = salesOpportunity.getFollowUpReminder();
+
+            LocalDate requestFollowUpReminder = null;
+            if (salesOpportunityRequestDto.getFollowUpReminder() instanceof LocalDate) {
+                requestFollowUpReminder = (LocalDate) salesOpportunityRequestDto.getFollowUpReminder();
+            }
+
+            if (!Objects.equals(salesOpportunity.getSalesStage(), salesOpportunityRequestDto.getSalesStage())) {
+                salesOpportunity.setSalesStage(salesOpportunityRequestDto.getSalesStage());
+                updateSalesStage(opportunityID, salesOpportunityRequestDto.getSalesStage());
+                isUpdated = true;
+            }
+
+            // Corrected comparison for followUpReminder
+            if (!Objects.equals(salesOpportunity.getFollowUpReminder(), requestFollowUpReminder)) {
+                salesOpportunity.setFollowUpReminder(requestFollowUpReminder);
+                isUpdated = true;
+                // Send Email Notification
+                EmailFormat email = EmailFormat.builder()
+                        .salutation("Dear employee,")
+                        .openingLine("I hope this message finds you well.")
+                        .body("This is to inform you that the Sales Opportunity with ID #" + opportunityID + " has been updated at " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + ".")
+                        .conclusion("THIS IS AN AUTO-GENERATED EMAIL. PLEASE DO NOT REPLY ON THIS!")
+                        .closing("SALES-AUTOMATION SERVICE \nCRM")
+                        .build();
+
+                StringBuilder changes = new StringBuilder("The following changes were made:\n");
+                // Correctly append the followUpReminder change
+                if (!Objects.equals(previousFollowUpReminder, requestFollowUpReminder)) {
+                    changes.append("  - Follow Up Reminder set to: ").append(Optional.ofNullable(requestFollowUpReminder).map(DATE_FORMATTER::format).orElse("null")).append(" \n");
+                }
+                email.setBody(email.getBody() + "\n" + changes.toString());
+
+                NotificationDTO notificationDTO = NotificationDTO.builder()
+                        .subject("Sales Opportunity Updated for Lead with ID " + opportunityID)
+                        .body(email.toString())
+                        .type(Type.EMAIL)
+                        .emailFor("employee")
+                        .employeeID("saharshraj10@gmail.com")
+                        .build();
+                proxy.sendNotificaton(notificationDTO);
+
+            }
+
+
+            return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(salesOpportunity));
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(ERROR_MSG);
         }
-        SalesOpportunity newSalesOpportunity = SalesOpportunityMapper.MAPPER.mapToSalesOpportunity(salesOpportunityRequestDto);
-        return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(newSalesOpportunity));
     }
 
     /**
@@ -136,6 +183,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
                 .emailFor("employee")
                 .employeeID("saharshraj10@gmail.com")
                 .build();
+
         proxy.sendNotificaton(notificationDTO);
         return SalesOpportunityMapper.MAPPER.mapToResponseDTO(repository.save(salesOpportunity));
         }
