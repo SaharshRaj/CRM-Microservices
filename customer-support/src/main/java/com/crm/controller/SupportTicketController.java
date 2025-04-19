@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/support")
 @Tag(name = "Customer Support Module APIs", description = "APIs for managing customer support tickets, tracking issues, and providing resolutions.")
-public interface SupportTicketController {
+public interface    SupportTicketController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Retrieve all support tickets", description = "Fetches a list of all customer support tickets.")

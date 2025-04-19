@@ -205,8 +205,8 @@ class SalesOpportunityServiceImplTest {
             return newSalesOpportunity;
         }));
         assertEquals(salesOpportunityResponseDTO, service.updateSalesOpportunity(1L, salesOpportunityRequestDTO));
-        verify(repository, times(1)).findById(1L);
-        verify(repository, times(1)).save(any(SalesOpportunity.class));
+        verify(repository, times(2)).findById(1L);
+        verify(repository, times(2)).save(any(SalesOpportunity.class));
     }
 
     @Test

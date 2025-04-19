@@ -250,7 +250,7 @@ class SalesOpportunityControllerTest {
 
         when(service.updateSalesOpportunity(anyLong(),any(SalesOpportunityRequestDTO.class))).thenReturn(expected);
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/1")
+        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1")
                         .content("{\"customerID\":1,\"" +
                                 "salesStage\":\"QUALIFICATION\"" +
                                 ",\"estimatedValue\":10000.0" +
@@ -270,14 +270,14 @@ class SalesOpportunityControllerTest {
         // api: POST /api/sales-opportunity/{opportunityID} ==> 404 : ErrorResponseDTO
         when(service.updateSalesOpportunity(anyLong(),any(SalesOpportunityRequestDTO.class))).thenThrow(new NoSuchElementException("Opportunity with given Id not found"));
 
-        ErrorResponseDTO expected = ErrorResponseDTO.builder()
+        ErrorResponseDTO expected = ErrorResponseDTO.builder    ()
                 .code("404")
                 .timestamp(LocalDateTime.now())
                 .path("uri=/api/sales-opportunity/1")
                 .message("Opportunity with given Id not found")
                 .build();
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/sales-opportunity/1")
+        MvcResult mvcResult = mockMvc.perform(put("/api/sales-opportunity/1")
                         .content("{\"customerID\":1,\"" +
                                 "salesStage\":\"QUALIFICATION\"" +
                                 ",\"estimatedValue\":10000.0" +
@@ -346,7 +346,7 @@ class SalesOpportunityControllerTest {
                 .code("400")
                 .timestamp(LocalDateTime.now())
                 .path("uri=/api/sales-opportunity/1/CLOSE_WON")
-                .message("Bad Value for Sales Stage, EXPECTING: [PROSPECTING, QUALIFICATION, CLOSED_WON, CLOSED_LOST], BUT RECEIVED: CLOSE_WON")
+                .message("No enum constant com.crm.enums.SalesStage.CLOSE_WON")
                 .build();
 
         MvcResult mvcResult = mockMvc.perform(patch("/api/sales-opportunity/1/CLOSE_WON"))

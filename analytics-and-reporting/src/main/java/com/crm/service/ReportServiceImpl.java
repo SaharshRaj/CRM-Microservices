@@ -61,7 +61,7 @@ public class ReportServiceImpl implements ReportService{
 
         // Top 5 Customers by Purchase Volume
         List<Map<String, Object>> top5Customers = customerProfiles.stream()
-                .sorted(Comparator.comparingInt(c -> c.getPurchaseHistory().size()))
+                .sorted(Comparator.comparingInt(c -> -c.getPurchaseHistory().size()))
                 .limit(5)
                 .map(c -> Map.<String, Object>of(
                         "customerId", c.getCustomerID(),
@@ -156,8 +156,9 @@ public class ReportServiceImpl implements ReportService{
                 .filter(ticket -> ticket.getStatus() == Status.CLOSED)
                 .count();
 
-        // Grouping Tickets by Assigned Agent
+        // Grouping Tickets by Assigned Agent, handling null values
         Map<Long, Long> ticketsPerAgent = supportTickets.stream()
+                .filter(ticket -> ticket.getAssignedAgent() != null) // Filter out tickets with null assigned agent
                 .collect(Collectors.groupingBy(SupportTicketDTO::getAssignedAgent, Collectors.counting()));
 
         // Top 5 Customers with Most Tickets
