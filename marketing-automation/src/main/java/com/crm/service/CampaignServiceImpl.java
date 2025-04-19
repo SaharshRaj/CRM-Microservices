@@ -56,7 +56,7 @@ public class CampaignServiceImpl implements CampaignService {
             emailFormat.setConclusion("Thanks for being with us,THIS IS AUTO GENERATED MAIL PLEASE DO NOT REPLY THIS MAIL");
             emailFormat.setClosing("Click below link to know more");
             notificationDTO.setType(savedCampaign.getType());
-            notificationDTO.setStatus("pending");
+            notificationDTO.setStatus("PENDING");
             notificationDTO.setSubject("This is an Campaign Infomartion with Campaign name"+campaign.getName());
             notificationDTO.setEmailFor("Customer");
             notificationDTO.setTrackingUrl(trackingUrl);
