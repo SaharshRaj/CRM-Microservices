@@ -481,7 +481,7 @@ class SalesOpportunityServiceImplTest {
     @DisplayName("scheduleFollowUpReminder() - Positive")
     void scheduleFollowUpReminderShouldUpdateAndReturnOpportunityWhenValidInput() {
         SalesOpportunity salesOpportunity = list.getFirst();
-        LocalDate localDate = LocalDate.of(2025, Month.APRIL, 18);
+        LocalDate localDate = LocalDate.of(2025, Month.APRIL, 30);
         when(repository.findById(1L)).thenReturn(Optional.ofNullable(salesOpportunity));
         assert salesOpportunity != null;
         when(repository.save(salesOpportunity)).thenAnswer(invocation -> {

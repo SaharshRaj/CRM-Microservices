@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class SalesOpportunityServiceImpl implements SalesOpportunityService {
@@ -348,5 +349,7 @@ public class SalesOpportunityServiceImpl implements SalesOpportunityService {
             throw new InvalidOpportunityIdException("Lead with Opportunity ID " + opportunityId + " does not exist.");
 
         }
+
     }
+
 }
